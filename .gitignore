@@ -1,0 +1,18 @@
+# secrets
+.env
+
+# fetched data + rendered charts (queries/ layer)
+queries/data/*.tsv
+queries/data/*.duckdb
+queries/rendered/*.json
+queries/rendered/*.svg
+
+# OS
+.DS_Store
+
+# Python (in case marimo notebooks land here later)
+__pycache__/
+*.py[cod]
+.venv/
+.direnv/
+__marimo__/
