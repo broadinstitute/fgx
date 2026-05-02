@@ -7,7 +7,7 @@
   "cells": [
     {
       "id": "setup",
-      "code_hash": "3c5fa8ae3f7c72ae45b68a4a8c5c7cea",
+      "code_hash": "08b26dae7a3e3e4a33bdc9117cf3095c",
       "outputs": [
         {
           "type": "data",
@@ -20,7 +20,7 @@
     },
     {
       "id": "Hbol",
-      "code_hash": "f0f197b7dde4aa80dbc6c4752ef6a470",
+      "code_hash": "8c310a1b910daf71a789dc8f03564fb5",
       "outputs": [
         {
           "type": "data",
@@ -33,7 +33,7 @@
     },
     {
       "id": "MJUe",
-      "code_hash": "c5dbe0ce4a10690a33a3dc9f180a2874",
+      "code_hash": "98862be604773482399b1c478dd6d658",
       "outputs": [
         {
           "type": "data",
@@ -46,7 +46,7 @@
     },
     {
       "id": "vblA",
-      "code_hash": "bb119867184d6e91468f54458407ab42",
+      "code_hash": "4c66835b8115c622f6712abb0eb3ac6a",
       "outputs": [
         {
           "type": "data",
@@ -72,7 +72,20 @@
     },
     {
       "id": "lEQa",
-      "code_hash": "9a6d35a0b5573081a55681179c73a088",
+      "code_hash": "e1848e241129138134dd7871ff4bc219",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='lEQa-0' random-id='74bc429e-17b1-57cd-45ca-61ca51d017e9'><marimo-text data-initial-value='&quot;&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;FINNGENIE_TOKEN&lt;/span&gt;&lt;/span&gt;&quot;' data-placeholder='&quot;Paste from finngenie.broadinstitute.org -&gt; MCP/API KEYS&quot;' data-kind='&quot;password&quot;' data-full-width='false' data-disabled='false' data-debounce='true' data-password-has-value='true'></marimo-text></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "bf441b0fcbed52b6951f1ba9f036af26",
       "outputs": [
         {
           "type": "data",
@@ -84,26 +97,13 @@
       "console": []
     },
     {
-      "id": "PKri",
+      "id": "Xref",
       "code_hash": "202a74730bb4d92d488204669471b34f",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"80-lead-variants-one-per-credible-set\">80 lead variants (one per credible set)</h3>\n<span class=\"paragraph\">Top 10 by <code>-log10p</code>. <code>gene_most_severe</code> is the gene the lead variant's consequence falls in -- not necessarily the causal gene, but a useful prior.</span></span><marimo-ui-element object-id='PKri-0' random-id='4dc884e2-e0d8-97f0-d627-e824ffa26b26'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;9:22103814:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:9,&#92;&quot;pos&#92;&quot;:22103814,&#92;&quot;mlog10p&#92;&quot;:121.65,&#92;&quot;pip&#92;&quot;:0.1516,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;CDKN2B-AS1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:12903725,&#92;&quot;mlog10p&#92;&quot;:35.548,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160564494,&#92;&quot;mlog10p&#92;&quot;:34.8607,&#92;&quot;pip&#92;&quot;:0.4013,&#92;&quot;cs_size&#92;&quot;:4,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:88887075:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:88887075,&#92;&quot;mlog10p&#92;&quot;:28.5051,&#92;&quot;pip&#92;&quot;:0.4005,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;mlog10p&#92;&quot;:28.0455,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:78762558:C:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:78762558,&#92;&quot;mlog10p&#92;&quot;:25.679,&#92;&quot;pip&#92;&quot;:0.0265,&#92;&quot;cs_size&#92;&quot;:69,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;19:44908822:C:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:44908822,&#92;&quot;mlog10p&#92;&quot;:24.4415,&#92;&quot;pip&#92;&quot;:0.8992,&#92;&quot;cs_size&#92;&quot;:2,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;APOE&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;4:147443768:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:4,&#92;&quot;pos&#92;&quot;:147443768,&#92;&quot;mlog10p&#92;&quot;:24.2646,&#92;&quot;pip&#92;&quot;:0.0706,&#92;&quot;cs_size&#92;&quot;:16,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intergenic_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:null},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:89036690:G:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:89036690,&#92;&quot;mlog10p&#92;&quot;:24.2123,&#92;&quot;pip&#92;&quot;:0.041,&#92;&quot;cs_size&#92;&quot;:45,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;upstream_gene_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;AC013565.1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160591981:T:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160591981,&#92;&quot;mlog10p&#92;&quot;:23.7277,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;}]&quot;' data-total-rows='10' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;variant_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;cs_size&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Xref",
-      "code_hash": "982f09a3155b364ccd4fbb87e949c2c3",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-10-loci-with-nearest-gene-annotation\">Top 10 loci with nearest-gene annotation</h3>\n<span class=\"paragraph\"><code>gene_most_severe</code> and <code>nearest_gene</code> usually agree -- when they don't, the lead is intergenic and the nearest gene is the better label.</span></span><marimo-ui-element object-id='Xref-0' random-id='ebbfb156-ff7c-640c-1f56-462742dcf057'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;9:22103814:A:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:121.65,&#92;&quot;pip&#92;&quot;:0.1516,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;CDKN2B-AS1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;CDKN2B&#92;&quot;,&#92;&quot;distance&#92;&quot;:94509},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:35.548,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:34.8607,&#92;&quot;pip&#92;&quot;:0.4013,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:88887075:G:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:28.5051,&#92;&quot;pip&#92;&quot;:0.4005,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:28.0455,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:78762558:C:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:25.679,&#92;&quot;pip&#92;&quot;:0.0265,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;19:44908822:C:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.4415,&#92;&quot;pip&#92;&quot;:0.8992,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;APOE&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;APOE&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;4:147443768:G:A&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.2646,&#92;&quot;pip&#92;&quot;:0.0706,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intergenic_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:null,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;EDNRA&#92;&quot;,&#92;&quot;distance&#92;&quot;:37149},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:89036690:G:C&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.2123,&#92;&quot;pip&#92;&quot;:0.041,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;upstream_gene_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;AC013565.1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;ABHD2&#92;&quot;,&#92;&quot;distance&#92;&quot;:50769},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160591981:T:C&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:23.7277,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;distance&#92;&quot;:0}]&quot;' data-total-rows='10' data-total-columns='7' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;variant_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;nearest_gene&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;distance&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"80-lead-variants-one-per-credible-set\">80 lead variants (one per credible set)</h3>\n<span class=\"paragraph\">Top 10 by <code>-log10p</code>. <code>gene_most_severe</code> is the gene the lead variant's consequence falls in -- not necessarily the causal gene, but a useful prior.</span></span><marimo-ui-element object-id='Xref-0' random-id='583ef31c-f78b-a783-f2c1-379fe05defcf'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;9:22103814:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:9,&#92;&quot;pos&#92;&quot;:22103814,&#92;&quot;mlog10p&#92;&quot;:121.65,&#92;&quot;pip&#92;&quot;:0.1516,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;CDKN2B-AS1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:12903725,&#92;&quot;mlog10p&#92;&quot;:35.548,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160564494,&#92;&quot;mlog10p&#92;&quot;:34.8607,&#92;&quot;pip&#92;&quot;:0.4013,&#92;&quot;cs_size&#92;&quot;:4,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:88887075:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:88887075,&#92;&quot;mlog10p&#92;&quot;:28.5051,&#92;&quot;pip&#92;&quot;:0.4005,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;mlog10p&#92;&quot;:28.0455,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:78762558:C:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:78762558,&#92;&quot;mlog10p&#92;&quot;:25.679,&#92;&quot;pip&#92;&quot;:0.0265,&#92;&quot;cs_size&#92;&quot;:69,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;19:44908822:C:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:44908822,&#92;&quot;mlog10p&#92;&quot;:24.4415,&#92;&quot;pip&#92;&quot;:0.8992,&#92;&quot;cs_size&#92;&quot;:2,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;APOE&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;4:147443768:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:4,&#92;&quot;pos&#92;&quot;:147443768,&#92;&quot;mlog10p&#92;&quot;:24.2646,&#92;&quot;pip&#92;&quot;:0.0706,&#92;&quot;cs_size&#92;&quot;:16,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intergenic_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:null},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:89036690:G:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:89036690,&#92;&quot;mlog10p&#92;&quot;:24.2123,&#92;&quot;pip&#92;&quot;:0.041,&#92;&quot;cs_size&#92;&quot;:45,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;upstream_gene_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;AC013565.1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160591981:T:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160591981,&#92;&quot;mlog10p&#92;&quot;:23.7277,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;}]&quot;' data-total-rows='10' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;variant_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;cs_size&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
           }
         }
       ],
@@ -111,6 +111,19 @@
     },
     {
       "id": "SFPL",
+      "code_hash": "e8a5cb540991383723e2704d6285374a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-10-loci-with-nearest-gene-annotation\">Top 10 loci with nearest-gene annotation</h3>\n<span class=\"paragraph\"><code>gene_most_severe</code> and <code>nearest_gene</code> usually agree -- when they don't, the lead is intergenic and the nearest gene is the better label.</span></span><marimo-ui-element object-id='SFPL-0' random-id='309b37d8-197f-7cb2-4dad-87b999017609'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;9:22103814:A:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:121.65,&#92;&quot;pip&#92;&quot;:0.1516,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;CDKN2B-AS1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;CDKN2B&#92;&quot;,&#92;&quot;distance&#92;&quot;:94509},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:35.548,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:34.8607,&#92;&quot;pip&#92;&quot;:0.4013,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:88887075:G:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:28.5051,&#92;&quot;pip&#92;&quot;:0.4005,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:28.0455,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:78762558:C:G&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:25.679,&#92;&quot;pip&#92;&quot;:0.0265,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;19:44908822:C:T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.4415,&#92;&quot;pip&#92;&quot;:0.8992,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;APOE&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;APOE&#92;&quot;,&#92;&quot;distance&#92;&quot;:0},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;4:147443768:G:A&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.2646,&#92;&quot;pip&#92;&quot;:0.0706,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intergenic_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:null,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;EDNRA&#92;&quot;,&#92;&quot;distance&#92;&quot;:37149},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:89036690:G:C&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:24.2123,&#92;&quot;pip&#92;&quot;:0.041,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;upstream_gene_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;AC013565.1&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;ABHD2&#92;&quot;,&#92;&quot;distance&#92;&quot;:50769},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160591981:T:C&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:23.7277,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;nearest_gene&#92;&quot;:&#92;&quot;LPA&#92;&quot;,&#92;&quot;distance&#92;&quot;:0}]&quot;' data-total-rows='10' data-total-columns='7' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;variant_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;nearest_gene&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;distance&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
       "code_hash": "b7bdc11be7762e192480e944d5b89791",
       "outputs": [
         {
@@ -123,7 +136,7 @@
       "console": []
     },
     {
-      "id": "BYtC",
+      "id": "RGSE",
       "code_hash": "ed382b3bfb31865fa528ec2dfb68c932",
       "outputs": [
         {
@@ -136,8 +149,8 @@
       "console": []
     },
     {
-      "id": "RGSE",
-      "code_hash": "d2dca924f9abbbd6aff04b51e3d1ef19",
+      "id": "Kclp",
+      "code_hash": "3eab32991949077271cfb1caa4e02958",
       "outputs": [
         {
           "type": "data",
@@ -149,7 +162,7 @@
       "console": []
     },
     {
-      "id": "Kclp",
+      "id": "emfo",
       "code_hash": "208f692a7fe602eefc6950d53b8d5ae3",
       "outputs": [
         {

@@ -26,36 +26,41 @@ with app.setup:
     import polars as pl
     from dotenv import load_dotenv
 
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
+    # Local: load .env at repo root. WASM/molab: no filesystem, so this is a no-op
+    # and the token UI cell below collects the key from the user instead.
+    _env_path = Path(__file__).resolve().parent.parent / ".env"
+    if _env_path.exists():
+        load_dotenv(_env_path)
+    DEFAULT_TOKEN = os.environ.get("FINNGENIE_TOKEN", "")
     BASE = "https://finngenie.fi/api/v1"
 
 
 @app.function
-def client() -> httpx.Client:
-    """Authenticated httpx client. Bearer token comes from .env at the repo root."""
-    if not FINNGENIE_TOKEN:
+def client(token: str) -> httpx.Client:
+    """Authenticated httpx client. Caller passes the bearer token from the UI cell."""
+    if not token:
         raise RuntimeError(
-            "FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key."
+            "FINNGENIE_TOKEN not set. Locally: copy .env.example to .env and paste "
+            "your key. In molab/WASM: paste the key into the FINNGENIE_TOKEN input."
         )
     return httpx.Client(
-        headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60
+        headers={"Authorization": f"Bearer {token}"}, timeout=60
     )
 
 
 @app.function
-def fetch_tsv(path: str, **params) -> pl.DataFrame:
+def fetch_tsv(path: str, token: str, **params) -> pl.DataFrame:
     """GET a FinnGenie endpoint as TSV and return a polars DataFrame."""
-    with client() as c:
+    with client(token) as c:
         r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
     return pl.read_csv(io.BytesIO(r.content), separator="\t", null_values="NA")
 
 
 @app.function
-def fetch_json(path: str, **params) -> list[dict]:
+def fetch_json(path: str, token: str, **params) -> list[dict]:
     """GET a FinnGenie endpoint as JSON. Most endpoints accept ?format=json."""
-    with client() as c:
+    with client(token) as c:
         r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
         r.raise_for_status()
     return r.json()
@@ -79,9 +84,21 @@ def _():
 
 @app.cell
 def _():
+    token_input = mo.ui.text(
+        kind="password",
+        label="FINNGENIE_TOKEN",
+        value=DEFAULT_TOKEN,
+        placeholder="Paste from finngenie.broadinstitute.org -> MCP/API KEYS",
+    )
+    token_input
+    return (token_input,)
+
+
+@app.cell
+def _(token_input):
     RESOURCE = "finngen"
     PHENOTYPE = "I9_CHD"
-    cs = fetch_tsv(f"/credible_sets_by_phenotype/{RESOURCE}/{PHENOTYPE}")
+    cs = fetch_tsv(f"/credible_sets_by_phenotype/{RESOURCE}/{PHENOTYPE}", token_input.value)
     n_cs = cs["cs_id"].n_unique()
     mo.md(
         f"### Pulled {len(cs):,} credible-set rows for **{PHENOTYPE}** "
@@ -130,7 +147,7 @@ def _(cs):
 
 
 @app.cell
-def _(leads):
+def _(leads, token_input):
     # Annotate the top 10 loci with their nearest gene from the gene-model endpoint.
     # gene_most_severe is variant-consequence-based; nearest_genes is purely positional and
     # works even when the lead falls in an intergenic region.
@@ -138,7 +155,7 @@ def _(leads):
     nearest_rows = []
     for v in top10["variant_id"]:
         try:
-            g = fetch_json(f"/nearest_genes/{v}", n=1)
+            g = fetch_json(f"/nearest_genes/{v}", token_input.value, n=1)
             nearest_rows.append(
                 {
                     "variant_id": v,
@@ -259,11 +276,11 @@ def _(PHENOTYPE, label_df, manhattan_df):
 
 
 @app.cell
-def _(top10):
+def _(token_input, top10):
     # Drill into the strongest locus: pull every coloc pair sharing its lead variant
     # and show the ten with the highest H4 (probability of one shared causal signal).
     top_variant = top10["variant_id"][0]
-    coloc = pl.DataFrame(fetch_json(f"/colocalization_by_variant/{top_variant}"))
+    coloc = pl.DataFrame(fetch_json(f"/colocalization_by_variant/{top_variant}", token_input.value))
     if len(coloc) == 0:
         mo.md(f"### No colocalization pairs found at `{top_variant}`")
     else:
