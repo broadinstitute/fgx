@@ -62,7 +62,7 @@ frontmatter. If you don't see the skill, it isn't loaded yet.
 From the fgx repo root, pick a free port and start nb01 in `--sandbox`
 mode so the PEP 723 header provisions a venv automatically:
 
-    PORT=$(python -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1])")
+    PORT=$(uv run python -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1])")
     env -u PYTHONPATH uvx marimo edit --sandbox --headless --no-token \
         --port $PORT notebooks/nb01_pcsk9_walkthrough.py
 

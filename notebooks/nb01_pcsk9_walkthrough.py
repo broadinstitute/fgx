@@ -1,7 +1,7 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = [
-#     "marimo",
+#     "marimo<0.23.4",
 #     "polars",
 #     "httpx",
 #     "altair",
@@ -48,7 +48,7 @@ def fetch_tsv(path: str, **params) -> pl.DataFrame:
     with _client() as c:
         r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
-    return pl.read_csv(io.BytesIO(r.content), separator="\t")
+    return pl.read_csv(io.BytesIO(r.content), separator="\t", null_values="NA")
 
 
 @app.function

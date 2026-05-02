@@ -37,9 +37,9 @@ Marimo's reactivity reruns dependent cells; don't manually kick anything. This i
 
 Use this when the analysis shape **differs** from nb01:
 
-- Different endpoint chain (e.g. start from a phenotype rather than a gene): `GET /api/v1/credible_sets_by_phenotype/{resource}/{phenotype}` -> filter loci -> annotate with `get_nearest_genes` -> chart.
+- Different endpoint chain (e.g. start from a phenotype rather than a gene): `fetch_tsv("/credible_sets_by_phenotype/{resource}/{phenotype}")` -> filter loci -> `fetch_json("/nearest_genes/{variant}", n=3)` to annotate -> chart.
 - Different output (manhattan plot, PheWAS layout, multi-resource comparison) -> the cell DAG changes shape, not just parameters.
-- Reusable helpers needed by both notebooks (e.g. a new `lookup_phenotype_codes` helper) -> add it to nb01 first as `@app.function`, then `from nb01_pcsk9_walkthrough import lookup_phenotype_codes` in nb02.
+- Reusable helpers needed by both notebooks (e.g. a small wrapper that fetches `/trait_name_mapping` once and indexes phenotype codes -> names) -> add it to nb01 first as `@app.function`, then `from nb01_pcsk9_walkthrough import that_helper` in nb02.
 
 When forking: copy `nb01_pcsk9_walkthrough.py` -> `nb02_<topic>.py`, edit the PEP 723 header if you need new deps, replace the analysis cells, keep the setup block (loads `.env` and re-exposes the helpers).
 
@@ -54,11 +54,11 @@ When forking: copy `nb01_pcsk9_walkthrough.py` -> `nb02_<topic>.py`, edit the PE
 
 ## Gotchas
 
-- **TSV is the API default.** `Content-Type: text/tab-separated-values`; pass `format=json` only when the response is a nested object (e.g. `colocalization_by_variant`). `fetch_tsv` adds nothing; `fetch_json` adds `format=json` automatically.
+- **TSV is the API default.** `Content-Type: text/tab-separated-values`; pass `format=json` only when the response is a nested object (e.g. `colocalization_by_variant`). `fetch_tsv` adds nothing; `fetch_json` *unconditionally* injects `format=json` into the query string -- if you pass `format="tsv"` to `fetch_json` it gets silently overridden. Pick the right helper for the response shape you want, don't try to flip format via kwargs.
 - **Response sizes can blow up context.** `credible_sets_by_gene/PCSK9` returns 3,224 rows, ~1.3 MB. Filter or summarize in-cell (`pl.DataFrame.filter`, `.head(20)`, `group_by + agg`) before printing the result -- and never let raw API output land in the chat transcript at full size.
 - **No data caching.** Every notebook run hits the API live. If a parameter is fixed (e.g. you're iterating on the plotting code, not the gene), bind the dataframe to a variable in an upstream cell so reactive cells downstream don't re-fetch.
 - **Lead-variant logic is fragile.** nb01 picks the highest-PIP missense in the GWAS bucket as a stand-in for "lead variant"; that's correct for PCSK9 but not generally. For other genes, look at the credible set explicitly (`get_credible_set_by_id` or filter by `cs_id`) rather than re-using the missense heuristic.
-- **Phenotype codes are FinnGen-specific.** `I9_CHD`, `T2D`, `K11_CROHN` etc. come from FinnGen's endpoint definitions, not free text. Use `lookup_phenotype_names` (via `fetch_tsv` against the matching endpoint) before passing strings to phenotype-keyed paths.
+- **Phenotype codes are FinnGen-specific.** `I9_CHD`, `T2D`, `K11_CROHN` etc. come from FinnGen's endpoint definitions, not free text. Hit `fetch_json("/trait_name_mapping")` once to get the full code -> name mapping, then pick the code you actually want before passing strings to phenotype-keyed paths.
 
 ## When to revise this skill
 

@@ -12,7 +12,7 @@ The argument behind that minimalism is the FinnGenie REST API itself: bearer aut
 
 We measured. The FinnGenie MCP server (`fulltiltgenomics/genetics-mcp-server`) registers 29 tools; every one is a thin `httpx` wrapper around `https://finngenie.fi/api/v1/*` or an internal BigQuery proxy. None use the two MCP-specific primitives (sampling, elicitation). A direct `curl` reproduces every result. See [the evaluator pass](../jx-dev/reference/2026-05-01__voa__finngenie-mcp-evaluator.md) for the full per-tool verdict. (The DepMap MCP scored the same way in April.)
 
-A skill file would be the next-lightest layer above the API. fgx goes one step further: the marimo notebook is the skill -- its first cell shows the bare-`curl` equivalent of every API call below, so an agent reading the notebook learns the API surface from the same artifact it composes against. There's no separate `SKILL.md` to drift out of sync with the notebook code.
+A heavy skill file would be the next-lightest layer above the API. fgx stays skill-light: the marimo notebook is the API substrate -- its first cell shows the bare-`curl` equivalent of every API call below, so an agent reading the notebook learns the API surface from the same artifact it composes against. The repo includes only thin operational skills for cold-start setup and notebook composition.
 
 A Python SDK would be lighter still in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API. The TSV-by-default response means `duckdb`'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK. We accept the few extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
 
