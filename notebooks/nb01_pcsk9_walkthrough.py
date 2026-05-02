@@ -66,13 +66,40 @@ def _():
         r"""
         # nb01: PCSK9 walkthrough
 
-        Composes recipes **q02** (credible sets near a gene) and **q04** (colocalization at a variant)
-        into one analysis. Pick a gene, find its lead missense variant in fine-mapped GWAS, then
-        ask which traits share its causal signal.
+        Pick a gene, find its lead missense variant in fine-mapped GWAS, then ask which traits share
+        its causal signal. Demonstrates the full pattern fgx is built on: an `httpx.get` against
+        `https://finngenie.fi/api/v1/*`, parse the response, plot.
+        """
+    )
+    return
 
-        Same data path as `recipes/q02_credible_sets_by_gene.sh` and `q04_colocalization.sh`,
-        same auth boundary (`.env` at the repo root). The notebook's job is composition + plots,
-        not new capability.
+
+@app.cell
+def _():
+    mo.md(
+        r"""
+        ## How fgx talks to FinnGenie
+
+        The whole "library" is `httpx.get` against `https://finngenie.fi/api/v1/*` with a bearer token.
+        Every Python call below is the equivalent of one of these shell one-liners; if you'd rather
+        skip Python, the same data comes out either way:
+
+        ```bash
+        # list all 29 datasets
+        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" https://finngenie.fi/api/v1/datasets
+
+        # credible sets near a gene (default Content-Type is text/tab-separated-values; pipe to duckdb)
+        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
+             "https://finngenie.fi/api/v1/credible_sets_by_gene/PCSK9"
+
+        # colocalization at a variant (JSON, opt-in via ?format=json)
+        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
+             "https://finngenie.fi/api/v1/colocalization_by_variant/1:55039974:G:T?format=json"
+        ```
+
+        That's the entire data-access layer. The two helpers below (`fetch_tsv`, `fetch_json`) are
+        thin wrappers that fold the bearer header in, parse the response, and hand back a polars
+        DataFrame or a list of dicts. There is no SDK, no MCP server, no schema cache.
         """
     )
     return

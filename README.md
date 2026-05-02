@@ -1,62 +1,45 @@
 # fgx - FinnGen eXplore
 
-An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API (FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch -- 29 datasets in total at last count).
+An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API (FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch -- 29 datasets at last count).
 
 ## The hypothesis
 
-fgx is a catalog of **REST recipes**, not a tool layer. The FinnGenie team operates a clean REST API at `https://finngenie.fi/api/v1/*`: bearer auth, predictable paths, TSV by default (which streams straight into `duckdb` / `polars`). Given that, every wrapper above the API -- MCP server, Python SDK, skill file -- is overhead. The shorter path is to publish worked queries that humans copy and agents read.
+fgx is a catalog of marimo notebooks against the FinnGenie REST API, and nothing else. No Python SDK, no MCP server, no schema cache. The substrate is the [`marimo`](https://marimo.io) notebook itself; the API is the contract; `httpx.get` is the entire data-access layer. The reusable functions inside each notebook are the only thing that gets shared.
 
-Three properties make this work:
+The argument behind that minimalism is the FinnGenie REST API itself: bearer auth, predictable paths, TSV by default (which streams straight into [`duckdb`](https://duckdb.org)). Given that, every wrapper above the API -- MCP server, Python SDK, custom CLI -- is overhead. The shorter path is to write the notebook directly against `https://finngenie.fi/api/v1/*`. Each notebook becomes simultaneously a tutorial, a regression test, and a reusable function library for the next analysis.
 
-- **The recipes are the docs.** Each `recipes/q*.sh` is a self-contained shell script that sources a token, hits one endpoint, and pipes the result through `jq` or `duckdb` to answer one specific question. The script is simultaneously a tutorial, a regression test, and a thing you can pipe into a notebook.
-- **TSV-by-default beats JSON.** The API's default `Content-Type: text/tab-separated-values` means a one-line `curl ... | duckdb -c "..."` does what a Python SDK would do in twenty. The agent reads the recipe, learns the pattern, and composes new queries against the same surface.
-- **No local data layer.** Unlike sibling pilots that build a local DuckDB from a snapshot, fgx is internet-first by design. The FinnGenie REST API is the source of truth; recipes hit it live, with the bearer token as the only piece of state.
+## Why notebooks instead of MCP, skills, or a Python SDK?
 
-A thin layer of structure (recipes named `q01_*`, `q02_*`, ...; one paragraph of context per recipe; a shared `.env` for the token) is the entire library. There is no Python package, no MCP server, no schema cache.
+We measured. The FinnGenie MCP server (`fulltiltgenomics/genetics-mcp-server`) registers 29 tools; every one is a thin `httpx` wrapper around `https://finngenie.fi/api/v1/*` or an internal BigQuery proxy. None use the two MCP-specific primitives (sampling, elicitation). A direct `curl` reproduces every result. See [the evaluator pass](../jx-dev/reference/2026-05-01__voa__finngenie-mcp-evaluator.md) for the full per-tool verdict. (The DepMap MCP scored the same way in April.)
 
-If this works for FinnGenie, the pattern transfers: any dataset with a clean REST surface = new recipe catalog, same machinery.
+A skill file would be the next-lightest layer above the API. fgx goes one step further: the marimo notebook is the skill -- its first cell shows the bare-`curl` equivalent of every API call below, so an agent reading the notebook learns the API surface from the same artifact it composes against. There's no separate `SKILL.md` to drift out of sync with the notebook code.
 
-## Why not skills, an MCP, or a Python SDK?
-
-We measured. The FinnGenie MCP server (`fulltiltgenomics/genetics-mcp-server`) registers 29 tools; every one is a thin `httpx` wrapper around `https://finngenie.fi/api/v1/*` or an internal BigQuery proxy. None use the two MCP-specific primitives (sampling, elicitation). A direct `curl` reproduces every result. See [the evaluator pass](../jx-dev/reference/2026-05-01__voa__finngenie-mcp-evaluator.md) for the full per-tool verdict. (The DepMap MCP scored the same way in April; two-for-two on Broad-built MCP servers wrapping internal REST APIs.)
-
-A skill file would be the next-lightest layer above the API. fgx goes one step further: the recipes themselves are the skill. An agent reads `recipes/README.md`, sees the available queries, picks the closest one, edits parameters. No separate `SKILL.md` to keep in sync.
+A Python SDK would be lighter still in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API. The TSV-by-default response means `duckdb`'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK. We accept the few extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
 
 ## Getting started
 
 1. Create an API key at [finngenie.broadinstitute.org](https://finngenie.broadinstitute.org/) (`MCP/API KEYS` -> `Create key`). The same key works for both the MCP and the REST API.
 2. `cp .env.example .env` and paste your key.
-3. `bash recipes/q01_list_datasets.sh` to confirm the token works.
-4. Browse `recipes/` and edit any script in place to ask your own variant of the question.
+3. From a fresh Claude Code session in this clone, ask: *help me get started*. The [`getting-started`](.claude/skills/getting-started/SKILL.md) skill installs `uv` and `marimo-pair`, launches nb01 in a live marimo kernel, and hands off to interactive composition.
 
-Prerequisites: `curl`, `jq`, and (for the recipes that aggregate) [`duckdb`](https://duckdb.org/docs/installation/). All three are one `brew install` away.
+If you want to skip the agent-assist and just open the notebook: `just notebook` (uses `uvx marimo edit --sandbox`, provisions deps from the PEP 723 header on first launch).
+
+Prerequisites: [`uv`](https://docs.astral.sh/uv/) is the only thing you need to install; the notebook's PEP 723 header pulls in marimo, polars, httpx, altair, and python-dotenv. Optional: [`duckdb`](https://duckdb.org/docs/installation/) on `$PATH` if you want to run ad-hoc SQL against the same TSV endpoints from your shell.
 
 ## Layout
 
-Three layers of the same surface, climbing in capability and dependencies:
-
 ```
 fgx/
-  README.md           # this file
-  Justfile            # `just fetch | build-db | render | notebook`
-  .env.example        # FINNGENIE_TOKEN= placeholder
-  recipes/            # one-shot bash + curl + jq/duckdb
-    q01_list_datasets.sh
-    q02_credible_sets_by_gene.sh         # PCSK9 walkthrough
-    q03_credible_sets_by_phenotype.sh    # I9_CHD walkthrough
-    q04_colocalization.sh                # variant -> shared causal signals
-  queries/            # ggsql charts against a local DuckDB cached from API
-    q01_top_traits_near_pcsk9.gsql
-    q02_top_chd_loci.gsql
-  notebooks/          # marimo, composes endpoints with reactive plots
-    nb01_pcsk9_walkthrough.py            # composes recipes q02 + q04
+  README.md                          # this file
+  Justfile                           # `just notebook`
+  .env.example                       # FINNGENIE_TOKEN= placeholder
+  .claude/skills/
+    getting-started/SKILL.md         # cold-clone bootstrap
+  notebooks/
+    nb01_pcsk9_walkthrough.py        # gene -> credible sets -> lead variant -> colocalization
 ```
 
-Each layer has its own audience:
-
-- **`recipes/`** -- the smallest demonstration that the API needs no tool layer. Bash + curl + jq/duckdb. Read-once-and-go for humans, copy-and-edit for agents.
-- **`queries/`** -- declarative charts. ggsql files run against a local DuckDB cached by `just fetch`. The auth boundary lives entirely in `fetch`; the .gsql files are auth-free SQL.
-- **`notebooks/`** -- composition + plots. Marimo notebooks chain multiple endpoints (e.g. gene -> credible sets -> lead variant -> colocalization). Reactive kernel feedback while exploring; reusable functions across notebooks.
+That's the whole repo. New analyses become `notebooks/nbNN_*.py`. When the catalog grows past the point where the README's index can carry it, fgx will likely add a [`compose-notebook`](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) skill (the same pattern jx uses); that's a scale-driven addition, not a starting point.
 
 ## License
 
@@ -64,4 +47,4 @@ BSD 3-Clause. See [LICENSE](LICENSE).
 
 ## Citation
 
-If fgx is useful in your work, please cite both fgx and the underlying FinnGenie service. See `CITATION.cff` (TODO).
+If fgx is useful in your work, please cite both fgx and the underlying FinnGenie service. CITATION.cff TBD.
