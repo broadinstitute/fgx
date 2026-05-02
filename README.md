@@ -39,9 +39,13 @@ fgx/
     compose-notebook/SKILL.md        # edit nb01 in place vs copy-fork to nb02_*
   notebooks/
     nb01_pcsk9_walkthrough.py        # gene -> credible sets -> lead variant -> colocalization
+    nb02_variant_phewas.py           # variant PheWAS across endpoints
+    nb03_phenotype_locus_zoom.py     # phenotype-driven locus zoom
+    nb04_gene_exome_burden.py        # gene-based exome burden results
+    __marimo__/session/              # committed session snapshots for molab previews
 ```
 
-That's the whole repo. `getting-started` walks a fresh clone to a running marimo kernel; `compose-notebook` covers picking the right path (edit-in-place vs copy-fork) and the right endpoint when the user asks for a new genetics analysis. Both skills are intentionally thin -- when the catalog grows past one notebook with cross-file function reuse, `compose-notebook` will need to grow into a per-module catalog table the way [jx's compose-notebook](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) does.
+That's the whole repo. `getting-started` walks a fresh clone to a running marimo kernel; `compose-notebook` covers picking the right path (edit-in-place vs copy-fork) and the right endpoint when the user asks for a new genetics analysis. Both skills are intentionally thin -- as the catalog grows and cross-file function reuse appears, `compose-notebook` will need to grow into a per-module catalog table the way [jx's compose-notebook](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) does.
 
 ## License
 
