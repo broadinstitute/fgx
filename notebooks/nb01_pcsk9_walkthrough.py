@@ -12,7 +12,7 @@
 
 import marimo
 
-__generated_with = "0.10.0"
+__generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -63,55 +63,51 @@ def fetch_json(path: str, **params) -> list[dict]:
 
 @app.cell
 def _():
-    mo.md(
-        r"""
-        # nb01: PCSK9 walkthrough
+    mo.md(r"""
+    # nb01: PCSK9 walkthrough
 
-        Pick a gene, find its lead missense variant in fine-mapped GWAS, then ask which traits share
-        its causal signal. Demonstrates the full pattern fgx is built on: an `httpx.get` against
-        `https://finngenie.fi/api/v1/*`, parse the response, plot.
-        """
-    )
+    Pick a gene, find its lead missense variant in fine-mapped GWAS, then ask which traits share
+    its causal signal. Demonstrates the full pattern fgx is built on: an `httpx.get` against
+    `https://finngenie.fi/api/v1/*`, parse the response, plot.
+    """)
     return
 
 
 @app.cell
 def _():
-    mo.md(
-        r"""
-        ## How fgx talks to FinnGenie
+    mo.md(r"""
+    ## How fgx talks to FinnGenie
 
-        The whole "library" is `httpx.get` against `https://finngenie.fi/api/v1/*` with a bearer token.
-        Every Python call below is the equivalent of one of these shell one-liners; if you'd rather
-        skip Python, the same data comes out either way:
+    The whole "library" is `httpx.get` against `https://finngenie.fi/api/v1/*` with a bearer token.
+    Every Python call below is the equivalent of one of these shell one-liners; if you'd rather
+    skip Python, the same data comes out either way:
 
-        ```bash
-        # list all 29 datasets
-        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" https://finngenie.fi/api/v1/datasets
+    ```bash
+    # list all 29 datasets
+    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" https://finngenie.fi/api/v1/datasets
 
-        # credible sets near a gene (default Content-Type is text/tab-separated-values; pipe to duckdb)
-        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
-             "https://finngenie.fi/api/v1/credible_sets_by_gene/PCSK9"
+    # credible sets near a gene (default Content-Type is text/tab-separated-values; pipe to duckdb)
+    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
+         "https://finngenie.fi/api/v1/credible_sets_by_gene/PCSK9"
 
-        # colocalization at a variant (JSON, opt-in via ?format=json)
-        curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
-             "https://finngenie.fi/api/v1/colocalization_by_variant/1:55039974:G:T?format=json"
-        ```
+    # colocalization at a variant (JSON, opt-in via ?format=json)
+    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
+         "https://finngenie.fi/api/v1/colocalization_by_variant/1:55039974:G:T?format=json"
+    ```
 
-        That's the entire data-access layer. The two helpers below (`fetch_tsv`, `fetch_json`) are
-        thin wrappers that fold the bearer header in, parse the response, and hand back a polars
-        DataFrame or a list of dicts. There is no SDK, no MCP server, no schema cache.
+    That's the entire data-access layer. The two helpers below (`fetch_tsv`, `fetch_json`) are
+    thin wrappers that fold the bearer header in, parse the response, and hand back a polars
+    DataFrame or a list of dicts. There is no SDK, no MCP server, no schema cache.
 
-        For the **complete surface** -- 26 paths across 13 tags (credible sets, colocalization,
-        exome, summary stats, search, rsid, etc.) -- the API ships its own OpenAPI 3.1 spec:
+    For the **complete surface** -- 26 paths across 13 tags (credible sets, colocalization,
+    exome, summary stats, search, rsid, etc.) -- the API ships its own OpenAPI 3.1 spec:
 
-        - <https://finngenie.fi/api/v1/openapi.json> (machine-readable, ~74 KB)
-        - <https://finngenie.fi/api/v1/docs> (Swagger UI -- browseable; live + version-correct)
+    - <https://finngenie.fi/api/v1/openapi.json> (machine-readable, ~74 KB)
+    - <https://finngenie.fi/api/v1/docs> (Swagger UI -- browseable; live + version-correct)
 
-        When composing a new notebook against an endpoint nb01 doesn't already touch, read the
-        spec rather than guessing the path; both links above are the source of truth.
-        """
-    )
+    When composing a new notebook against an endpoint nb01 doesn't already touch, read the
+    spec rather than guessing the path; both links above are the source of truth.
+    """)
     return
 
 
@@ -131,7 +127,7 @@ def _(cs):
         .sort("n_rows", descending=True)
     )
     mo.vstack([mo.md("**Rows by data type:**"), by_type])
-    return (by_type,)
+    return
 
 
 @app.cell
@@ -173,7 +169,7 @@ def _(GENE, top_gwas):
         .properties(height=400, title=f"Top traits associated near {GENE}")
     )
     chart
-    return (chart,)
+    return
 
 
 @app.cell
@@ -201,7 +197,7 @@ def _(cs):
         f"(PIP={lead['pip'][0]:.3f}, -log10p={lead['mlog10p'][0]:.0f}, "
         f"trait={lead['trait'][0]}, resource={lead['resource'][0]})"
     )
-    return lead, variant_id
+    return (variant_id,)
 
 
 @app.cell
@@ -242,7 +238,7 @@ def _(coloc):
             top_coloc,
         ]
     )
-    return (top_coloc,)
+    return
 
 
 @app.cell
@@ -279,7 +275,7 @@ def _(coloc, variant_id):
         )
     )
     coloc_chart
-    return (coloc_chart,)
+    return
 
 
 if __name__ == "__main__":

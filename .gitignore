@@ -10,3 +10,6 @@ __pycache__/
 .venv/
 .direnv/
 __marimo__/
+!notebooks/__marimo__/
+!notebooks/__marimo__/session/
+!notebooks/__marimo__/session/*.json

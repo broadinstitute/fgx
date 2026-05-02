@@ -1,0 +1,165 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.3",
+    "script_metadata_hash": "9a4680185fb050ea889965dfa1ff1a87"
+  },
+  "cells": [
+    {
+      "id": "setup",
+      "code_hash": "3c5fa8ae3f7c72ae45b68a4a8c5c7cea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "f0f197b7dde4aa80dbc6c4752ef6a470",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "c5dbe0ce4a10690a33a3dc9f180a2874",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "bb119867184d6e91468f54458407ab42",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "0d21b347317a935003c09370ade8b81b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"nb02-phewas-for-an-rsid\">nb02: PheWAS for an rsID</h1>\n<span class=\"paragraph\">Start from an rsID, resolve it to a chr:pos:ref:alt variant, then ask: which traits across\nwhich resources have a credible set that contains this variant? That's a PheWAS view, but\npowered by fine-mapping rather than marginal association \u2014 every dot below is a variant\nsitting inside a 95% credible set, so the signal has already survived LD shrinkage.</span>\n<span class=\"paragraph\">Companion to nb01 (gene-first). Same two helpers (<code>fetch_tsv</code>, <code>fetch_json</code>), different\nentry point and a different chart pattern.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "4e6ca6d0a88e148a27357e419b8441c4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"entry-point-rs11591147\">Entry point: <code>rs11591147</code></h3>\n<span class=\"paragraph\">PCSK9 R46L \u2014 a missense loss-of-function allele, one of the cleanest natural-experiment variants in cardiometabolic genetics. Carriers have lower LDL cholesterol and lower CHD risk. We expect the PheWAS to light up lipid traits and atherosclerotic disease.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "2db5ac538b771d66dff30d93756ebe63",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Resolved rs11591147</strong> -&gt; resolver returned <code>['1:55039974:G:A']</code>; credible-set data is keyed under <code>1:55039974:G:T</code> (592 rows across resources/data types).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "d094dff598e409de9e26705e79b9cc43",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Rows by resource and data type.</strong> GWAS rows dominate; QTL hits (pQTL/eQTL/caQTL) are the molecular layer that lets us reason about mechanism if we want to chain into colocalization later.</span></span><marimo-ui-element object-id='Xref-0' random-id='90f52214-d9fa-c116-af93-448551e2d902'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:526},{&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:30},{&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:16},{&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:15},{&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:3},{&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;caQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:1},{&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:1}]&quot;' data-total-rows='7' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_rows&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "d766b11c0eedbaa1bfe0a4483376a56b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-25-gwas-traits-whose-credible-set-contains-155039974gt\">Top 25 GWAS traits whose credible set contains <code>1:55039974:G:T</code></h3>\n<span class=\"paragraph\">Trait codes are FinnGen / UKBB phenocodes \u2014 opaque short strings rather than human labels. That's authentic to the API; resolving them to plain English would be its own vignette (see <code>/phenotype/{resource}/{phenocode}/markdown</code>).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f5cb2babee3e99a13ff8df0bb68ddc27",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"data\": {\n    \"name\": \"data-dd43ebe30d46047478002dd86d963b37\"\n  },\n  \"datasets\": {\n    \"data-dd43ebe30d46047478002dd86d963b37\": [\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.2433,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"chr1:52383562-58178931_1\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"FinnGen_kanta\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 363.2248,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"finngen\",\n        \"se\": 0.005962,\n        \"trait\": \"3019900\",\n        \"trait_label\": \"3019900 (finngen)\",\n        \"trait_original\": \"3019900\",\n        \"version\": \"R12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.02787,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"47afcf6dd13d45fee39ea8f94053b7bc\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 17.176,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269509\",\n        \"trait_label\": \"GCST90269509 (open_targets)\",\n        \"trait_original\": \"GCST90269509\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": 0.06016,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"74c2ed1612992495808339cd2a354c92\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"higher in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 66.7015,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90445917\",\n        \"trait_label\": \"GCST90445917 (open_targets)\",\n        \"trait_original\": \"GCST90445917\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.01906,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"203c71463944a829883f9c2c6f40e7f4\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 10.6538,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092841\",\n        \"trait_label\": \"GCST90092841 (open_targets)\",\n        \"trait_original\": \"GCST90092841\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.05676,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"6773408bb6c33a385576f4b3efd89b98\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 67.8992,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269630\",\n        \"trait_label\": \"GCST90269630 (open_targets)\",\n        \"trait_original\": \"GCST90269630\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.05199,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"499dbc57ed80e773550ddd5bffa4f6d0\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 73.0002,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092973\",\n        \"trait_label\": \"GCST90092973 (open_targets)\",\n        \"trait_original\": \"GCST90092973\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.05371,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"14873027884c600ada90947160ef746a\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 61.0366,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269618\",\n        \"trait_label\": \"GCST90269618 (open_targets)\",\n        \"trait_original\": \"GCST90269618\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.04028,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"dd6629b84c53c3b7e3f05e952e887bdf\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 32.0853,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90445857\",\n        \"trait_label\": \"GCST90445857 (open_targets)\",\n        \"trait_original\": \"GCST90445857\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.02997,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"9e0249bacdbf16a70d3311e720f5d27a\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 27.9558,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90502294\",\n        \"trait_label\": \"GCST90502294 (open_targets)\",\n        \"trait_original\": \"GCST90502294\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.0365938,\n        \"alt\": \"T\",\n        \"beta\": -0.417,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"chr1_55039974_G_T\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"FinnGen_R13_UKBB\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 140.54,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 0.99,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"finngen_ukbb\",\n        \"se\": 0.0165,\n        \"trait\": \"Pure_hypercholesterolaemia\",\n        \"trait_label\": \"Pure_hypercholesterolaemia (finngen_ukbb)\",\n        \"trait_original\": \"E4_HYPERCHOL\",\n        \"version\": \"R13\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.01578,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"97897c4c7bac4d306002a3c10cc6741c\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 29.8729,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90693001\",\n        \"trait_label\": \"GCST90693001 (open_targets)\",\n        \"trait_original\": \"GCST90693001\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.05555,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"977a62ca9518bd86015c9776b6fd0ad9\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 89.4468,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092864\",\n        \"trait_label\": \"GCST90092864 (open_targets)\",\n        \"trait_original\": \"GCST90092864\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.0548,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"a6ff60cb5fd453ea3a6716178ec1e88e\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 63.3552,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269631\",\n        \"trait_label\": \"GCST90269631 (open_targets)\",\n        \"trait_original\": \"GCST90269631\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.04784,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"15c259b5986d96546208917dba5414bc\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 48.8458,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269609\",\n        \"trait_label\": \"GCST90269609 (open_targets)\",\n        \"trait_original\": \"GCST90269609\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.06148,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"299890aa3bf0942d547c6193d7f4bd89\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 81.2992,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269603\",\n        \"trait_label\": \"GCST90269603 (open_targets)\",\n        \"trait_original\": \"GCST90269603\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.06542,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"fa30c30b77c8f697e901c75d69f41210\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 68.3509,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90446094\",\n        \"trait_label\": \"GCST90446094 (open_targets)\",\n        \"trait_original\": \"GCST90446094\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.05423,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"a5ef8b0b04a9efd719e1cfd9c94d250b\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 85.678,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092862\",\n        \"trait_label\": \"GCST90092862 (open_targets)\",\n        \"trait_original\": \"GCST90092862\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.0419,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"2bfc8e7195a01c6bfd224bceab1a7d9d\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 48.0533,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092849\",\n        \"trait_label\": \"GCST90092849 (open_targets)\",\n        \"trait_original\": \"GCST90092849\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": 0.05218,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"e547fe5f596e8bdb710e7c3dd75969f6\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"higher in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 73.6809,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092927\",\n        \"trait_label\": \"GCST90092927 (open_targets)\",\n        \"trait_original\": \"GCST90092927\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.02271,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"091479d1fb8adac4aa5866905dbfd2c3\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 6.5586,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 0.9735,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90475204\",\n        \"trait_label\": \"GCST90475204 (open_targets)\",\n        \"trait_original\": \"GCST90475204\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.03728,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"fb826467a9d15b8ca6695a0eb4f2ae04\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 82.5561,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90502101\",\n        \"trait_label\": \"GCST90502101 (open_targets)\",\n        \"trait_original\": \"GCST90502101\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.07567,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"95463fe75e61cc0bf0e64f7cf78dd04e\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 322.0052,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90019501\",\n        \"trait_label\": \"GCST90019501 (open_targets)\",\n        \"trait_original\": \"GCST90019501\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.02926,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"46c62d2fc2afdb43dc0a0717d724b513\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 16.4374,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90445901\",\n        \"trait_label\": \"GCST90445901 (open_targets)\",\n        \"trait_original\": \"GCST90445901\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.04304,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"5332689d97c785bfe5793f9e071827b1\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 39.8822,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90269608\",\n        \"trait_label\": \"GCST90269608 (open_targets)\",\n        \"trait_original\": \"GCST90269608\",\n        \"version\": \"25.12\"\n      },\n      {\n        \"aaf\": 0.03568,\n        \"alt\": \"T\",\n        \"beta\": -0.02148,\n        \"cell_type\": null,\n        \"chr\": 1,\n        \"cs_id\": \"2ffd1b27bb113f7182983015e464b4d8\",\n        \"cs_min_r2\": 1.0,\n        \"cs_size\": 1,\n        \"data_type\": \"GWAS\",\n        \"dataset\": \"Open_Targets_25.12\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"PCSK9\",\n        \"mlog10p\": 13.1983,\n        \"most_severe\": \"missense_variant\",\n        \"pip\": 1.0,\n        \"pos\": 55039974,\n        \"ref\": \"G\",\n        \"resource\": \"open_targets\",\n        \"se\": null,\n        \"trait\": \"GCST90092816\",\n        \"trait_label\": \"GCST90092816 (open_targets)\",\n        \"trait_original\": \"GCST90092816\",\n        \"version\": \"25.12\"\n      }\n    ]\n  },\n  \"encoding\": {\n    \"color\": {\n      \"field\": \"direction\",\n      \"scale\": {\n        \"domain\": [\n          \"lower in alt\",\n          \"higher in alt\"\n        ],\n        \"range\": [\n          \"#2b83ba\",\n          \"#d7191c\"\n        ]\n      },\n      \"title\": \"Effect direction\",\n      \"type\": \"nominal\"\n    },\n    \"size\": {\n      \"field\": \"pip\",\n      \"scale\": {\n        \"range\": [\n          40,\n          300\n        ]\n      },\n      \"title\": \"PIP\",\n      \"type\": \"quantitative\"\n    },\n    \"tooltip\": [\n      {\n        \"field\": \"trait\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"resource\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"dataset\",\n        \"type\": \"nominal\"\n      },\n      {\n        \"field\": \"mlog10p\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"beta\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"pip\",\n        \"type\": \"quantitative\"\n      },\n      {\n        \"field\": \"most_severe\",\n        \"type\": \"nominal\"\n      }\n    ],\n    \"x\": {\n      \"field\": \"mlog10p\",\n      \"title\": \"-log10(p)\",\n      \"type\": \"quantitative\"\n    },\n    \"y\": {\n      \"field\": \"trait_label\",\n      \"sort\": \"-x\",\n      \"title\": null,\n      \"type\": \"nominal\"\n    }\n  },\n  \"height\": 520,\n  \"mark\": {\n    \"opacity\": 0.85,\n    \"size\": 140,\n    \"type\": \"circle\"\n  },\n  \"title\": \"PheWAS at 1:55039974:G:T (credible-set membership)\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  }\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "69641d913e75bacd06074c676bb1459a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"nearest-protein-coding-genes-to-155039974gt\">Nearest protein-coding genes to <code>1:55039974:G:T</code></h3></span><marimo-ui-element object-id='RGSE-0' random-id='b5b8d07d-d133-640d-c010-1885db25e2cd'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;,&#92;&quot;distance&#92;&quot;:0,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;proprotein convertase subtilisin/kexin type 9&#92;&quot;,&#92;&quot;gene_strand&#92;&quot;:&#92;&quot;+&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;},{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;BSND&#92;&quot;,&#92;&quot;distance&#92;&quot;:22802,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;barttin CLCNK type accessory subunit beta&#92;&quot;,&#92;&quot;gene_strand&#92;&quot;:&#92;&quot;+&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;},{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;USP24&#92;&quot;,&#92;&quot;distance&#92;&quot;:26385,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;ubiquitin specific peptidase 24&#92;&quot;,&#92;&quot;gene_strand&#92;&quot;:&#92;&quot;-&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;}]&quot;' data-total-rows='3' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;gene_name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;distance&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;hgnc_name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_strand&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_type&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "ff193bda65ecf735df93b0b8b4764154",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"to-extend\">To extend</h2>\n<ul>\n<li>Swap <code>rs11591147</code> for <code>rs7412</code> (APOE, drives LDL via a different mechanism) and re-run \u2014\n  the dot plot should still be lipid-anchored but the QTL co-signals will look different.</li>\n<li>Take the top GWAS trait above and feed its <code>cs_id</code> into <code>/colocalization_by_credible_set_id/{id}</code>\n  to ask which other credible sets share this signal \u2014 that bridges PheWAS into the\n  colocalization view from nb01.</li>\n<li>Resolve the FinnGen phenocodes to human labels by calling\n  <code>/phenotype/finngen/{phenocode}/markdown</code> for each top trait, and re-render the y-axis\n  with readable names.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

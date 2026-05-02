@@ -8,6 +8,15 @@ Same shape as [jx](https://github.com/broadinstitute/jx) -- a catalog of marimo 
 
 A Python SDK would be lighter in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API. The TSV-by-default response means [`duckdb`](https://duckdb.org)'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK -- we accept the extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
 
+Each notebook ships with a committed session snapshot under [`notebooks/__marimo__/session/`](notebooks/__marimo__/session/) so the molab preview renders cell outputs (plots, tables) without re-executing. Click a badge to view the rendered notebook in [molab](https://docs.marimo.io/guides/molab/), or fork it from there.
+
+| Notebook | Role | Preview |
+|---|---|---|
+| [`nb01_pcsk9_walkthrough.py`](notebooks/nb01_pcsk9_walkthrough.py) | Gene -> credible sets -> lead variant -> colocalization | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb01_pcsk9_walkthrough.py) |
+| [`nb02_variant_phewas.py`](notebooks/nb02_variant_phewas.py) | Variant PheWAS across endpoints | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb02_variant_phewas.py) |
+| [`nb03_phenotype_locus_zoom.py`](notebooks/nb03_phenotype_locus_zoom.py) | Phenotype-driven locus zoom | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb03_phenotype_locus_zoom.py) |
+| [`nb04_gene_exome_burden.py`](notebooks/nb04_gene_exome_burden.py) | Gene-based exome burden results | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb04_gene_exome_burden.py) |
+
 ## Getting started
 
 1. Create an API key at [finngenie.broadinstitute.org](https://finngenie.broadinstitute.org/) (`MCP/API KEYS` -> `Create key`). The same key works for both the MCP and the REST API.
