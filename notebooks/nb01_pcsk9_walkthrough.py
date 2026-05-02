@@ -100,6 +100,15 @@ def _():
         That's the entire data-access layer. The two helpers below (`fetch_tsv`, `fetch_json`) are
         thin wrappers that fold the bearer header in, parse the response, and hand back a polars
         DataFrame or a list of dicts. There is no SDK, no MCP server, no schema cache.
+
+        For the **complete surface** -- 26 paths across 13 tags (credible sets, colocalization,
+        exome, summary stats, search, rsid, etc.) -- the API ships its own OpenAPI 3.1 spec:
+
+        - <https://finngenie.fi/api/v1/openapi.json> (machine-readable, ~74 KB)
+        - <https://finngenie.fi/api/v1/docs> (Swagger UI -- browseable; live + version-correct)
+
+        When composing a new notebook against an endpoint nb01 doesn't already touch, read the
+        spec rather than guessing the path; both links above are the source of truth.
         """
     )
     return
