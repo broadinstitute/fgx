@@ -2,6 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #     "marimo<0.23.4",
+#     "jedi<0.20.0",
 #     "polars",
 #     "httpx",
 #     "altair",
@@ -31,7 +32,7 @@ with app.setup:
 
 
 @app.function
-def _client() -> httpx.Client:
+def client() -> httpx.Client:
     """Authenticated httpx client. Bearer token comes from .env at the repo root."""
     if not FINNGENIE_TOKEN:
         raise RuntimeError(
@@ -45,7 +46,7 @@ def _client() -> httpx.Client:
 @app.function
 def fetch_tsv(path: str, **params) -> pl.DataFrame:
     """GET a FinnGenie endpoint as TSV and return a polars DataFrame."""
-    with _client() as c:
+    with client() as c:
         r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
     return pl.read_csv(io.BytesIO(r.content), separator="\t", null_values="NA")
@@ -54,7 +55,7 @@ def fetch_tsv(path: str, **params) -> pl.DataFrame:
 @app.function
 def fetch_json(path: str, **params) -> list[dict]:
     """GET a FinnGenie endpoint as JSON. Most endpoints accept ?format=json."""
-    with _client() as c:
+    with client() as c:
         r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
         r.raise_for_status()
     return r.json()
@@ -161,7 +162,7 @@ def _(GENE, cs):
 @app.cell
 def _(GENE, top_gwas):
     chart = (
-        alt.Chart(top_gwas.to_pandas())
+        alt.Chart(top_gwas)
         .mark_bar()
         .encode(
             x=alt.X("mlog10p:Q", title="-log10(p)"),
@@ -255,7 +256,6 @@ def _(coloc, variant_id):
         )
         .sort("hit1_mlog10p", descending=True)
         .head(25)
-        .to_pandas()
     )
     coloc_chart = (
         alt.Chart(pairs)

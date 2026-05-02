@@ -68,12 +68,19 @@ mode so the PEP 723 header provisions a venv automatically:
 
 Use `run_in_background=true` on the Bash call so you can poll while
 deps install. First launch installs marimo + polars + httpx + altair +
-python-dotenv (~30 seconds). Verify the server is up with:
+python-dotenv (~30 seconds). Then poll until the server answers:
 
-    curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:$PORT/
+    until curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:$PORT/ 2>/dev/null | grep -q "200"; do sleep 3; done; echo "Server is up"
 
-Expect HTTP 200. Tell the user the URL so they can open the browser UI
-alongside your session if they want to watch cells render.
+Don't `sleep 60` then check once -- if the resolver fails fast (see the
+marimo[lsp]/jedi gotcha below) you'll wait a full minute on a launch
+that already exited. The `until`-loop returns immediately on success
+and surfaces failures via the background task's exit notification.
+
+Once it returns "Server is up", tell the user the URL so they can open
+the browser UI alongside your session, and run
+`bash ~/.claude/skills/marimo-pair/scripts/discover-servers.sh` to
+confirm marimo-pair sees the kernel before handing off.
 
 ### 5. Hand off to compose-notebook
 
@@ -91,6 +98,16 @@ genetics question they want to explore (a gene, a phenotype code like
 - **`--sandbox` is required.** Without it, `uvx marimo edit` opens the
   file picker but does not provision a venv from the PEP 723 header --
   opening any notebook then fails with `ModuleNotFoundError: polars`.
+- **marimo[lsp] resolver conflict (`jedi==0.20.0`).** `uvx marimo edit
+  --sandbox` resolves marimo with its `[lsp]` extras, which transitively
+  pulls `python-lsp-server>=1.13.0` requiring `jedi<0.20.0`, while
+  something in the resolution graph pins `jedi==0.20.0`. nb01's PEP 723
+  header carries an explicit `jedi<0.20.0` to break the tie -- if you
+  copy-fork to nb02 and the launch fails with "you require jedi==0.20.0
+  and marimo[lsp] ...", the `jedi<0.20.0` line is missing from the new
+  notebook's header. Don't drop it. Don't try to "fix" it by relaxing
+  the `marimo<0.23.4` pin either; that pin avoids a separate 0.23.4
+  sandbox lockfile bug.
 - **Don't share the `FINNGENIE_TOKEN`.** It's personal and gates access
   to embargoed FinnGen data. Never commit `.env`; never paste the token
   into chat. The portal's "Created" timestamp lets the user audit which
