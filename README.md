@@ -4,17 +4,9 @@ An experiment in agent-driven scientific data exploration, built around [FinnGen
 
 ## The hypothesis
 
-fgx is a catalog of marimo notebooks against the FinnGenie REST API, and nothing else. No Python SDK, no MCP server, no schema cache. The substrate is the [`marimo`](https://marimo.io) notebook itself; the API is the contract; `httpx.get` is the entire data-access layer. The reusable functions inside each notebook are the only thing that gets shared.
+Same shape as [jx](https://github.com/broadinstitute/jx) -- a catalog of marimo notebooks plus thin operational skills -- with one difference: jx queries local DuckDB files, fgx hits a REST API. FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default. That collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache -- nb01's first cell shows the bare-`curl` equivalent of every API call below it. See [the evaluator pass](../jx-dev/reference/2026-05-01__voa__finngenie-mcp-evaluator.md) for why a 29-tool MCP wrapper isn't pulling its weight against this API.
 
-The argument behind that minimalism is the FinnGenie REST API itself: bearer auth, predictable paths, TSV by default (which streams straight into [`duckdb`](https://duckdb.org)). Given that, every wrapper above the API -- MCP server, Python SDK, custom CLI -- is overhead. The shorter path is to write the notebook directly against `https://finngenie.fi/api/v1/*`. Each notebook becomes simultaneously a tutorial, a regression test, and a reusable function library for the next analysis.
-
-## Why notebooks instead of MCP, skills, or a Python SDK?
-
-We measured. The FinnGenie MCP server (`fulltiltgenomics/genetics-mcp-server`) registers 29 tools; every one is a thin `httpx` wrapper around `https://finngenie.fi/api/v1/*` or an internal BigQuery proxy. None use the two MCP-specific primitives (sampling, elicitation). A direct `curl` reproduces every result. See [the evaluator pass](../jx-dev/reference/2026-05-01__voa__finngenie-mcp-evaluator.md) for the full per-tool verdict. (The DepMap MCP scored the same way in April.)
-
-A heavy skill file would be the next-lightest layer above the API. fgx stays skill-light: the marimo notebook is the API substrate -- its first cell shows the bare-`curl` equivalent of every API call below, so an agent reading the notebook learns the API surface from the same artifact it composes against. The repo includes only thin operational skills for cold-start setup and notebook composition.
-
-A Python SDK would be lighter still in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API. The TSV-by-default response means `duckdb`'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK. We accept the few extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
+A Python SDK would be lighter in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API. The TSV-by-default response means [`duckdb`](https://duckdb.org)'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK -- we accept the extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
 
 ## Getting started
 
