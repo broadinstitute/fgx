@@ -7,7 +7,7 @@
   "cells": [
     {
       "id": "setup",
-      "code_hash": "08b26dae7a3e3e4a33bdc9117cf3095c",
+      "code_hash": "3c5fa8ae3f7c72ae45b68a4a8c5c7cea",
       "outputs": [
         {
           "type": "data",
@@ -20,7 +20,7 @@
     },
     {
       "id": "Hbol",
-      "code_hash": "8c310a1b910daf71a789dc8f03564fb5",
+      "code_hash": "f0f197b7dde4aa80dbc6c4752ef6a470",
       "outputs": [
         {
           "type": "data",
@@ -33,7 +33,7 @@
     },
     {
       "id": "MJUe",
-      "code_hash": "98862be604773482399b1c478dd6d658",
+      "code_hash": "c5dbe0ce4a10690a33a3dc9f180a2874",
       "outputs": [
         {
           "type": "data",
@@ -46,7 +46,7 @@
     },
     {
       "id": "vblA",
-      "code_hash": "4c66835b8115c622f6712abb0eb3ac6a",
+      "code_hash": "bb119867184d6e91468f54458407ab42",
       "outputs": [
         {
           "type": "data",
@@ -59,7 +59,7 @@
     },
     {
       "id": "bkHC",
-      "code_hash": "b35d000edd32c8f92d2dc19e97d2ead3",
+      "code_hash": "d864d5da27ca1bab22393c9261f692be",
       "outputs": [
         {
           "type": "data",
@@ -72,7 +72,7 @@
     },
     {
       "id": "lEQa",
-      "code_hash": "527306c51cc1c32a6e05cbe002ccc2af",
+      "code_hash": "fe3b845fb5bf31616b4cf8c5d66e6d8f",
       "outputs": [
         {
           "type": "data",
@@ -85,20 +85,7 @@
     },
     {
       "id": "PKri",
-      "code_hash": "e1848e241129138134dd7871ff4bc219",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<marimo-ui-element object-id='PKri-0' random-id='21b42686-f3e7-0025-60a8-a1d9fbd18884'><marimo-text data-initial-value='&quot;&quot;' data-label='&quot;&lt;span class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&gt;&lt;span class=&#92;&quot;paragraph&#92;&quot;&gt;FINNGENIE_TOKEN&lt;/span&gt;&lt;/span&gt;&quot;' data-placeholder='&quot;Paste from finngenie.broadinstitute.org -&gt; MCP/API KEYS&quot;' data-kind='&quot;password&quot;' data-full-width='false' data-disabled='false' data-debounce='true' data-password-has-value='true'></marimo-text></marimo-ui-element>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "Xref",
-      "code_hash": "94e1a3ed660454ba7cec75de3e59d8a6",
+      "code_hash": "bbef67b0fede8ac7412a4c9d1e49026c",
       "outputs": [
         {
           "type": "data",
@@ -110,13 +97,26 @@
       "console": []
     },
     {
-      "id": "SFPL",
+      "id": "Xref",
       "code_hash": "29e7bcc7e1e0e8a62b965dea81ed6253",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Rows by data type:</strong></span></span><marimo-ui-element object-id='SFPL-0' random-id='69a0ae92-4c1e-15b9-0df2-aa7d23a44d17'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:2994},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;eQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:170},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;caQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:43},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:17}]&quot;' data-total-rows='4' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_rows&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Rows by data type:</strong></span></span><marimo-ui-element object-id='Xref-0' random-id='e31a960d-9052-198c-0229-7190a89d9084'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:2994},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;eQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:170},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;caQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:43},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:17}]&quot;' data-total-rows='4' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_rows&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "1124cbb0fb0c796aa0553498aafe9e86",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-20-gwas-hits-near-pcsk9\">Top 20 GWAS hits near PCSK9</h3></span><marimo-ui-element object-id='SFPL-0' random-id='f81b85e6-fe9e-3039-b096-434d3f782fba'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:512.2795,&#92;&quot;beta&#92;&quot;:-0.2898,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;3014791&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_R13_UKBB_labs&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:470.94,&#92;&quot;beta&#92;&quot;:-0.437,&#92;&quot;pip&#92;&quot;:0.99,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;ATC_C10AA_IRN&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_drugs&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:464.4397,&#92;&quot;beta&#92;&quot;:-0.1734,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:447.2272,&#92;&quot;beta&#92;&quot;:-0.2777,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:397.6018,&#92;&quot;beta&#92;&quot;:-0.5593,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:363.2248,&#92;&quot;beta&#92;&quot;:-0.2433,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90002412&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.08995,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90013871&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.06828,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90013994&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.06808,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90014000&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.0604,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;}]&quot;' data-total-rows='20' data-total-columns='11' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;trait&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;ref&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;alt&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;beta&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
           }
         }
       ],
@@ -124,19 +124,6 @@
     },
     {
       "id": "BYtC",
-      "code_hash": "1124cbb0fb0c796aa0553498aafe9e86",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-20-gwas-hits-near-pcsk9\">Top 20 GWAS hits near PCSK9</h3></span><marimo-ui-element object-id='BYtC-0' random-id='a88806c1-45d5-4b45-0c2e-459f0a00a78f'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:512.2795,&#92;&quot;beta&#92;&quot;:-0.2898,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;3014791&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_R13_UKBB_labs&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:470.94,&#92;&quot;beta&#92;&quot;:-0.437,&#92;&quot;pip&#92;&quot;:0.99,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;ATC_C10AA_IRN&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_drugs&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:464.4397,&#92;&quot;beta&#92;&quot;:-0.1734,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:447.2272,&#92;&quot;beta&#92;&quot;:-0.2777,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:397.6018,&#92;&quot;beta&#92;&quot;:-0.5593,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:363.2248,&#92;&quot;beta&#92;&quot;:-0.2433,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90002412&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.08995,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90013871&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.06828,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90013994&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.06808,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90014000&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;dataset&#92;&quot;:&#92;&quot;Open_Targets_25.12&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;mlog10p&#92;&quot;:322.0052,&#92;&quot;beta&#92;&quot;:-0.0604,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;}]&quot;' data-total-rows='20' data-total-columns='11' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;trait&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;ref&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;alt&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;beta&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
-          }
-        }
-      ],
-      "console": []
-    },
-    {
-      "id": "RGSE",
       "code_hash": "8b62de17f49ebef39d7bc9edb1ab6683",
       "outputs": [
         {
@@ -149,7 +136,7 @@
       "console": []
     },
     {
-      "id": "Kclp",
+      "id": "RGSE",
       "code_hash": "9ccda69a7cdc039ba2ceafcb02e087eb",
       "outputs": [
         {
@@ -162,8 +149,8 @@
       "console": []
     },
     {
-      "id": "emfo",
-      "code_hash": "c5f5abd49f65ca4f9298bef84b71fcec",
+      "id": "Kclp",
+      "code_hash": "93060ad724aeebb5d8ca050548b51f99",
       "outputs": [
         {
           "type": "data",
@@ -175,20 +162,20 @@
       "console": []
     },
     {
-      "id": "Hstk",
+      "id": "emfo",
       "code_hash": "0ee447c2db9982fac8ee7d8cb700d952",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-colocalizing-trait-pairs-by-hit1_mlog10p\">Top colocalizing trait pairs (by <code>hit1_mlog10p</code>)</h3>\n<span class=\"paragraph\">Each row is one pair of traits whose credible sets share this variant. Expected biology: lipid labs (LDL, nonHDL) colocalizing with hyperlipidemia and cardiovascular endpoints, all driven by the PCSK9 LoF missense.</span></span><marimo-ui-element object-id='Hstk-0' random-id='3f548d8b-87af-5a18-08c0-10fab10dd8fa'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait1&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.27775,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.289802,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.289802},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.27775},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_FC&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_NMR&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:69.8608,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.375005},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_PL&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_NMR&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:69.9093,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.375278},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;E4_LIPOPROT&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:121.945,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.430956},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;E4_METABOLIA&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:81.9236,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.299394},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.243277,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.243277}]&quot;' data-total-rows='25' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;trait1&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset1&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;trait2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;hit1_mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit2_mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit1_beta&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit2_beta&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"top-colocalizing-trait-pairs-by-hit1_mlog10p\">Top colocalizing trait pairs (by <code>hit1_mlog10p</code>)</h3>\n<span class=\"paragraph\">Each row is one pair of traits whose credible sets share this variant. Expected biology: lipid labs (LDL, nonHDL) colocalizing with hyperlipidemia and cardiovascular endpoints, all driven by the PCSK9 LoF missense.</span></span><marimo-ui-element object-id='emfo-0' random-id='a00f5998-6556-2417-9e45-d1e2ebf61c56'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait1&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.27775,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.289802,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.289802},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.27775},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_FC&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_NMR&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:69.8608,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.375005},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_PL&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_NMR&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:69.9093,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.375278},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;E4_LIPOPROT&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:121.945,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.430956},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;E4_METABOLIA&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:81.9236,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.299394},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;chr1-55056931-55057430&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_ATACseq&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:5.5823,&#92;&quot;hit1_beta&#92;&quot;:-0.243277,&#92;&quot;hit2_beta&#92;&quot;:-0.41625825},{&#92;&quot;trait1&#92;&quot;:&#92;&quot;RX_STATIN&#92;&quot;,&#92;&quot;dataset1&#92;&quot;:&#92;&quot;FinnGen_R13&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;3019900&#92;&quot;,&#92;&quot;dataset2&#92;&quot;:&#92;&quot;FinnGen_kanta&#92;&quot;,&#92;&quot;hit1_mlog10p&#92;&quot;:308.0,&#92;&quot;hit2_mlog10p&#92;&quot;:308.0,&#92;&quot;hit1_beta&#92;&quot;:-0.559301,&#92;&quot;hit2_beta&#92;&quot;:-0.243277}]&quot;' data-total-rows='25' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;trait1&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset1&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;trait2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;dataset2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;hit1_mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit2_mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit1_beta&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;hit2_beta&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
           }
         }
       ],
       "console": []
     },
     {
-      "id": "nWHF",
+      "id": "Hstk",
       "code_hash": "4fb74667cfb3278bd09c049cdb12ab2f",
       "outputs": [
         {

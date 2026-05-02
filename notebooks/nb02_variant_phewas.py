@@ -27,41 +27,36 @@ with app.setup:
     import polars as pl
     from dotenv import load_dotenv
 
-    # Local: load .env at repo root. WASM/molab: no filesystem, so this is a no-op
-    # and the token UI cell below collects the key from the user instead.
-    _env_path = Path(__file__).resolve().parent.parent / ".env"
-    if _env_path.exists():
-        load_dotenv(_env_path)
-    DEFAULT_TOKEN = os.environ.get("FINNGENIE_TOKEN", "")
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
     BASE = "https://finngenie.fi/api/v1"
 
 
 @app.function
-def client(token: str) -> httpx.Client:
-    """Authenticated httpx client. Caller passes the bearer token from the UI cell."""
-    if not token:
+def client() -> httpx.Client:
+    """Authenticated httpx client. Bearer token comes from .env at the repo root."""
+    if not FINNGENIE_TOKEN:
         raise RuntimeError(
-            "FINNGENIE_TOKEN not set. Locally: copy .env.example to .env and paste "
-            "your key. In molab/WASM: paste the key into the FINNGENIE_TOKEN input."
+            "FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key."
         )
     return httpx.Client(
-        headers={"Authorization": f"Bearer {token}"}, timeout=60
+        headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60
     )
 
 
 @app.function
-def fetch_tsv(path: str, token: str, **params) -> pl.DataFrame:
+def fetch_tsv(path: str, **params) -> pl.DataFrame:
     """GET a FinnGenie endpoint as TSV and return a polars DataFrame."""
-    with client(token) as c:
+    with client() as c:
         r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
     return pl.read_csv(io.BytesIO(r.content), separator="\t", null_values="NA")
 
 
 @app.function
-def fetch_json(path: str, token: str, **params) -> list[dict]:
+def fetch_json(path: str, **params) -> list[dict]:
     """GET a FinnGenie endpoint as JSON. Most endpoints accept ?format=json."""
-    with client(token) as c:
+    with client() as c:
         r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
         r.raise_for_status()
     return r.json()
@@ -85,18 +80,6 @@ def _():
 
 @app.cell
 def _():
-    token_input = mo.ui.text(
-        kind="password",
-        label="FINNGENIE_TOKEN",
-        value=DEFAULT_TOKEN,
-        placeholder="Paste from finngenie.broadinstitute.org -> MCP/API KEYS",
-    )
-    token_input
-    return (token_input,)
-
-
-@app.cell
-def _():
     RSID = "rs11591147"
     mo.md(
         f"### Entry point: `{RSID}`\n\n"
@@ -109,10 +92,10 @@ def _():
 
 
 @app.cell
-def _(RSID, token_input):
+def _(RSID):
     # Step 1: rsID -> variant. The endpoint returns a list of variants per rsID
     # (multi-allelic sites can map to several).
-    resolved = fetch_json("/rsid/variants", token_input.value, rsids=RSID)
+    resolved = fetch_json("/rsid/variants", rsids=RSID)
     candidate_variants = resolved[0]["variants"] if resolved else []
 
     # Step 2: not every variant string the resolver returns has credible-set data
@@ -134,7 +117,7 @@ def _(RSID, token_input):
 
     chosen, cs = None, []
     for v in tries:
-        cs = fetch_json(f"/credible_sets_by_variant/{v}", token_input.value)
+        cs = fetch_json(f"/credible_sets_by_variant/{v}")
         if cs:
             chosen = v
             break
@@ -235,10 +218,10 @@ def _(phewas, variant_id):
 
 
 @app.cell
-def _(token_input, variant_id):
+def _(variant_id):
     # Light annotation: which gene is this variant nearest to? Useful when an rsID
     # is unfamiliar and you want a one-line "what region is this".
-    near = pl.DataFrame(fetch_json(f"/nearest_genes/{variant_id}", token_input.value, n=3))
+    near = pl.DataFrame(fetch_json(f"/nearest_genes/{variant_id}", n=3))
     mo.vstack(
         [
             mo.md(f"### Nearest protein-coding genes to `{variant_id}`"),
