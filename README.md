@@ -35,11 +35,12 @@ fgx/
   .env.example                       # FINNGENIE_TOKEN= placeholder
   .claude/skills/
     getting-started/SKILL.md         # cold-clone bootstrap
+    compose-notebook/SKILL.md        # edit nb01 in place vs copy-fork to nb02_*
   notebooks/
     nb01_pcsk9_walkthrough.py        # gene -> credible sets -> lead variant -> colocalization
 ```
 
-That's the whole repo. New analyses become `notebooks/nbNN_*.py`. When the catalog grows past the point where the README's index can carry it, fgx will likely add a [`compose-notebook`](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) skill (the same pattern jx uses); that's a scale-driven addition, not a starting point.
+That's the whole repo. `getting-started` walks a fresh clone to a running marimo kernel; `compose-notebook` covers picking the right path (edit-in-place vs copy-fork) and the right endpoint when the user asks for a new genetics analysis. Both skills are intentionally thin -- when the catalog grows past one notebook with cross-file function reuse, `compose-notebook` will need to grow into a per-module catalog table the way [jx's compose-notebook](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) does.
 
 ## License
 

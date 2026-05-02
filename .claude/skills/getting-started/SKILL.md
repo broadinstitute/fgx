@@ -14,9 +14,9 @@ description: >-
 # Getting started with fgx
 
 Your job: get this user from a cold clone to a live marimo kernel pointed at
-nb01, then hand off to interactive composition. fgx has only one notebook
-today (`nb01_pcsk9_walkthrough.py`), so there is no `compose-notebook` skill
-yet -- the user composes new analyses by editing nb01 or copy-forking it.
+nb01, then hand off to the [`compose-notebook`](../compose-notebook/SKILL.md)
+skill for the actual analysis composition (edit nb01 in place vs copy-fork
+to `nb02_*.py`, picking the right endpoint, etc.).
 
 ## Setup flow
 
@@ -75,21 +75,13 @@ python-dotenv (~30 seconds). Verify the server is up with:
 Expect HTTP 200. Tell the user the URL so they can open the browser UI
 alongside your session if they want to watch cells render.
 
-### 5. Hand off
+### 5. Hand off to compose-notebook
 
-Once the kernel is live and marimo-pair is connected:
-
-1. Ask the user what genetics question they want to explore (a gene, a
-   phenotype code like `I9_CHD`, a variant in `chr:pos:ref:alt` form).
-2. Read nb01's first cell with the user -- it shows the bare-`curl`
-   equivalent of every API call the notebook makes. The reusable
-   functions (`fetch_tsv`, `fetch_json`) are defined in the setup block
-   and can be called from any new cell.
-3. For their question, decide whether to edit nb01 in place (small
-   tweak, same gene/phenotype shape) or copy it to `notebooks/nb02_*.py`
-   (different analysis pattern). When in doubt, copy-fork.
-4. Use marimo-pair's `execute-code.sh` to run cells against the live
-   kernel rather than asking the user to paste output.
+Once the kernel is live and marimo-pair is connected, ask the user what
+genetics question they want to explore (a gene, a phenotype code like
+`I9_CHD`, a variant in `chr:pos:ref:alt` form), then invoke the
+[`compose-notebook`](../compose-notebook/SKILL.md) skill and follow its
+"Process for a new composition" checklist against the running kernel.
 
 ## Gotchas
 
@@ -108,11 +100,3 @@ Once the kernel is live and marimo-pair is connected:
   manage). If the API is slow today, suggest the user pin a
   parameter (gene/phenotype) so reactive cells re-fetch less.
 
-## When the catalog grows
-
-If a second notebook appears that imports functions from nb01 (e.g.
-`from nb01_pcsk9_walkthrough import fetch_tsv`), fgx has crossed the
-threshold where a `compose-notebook` skill earns its keep. The pattern
-to copy is at
-<https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md>.
-Until then, this skill is the whole onboarding path.
