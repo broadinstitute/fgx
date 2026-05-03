@@ -37,6 +37,57 @@ with app.setup:
     from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
 
 
+@app.function
+def pick_leads(cs: pl.DataFrame) -> pl.DataFrame:
+    """One row per credible set: the variant with the highest -log10p inside each `cs_id`.
+
+    Adds a `variant_id` column in `chr:pos:ref:alt` form. Sorts the result by
+    `mlog10p` descending so `.head(N)` gives the top loci. Generic for any
+    credible-set DataFrame returned by `credible_sets_by_*` (same schema across
+    resources).
+    """
+    return (
+        cs.filter(pl.col("mlog10p").is_not_null())
+        .sort("mlog10p", descending=True)
+        .group_by("cs_id", maintain_order=True)
+        .head(1)
+        .with_columns(
+            pl.concat_str(
+                [pl.col("chr"), pl.col("pos"), pl.col("ref"), pl.col("alt")],
+                separator=":",
+            ).alias("variant_id")
+        )
+        .sort("mlog10p", descending=True)
+    )
+
+
+@app.function
+def annotate_with_nearest_gene(variants: list[str]) -> pl.DataFrame:
+    """For each `chr:pos:ref:alt` variant, fetch its nearest protein-coding gene.
+
+    Calls `/nearest_genes/{variant}?n=1` per variant; returns a DataFrame with
+    columns `variant_id`, `nearest_gene`, `distance`. Swallows
+    `httpx.HTTPStatusError` per variant and emits null annotations for those rows
+    so the caller can still join cleanly.
+    """
+    rows = []
+    for v in variants:
+        try:
+            g = fetch_json(f"/nearest_genes/{v}", n=1)
+            rows.append(
+                {
+                    "variant_id": v,
+                    "nearest_gene": g[0]["gene_name"] if g else None,
+                    "distance": g[0]["distance"] if g else None,
+                }
+            )
+        except httpx.HTTPStatusError:
+            rows.append(
+                {"variant_id": v, "nearest_gene": None, "distance": None}
+            )
+    return pl.DataFrame(rows)
+
+
 @app.cell
 def _():
     mo.md(r"""
@@ -68,21 +119,9 @@ def _():
 
 @app.cell
 def _(cs):
-    # One row per credible set: keep the variant with the highest -log10p inside each cs_id.
+    # One row per credible set: the variant with the highest -log10p inside each cs_id.
     # That variant is the locus's "lead" -- what gets a Manhattan dot and a gene label.
-    leads = (
-        cs.filter(pl.col("mlog10p").is_not_null())
-        .sort("mlog10p", descending=True)
-        .group_by("cs_id", maintain_order=True)
-        .head(1)
-        .with_columns(
-            pl.concat_str(
-                [pl.col("chr"), pl.col("pos"), pl.col("ref"), pl.col("alt")],
-                separator=":",
-            ).alias("variant_id")
-        )
-        .sort("mlog10p", descending=True)
-    )
+    leads = pick_leads(cs)
     mo.vstack(
         [
             mo.md(
@@ -111,22 +150,7 @@ def _(leads):
     # gene_most_severe is variant-consequence-based; nearest_genes is purely positional and
     # works even when the lead falls in an intergenic region.
     top10 = leads.head(10)
-    nearest_rows = []
-    for v in top10["variant_id"]:
-        try:
-            g = fetch_json(f"/nearest_genes/{v}", n=1)
-            nearest_rows.append(
-                {
-                    "variant_id": v,
-                    "nearest_gene": g[0]["gene_name"] if g else None,
-                    "distance": g[0]["distance"] if g else None,
-                }
-            )
-        except httpx.HTTPStatusError:
-            nearest_rows.append(
-                {"variant_id": v, "nearest_gene": None, "distance": None}
-            )
-    nearest = pl.DataFrame(nearest_rows)
+    nearest = annotate_with_nearest_gene(top10["variant_id"].to_list())
     top10_annotated = top10.join(nearest, on="variant_id", how="left").select(
         "variant_id",
         "mlog10p",

@@ -35,6 +35,7 @@ with app.setup:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
     from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+    from nb04_gene_exome_burden import prepare_deleterious  # noqa: F401
 
 
 @app.cell
@@ -103,31 +104,11 @@ def _(exome):
 
 @app.cell
 def _(GENE, exome):
-    # Keep only the deleterious classes and only well-determined effects (filter out the
-    # mlog10p == 324 floating-point cap, which leaves se == 0 and breaks CI math).
-    deleterious = (
-        exome.filter(pl.col("annotation").is_in(["pLoF", "missense"]))
-        .filter(pl.col("se") > 0)
-        .filter(pl.col("mlog10p").is_not_null())
-        .with_columns(
-            (pl.col("beta") - 1.96 * pl.col("se")).alias("ci_lo"),
-            (pl.col("beta") + 1.96 * pl.col("se")).alias("ci_hi"),
-            pl.concat_str(
-                [
-                    pl.col("trait"),
-                    pl.lit("  ("),
-                    pl.col("chr").cast(pl.Utf8),
-                    pl.lit(":"),
-                    pl.col("pos").cast(pl.Utf8),
-                    pl.lit(":"),
-                    pl.col("ref"),
-                    pl.lit(":"),
-                    pl.col("alt"),
-                    pl.lit(")"),
-                ]
-            ).alias("trait_variant"),
-        )
-    )
+    # Same prep pipeline as nb04 -- filter to deleterious classes, drop mlog10p
+    # underflow rows, attach CI bounds and pretty trait_variant labels. Imported
+    # rather than copy-pasted so the next time this prep changes, both notebooks
+    # pick it up.
+    deleterious = prepare_deleterious(exome)
     top = deleterious.sort("mlog10p", descending=True).head(20)
     mo.vstack(
         [

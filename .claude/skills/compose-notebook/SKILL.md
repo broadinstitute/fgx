@@ -18,9 +18,9 @@ nb01-04 are the canonical core: each is a self-contained vignette that demonstra
 | Module | Reusable functions | What the vignette demonstrates |
 |---|---|---|
 | `nb01_pcsk9_walkthrough` | `client()`, `fetch_tsv(path, **params)`, `fetch_json(path, **params)` | Gene -> `credible_sets_by_gene` -> `colocalization_by_variant` -> bar chart of top traits + colocalizing pairs. **Every other notebook imports the three helpers from here.** |
-| `nb02_variant_phewas` | `alt_alleles(variant)` (defined inline as a closure today; promote to `@app.function` if a second notebook needs it) | rsID / variant -> `rsid/variants` -> `credible_sets_by_variant` -> `nearest_genes` -> PheWAS dot plot. The strand/allele-fallback logic is the reusable bit when an rsID resolution misses the credible-set index under one alt allele. |
-| `nb03_phenotype_locus_zoom` | -- | Phenocode + resource -> `credible_sets_by_phenotype` -> per-`cs_id` lead picker -> `nearest_genes` (per top locus) -> Manhattan with gene labels. |
-| `nb04_gene_exome_burden` | -- | Gene (rare-variant arm) -> `exome_results_by_gene` -> `gene_disease` -> forest plot of pLoF/missense betas with CIs. |
+| `nb02_variant_phewas` | `alt_alleles(variant)` | rsID / variant -> `rsid/variants` -> `credible_sets_by_variant` -> `nearest_genes` -> PheWAS dot plot. `alt_alleles` returns strand/allele-fallback candidates when an rsID resolution misses the credible-set index under one alt allele. |
+| `nb03_phenotype_locus_zoom` | `pick_leads(cs)`, `annotate_with_nearest_gene(variants)` | Phenocode + resource -> `credible_sets_by_phenotype` -> Manhattan with gene labels. `pick_leads` reduces a credible-set DataFrame to one lead row per `cs_id`; `annotate_with_nearest_gene` joins each variant with its nearest protein-coding gene. |
+| `nb04_gene_exome_burden` | `prepare_deleterious(exome, ci_z=1.96)` | Gene (rare-variant arm) -> `exome_results_by_gene` -> `gene_disease` -> forest plot of pLoF/missense betas with CIs. `prepare_deleterious` is the polars prep pipeline (filter to pLoF/missense, drop `mlog10p` underflow rows, attach CI bounds + `trait_variant` label). nb05 imports it to avoid duplicating the pipeline. |
 
 When the user's question matches a row's "demonstrates" column with only a parameter changed, see Path A below. When it matches the *shape* of a row but tells a different story, or when it doesn't match any row, compose -- see Path C.
 

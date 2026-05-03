@@ -37,6 +37,24 @@ with app.setup:
     from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
 
 
+@app.function
+def alt_alleles(v: str) -> list[str]:
+    """Candidate variant strings for `chrom:pos:ref:alt` when the credible-set index
+    may have stored the site under a different alt allele than dbSNP returned.
+
+    Returns the input first, then `chrom:pos:ref:<other_nt>` for each nucleotide
+    that isn't already the ref or alt. Use when an rsID resolution returns a variant
+    that misses the credible-set lookup -- iterate through the candidates and keep
+    the first one that returns rows.
+    """
+    chrom, pos, ref, alt = v.split(":")
+    tries = [v]
+    for a in ("A", "C", "G", "T"):
+        if a not in (ref, alt):
+            tries.append(f"{chrom}:{pos}:{ref}:{a}")
+    return tries
+
+
 @app.cell
 def _():
     mo.md(r"""
@@ -75,17 +93,8 @@ def _(RSID):
 
     # Step 2: not every variant string the resolver returns has credible-set data
     # (allele-strand / ref-allele conventions differ between dbSNP and FinnGen).
-    # Try each candidate plus the strand-flipped alt; keep the first that returns rows.
-    def alt_alleles(v: str) -> list[str]:
-        chrom, pos, ref, alt = v.split(":")
-        # FinnGen sometimes stores the same site under a different alt. Try the
-        # resolver's answer first, then a small fallback set.
-        tries = [v]
-        for a in ("A", "C", "G", "T"):
-            if a not in (ref, alt):
-                tries.append(f"{chrom}:{pos}:{ref}:{a}")
-        return tries
-
+    # Try each candidate plus the alt-allele fallbacks from `alt_alleles`; keep the
+    # first that returns rows.
     tries: list[str] = []
     for v in candidate_variants:
         tries.extend(alt_alleles(v))
