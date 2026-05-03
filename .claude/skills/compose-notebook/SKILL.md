@@ -7,66 +7,131 @@ description: Compose a new genetics analysis in the fgx repo by reusing the mari
 
 ## What this skill is for
 
-fgx is a single-substrate repo: marimo notebooks against FinnGenie's REST API at `https://finngenie.fi/api/v1/*` via `httpx.get`, and nothing else. There is no Python SDK, no MCP server, no schema cache. Every notebook carries its own copy of the same three `@app.function` helpers (`client`, `fetch_tsv`, `fetch_json`) -- the helpers are tiny, self-contained, and easier to fork than to import across files.
+fgx is a single-substrate repo: marimo notebooks against FinnGenie's REST API at `https://finngenie.fi/api/v1/*` via `httpx.get`, and nothing else. There is no Python SDK, no MCP server, no schema cache, and no shared library file -- every helper lives in the notebook that introduced it, and other notebooks reach across via plain Python imports. The `nbNN_<topic>.py` filename convention exists *specifically* so a sibling notebook can do `sys.path.insert(0, "notebooks") + from nb01_pcsk9_walkthrough import fetch_tsv`. Python forbids module names starting with a digit; `nbNN_*` sidesteps that. This is the same layering the [jx repo](https://github.com/broadinstitute/jx) uses for JUMP Cell Painting.
 
-When the user asks a genetics question that the FinnGenie API can answer, your job is to (a) decide whether to edit the closest existing notebook in place or copy-fork to a new `nbNN_*.py`, and (b) compose against the existing helpers rather than re-implementing auth and TSV/JSON parsing from scratch.
+When the user asks a genetics question that the FinnGenie API can answer, your job is to (a) decide whether to edit a canonical notebook in place (parameter swap), or compose a fresh exploration notebook that imports from the canonical homes, and (b) reuse the existing helpers rather than re-implementing auth, TSV/JSON parsing, or any other plumbing.
 
 ## The catalog
 
-Each notebook is a self-contained vignette covering one entry-point + visualization combination. Pick the one whose shape matches the user's question; if none does, copy-fork the closest.
+nb01-04 are the canonical core: each is a self-contained vignette that demonstrates one entry-point + visualization combination AND owns the helpers it introduced. Future explorations are nb05+ -- they import from this core and are not expected to back-port their own helpers unless a third notebook ends up needing them.
 
-| File | Entry point | Endpoint chain | Visualization |
-|---|---|---|---|
-| `notebooks/nb01_pcsk9_walkthrough.py` | gene | `credible_sets_by_gene` -> `colocalization_by_variant` | bar (top traits + colocalizing pairs) |
-| `notebooks/nb02_variant_phewas.py` | rsID / variant | `rsid/variants` -> `credible_sets_by_variant` -> `nearest_genes` | PheWAS dot plot |
-| `notebooks/nb03_phenotype_locus_zoom.py` | phenocode + resource | `credible_sets_by_phenotype` -> `nearest_genes` (per top locus) | Manhattan with gene labels |
-| `notebooks/nb04_gene_exome_burden.py` | gene (rare-variant arm) | `exome_results_by_gene` -> `gene_disease` | forest plot of betas with CIs |
+| Module | Reusable functions | What the vignette demonstrates |
+|---|---|---|
+| `nb01_pcsk9_walkthrough` | `client()`, `fetch_tsv(path, **params)`, `fetch_json(path, **params)` | Gene -> `credible_sets_by_gene` -> `colocalization_by_variant` -> bar chart of top traits + colocalizing pairs. **Every other notebook imports the three helpers from here.** |
+| `nb02_variant_phewas` | `alt_alleles(variant)` (defined inline as a closure today; promote to `@app.function` if a second notebook needs it) | rsID / variant -> `rsid/variants` -> `credible_sets_by_variant` -> `nearest_genes` -> PheWAS dot plot. The strand/allele-fallback logic is the reusable bit when an rsID resolution misses the credible-set index under one alt allele. |
+| `nb03_phenotype_locus_zoom` | -- | Phenocode + resource -> `credible_sets_by_phenotype` -> per-`cs_id` lead picker -> `nearest_genes` (per top locus) -> Manhattan with gene labels. |
+| `nb04_gene_exome_burden` | -- | Gene (rare-variant arm) -> `exome_results_by_gene` -> `gene_disease` -> forest plot of pLoF/missense betas with CIs. |
 
-Reusable helpers in every notebook: `fetch_tsv(path, **params) -> pl.DataFrame` and `fetch_json(path, **params) -> list[dict] | dict`. `path` is the part after `/api/v1`, kwargs become query parameters. The underlying `client()` builder is private to the notebook -- don't call it from cells, don't rename it `_client` (see the underscore-mangling Gotcha).
+When the user's question matches a row's "demonstrates" column with only a parameter changed, see Path A below. When it matches the *shape* of a row but tells a different story, or when it doesn't match any row, compose -- see Path C.
 
-## Portfolio principle
+## Cross-notebook import recipe
 
-The library is *minimal-spanning by design*: each notebook earns its place by adding an axis -- a new entry point (gene / variant / phenotype / region) or a new visualization shape (bar / PheWAS / Manhattan / forest / locus-zoom / network) -- not just a new question. When the user asks for nb05+, ask "what axis does this add?" first. If the answer is "same shape as an existing notebook, just different parameters", that's Path A: edit the existing notebook. If it's a genuinely new entry point or viz, that's Path B: copy-fork. Resist the urge to spawn a near-duplicate -- it dilutes the catalog and gives the next composer two notebooks to choose between when one would do.
+Every non-nb01 notebook's `with app.setup:` block ends with this snippet:
 
-## Two paths: edit-in-place vs copy-fork
+```python
+NOTEBOOK_DIR = Path(__file__).resolve().parent
+if str(NOTEBOOK_DIR) not in sys.path:
+    sys.path.insert(0, str(NOTEBOOK_DIR))
 
-### Path A: edit the closest-matching notebook in place
+from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+```
 
-Use this when the new question has the **same shape** as an existing notebook, just a different parameter:
+The `noqa: F401` matters because ruff sees the imported names as unused -- `@app.function` and `@app.cell` cells reference them statically-invisibly. Importing nb01 also runs nb01's own `with app.setup:` block (idempotent: same `load_dotenv`, same `import polars`); cell *bodies* don't execute on import because `if __name__ == "__main__": app.run()` guards the kernel start. Local `BASE` and `FINNGENIE_TOKEN` constants stay in each notebook's setup so .env diagnostics surface locally rather than chasing imports.
 
-- "do nb01 for APOE" -> change `GENE = "PCSK9"` to `GENE = "APOE"` in nb01, the rest cascades reactively.
+## Two paths: parameter swap vs compose
+
+### Path A: edit a canonical notebook in place
+
+Use this when the new question has the **same shape** as nb01-04 with only a parameter changed:
+
+- "do nb01 for APOE" -> change `GENE = "PCSK9"` to `GENE = "APOE"` in nb01.
 - "do nb02 for `rs7412`" -> change `RSID` in nb02.
 - "do nb03 for T2D on UKBB" -> change `PHENOTYPE` and `RESOURCE` in nb03.
 - "do nb04 for LDLR" -> change `GENE` in nb04.
 
-Marimo's reactivity reruns dependent cells; don't manually kick anything. This is the cheapest path and preserves the per-notebook canonical example.
+Marimo's reactivity reruns dependent cells; don't manually kick anything. This is the cheapest path. Use it sparingly though -- editing a canonical in place overwrites its narrative and the next reader will see the new gene's story instead of the original. If the swap *also* needs different markdown to make sense, consider Path C instead.
 
-### Path B: copy-fork to `notebooks/nbNN_<topic>.py`
+### Path C: compose a new exploration notebook
 
-Use this when the analysis shape **differs** from every existing notebook. Symptoms:
+This is the default for everything that isn't a parameter-swap. Create `notebooks/nbNN_<topic>.py`. The starting template:
 
-- Different endpoint chain (e.g. region-first instead of gene-first, or chaining `summary_stats` after `credible_sets`).
-- Different output (locus-zoom around a single region, multi-resource comparison, network of trait-trait colocalization).
-- A reusable helper would need to live in two notebooks, and copy-pasting it twice is uglier than letting one notebook import it from a sibling.
+```python
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#     "marimo<0.23.4",
+#     "jedi<0.20.0",
+#     "polars",
+#     "httpx",
+#     "altair",
+#     "python-dotenv",
+# ]
+# ///
 
-When forking: copy the closest-matching notebook -> `nbNN_<topic>.py`, edit the PEP 723 header if you need new deps, replace the analysis cells, keep the setup block (loads `.env` and re-defines the helpers verbatim). Keep the `marimo<0.23.4` and `jedi<0.20.0` pins in the header verbatim -- both work around `uvx marimo edit --sandbox` resolver bugs. If you trim them, the next launch will fail at venv provisioning, not at runtime.
+import marimo
+
+__generated_with = "0.23.3"
+app = marimo.App(width="medium")
+
+with app.setup:
+    import os
+    import sys
+    from pathlib import Path
+
+    import altair as alt
+    import httpx  # only if you actually call httpx.X directly
+    import marimo as mo
+    import polars as pl
+    from dotenv import load_dotenv
+
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
+    BASE = "https://finngenie.fi/api/v1"
+
+    NOTEBOOK_DIR = Path(__file__).resolve().parent
+    if str(NOTEBOOK_DIR) not in sys.path:
+        sys.path.insert(0, str(NOTEBOOK_DIR))
+
+    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+
+
+@app.cell
+def _():
+    mo.md(r"""
+    # nbNN: <topic>
+    ...
+    """)
+    return
+
+
+# analysis cells: call fetch_tsv / fetch_json directly, no boilerplate.
+
+
+if __name__ == "__main__":
+    app.run()
+```
+
+Keep the `marimo<0.23.4` and `jedi<0.20.0` pins verbatim -- both work around `uvx marimo edit --sandbox` resolver bugs. If you trim them, the next launch will fail at venv provisioning, not at runtime.
+
+If the new notebook genuinely needs a fresh helper -- e.g. a region-around-gene utility, a coloc-row deduper -- define it as a top-level `@app.function` *in nbNN itself*. It then becomes importable by future composers via the same `from nbNN_<topic> import <helper>` pattern. **No central library, ever.** Helpers stay where they were born; importers reach across notebooks.
 
 ## Process for a new composition
 
-1. **Read the closest existing notebook.** The first cell explains what the notebook does; the helpers (`client`, `fetch_tsv`, `fetch_json`) are at the top as `@app.function`. Skim before composing.
+1. **Read the closest existing notebook.** The first cell explains what it does; the helpers and import recipe sit at the top. Skim before composing.
 2. **Identify the endpoint.** Map the user's question to a `/api/v1/*` path. The full surface is in the OpenAPI spec at <https://finngenie.fi/api/v1/openapi.json> (browseable Swagger at <https://finngenie.fi/api/v1/docs>) -- 28 operations across 13 tags. Read the spec before guessing; the description's path list is a reminder, not a contract. If you're unsure of the response shape, run `curl -fsS -H "Authorization: Bearer $FINNGENIE_TOKEN" "https://finngenie.fi/api/v1/<path>?format=json"` once to confirm, then write the cell.
-3. **Pick the path (A or B).** When in doubt, copy-fork.
+3. **Pick the path.** Parameter-swap on a canonical -> Path A. Anything else -> Path C.
 4. **Validate against the live kernel via marimo-pair.** This is non-negotiable, and the rest of this step exists because there are three failure modes that look like shortcuts but aren't.
     - **Browser session is a prerequisite, not optional.** `uvx marimo edit --headless` launches a kernel, but `execute-code.sh` won't attach until the user opens the URL in a browser tab and a websocket session is alive. If you call `execute-code.sh` and see `No active sessions on the server`, the right move is to tell the user "open `http://127.0.0.1:<port>/` in your browser, then ping me" -- not to fall back to running the same logic in a standalone `uv run python3` script. A parallel script imports nothing from the notebook and runs with its own module scope, so it can't catch `@app.function` vs `@app.cell` scoping bugs, marimo auto-formatter rewrites, or stale compiled cells. False green there is worse than no signal.
     - **Hot-reload reloads the file but does not re-run cells.** When you edit a `.py` file, marimo notices and re-imports module-level definitions, but the kernel still holds the old compiled cell objects in memory until something triggers a rerun. So after every code edit, ask the user to hit "Run all" (Cmd+Shift+R, or the play-all button in the toolbar) before you re-validate. Otherwise `execute-code.sh` will report errors against the *previous* version of the code, which is maddening to debug.
-    - **One cell at a time.** Once the session is attached and cells have been re-run, drive validation through `execute-code.sh --port <port> -c "..."` cell by cell -- not by re-pasting whole notebook bodies. The setup block (`with app.setup:`) is already provisioned by the PEP 723 header, and `@app.function` helpers like `fetch_tsv` and `fetch_json` are visible in the scratchpad's namespace; a single cell returns a `polars.DataFrame` you can summarize inline.
+    - **"Run all" does NOT re-execute `with app.setup:` or re-register `@app.function` defs.** Both run once at kernel-start and stay registered for the kernel's lifetime. "Run all" only re-runs `@app.cell` bodies. So if you edit imports, the setup block, or any `@app.function` helper, the kernel still holds the *old* registrations and `fetch_tsv.__module__` (or whatever) reports stale results. The fix is a full kernel restart -- kill the marimo server (`kill $(lsof -ti :<port>)`), relaunch with `uvx marimo edit --sandbox`, and have the user refresh the browser tab. Symptom that you've hit this: a function imported from another notebook reports `__module__ == "__main__"` instead of the expected sibling-notebook name -- the local definition is still in memory from the pre-edit kernel.
+    - **One cell at a time.** Once the session is attached and cells have been re-run, drive validation through `execute-code.sh --port <port> -c "..."` cell by cell -- not by re-pasting whole notebook bodies. The setup block (`with app.setup:`) is already provisioned by the PEP 723 header, and `fetch_tsv` / `fetch_json` are visible in the scratchpad's namespace via the import recipe; a single cell returns a `polars.DataFrame` you can summarize inline.
 5. **End with extension prompts.** Every vignette closes with a `## To extend` markdown cell listing 2-3 concrete next prompts (e.g. "swap PCSK9 for LDLR", "add a second resource and stack the dot plots"). This turns each notebook into a launchpad rather than a dead end.
 6. **Plot when it adds signal.** Altair is in the PEP 723 deps; a one-cell chart is often more informative than a 20-row table head.
 7. **Don't fabricate.** If a helper doesn't exist or an endpoint returns an empty result, say so and ask the user how to proceed -- don't invent a fallback path.
 
 ## Gotchas
 
-The first three are tooling traps that cost real session time when missed; the middle three are API papercuts; the last three are biology / endpoint-semantics nuances.
+The first three are tooling traps that cost real session time when missed; the next three are API papercuts; the rest are biology / endpoint-semantics nuances.
 
 - **Validate via marimo-pair against a live kernel, never via a standalone `uv run python3` script.** A parallel script can't see `@app.function` mangling, can't catch auto-formatter rewrites, and gives you a false green that costs more than no signal. If `execute-code.sh` reports `No active sessions`, the fix is to ask the user to open the browser URL -- not to bypass.
 - **Polars-only; never call `.to_pandas()`.** Altair 6+ accepts polars DataFrames directly via narwhals (`alt.Chart(df_polars)` works -- no conversion). The PEP 723 deps don't include `pandas` or `pyarrow`, and modern polars routes `.to_pandas()` through Arrow, so any `.to_pandas()` call raises `ModuleNotFoundError: pa.Table requires 'pyarrow' module`. The fix is the cleaner one: pass polars DataFrames straight to Altair. Don't add pandas / pyarrow to the deps to "fix" it -- the dependency is the bug, not the missing package.
@@ -82,7 +147,6 @@ The first three are tooling traps that cost real session time when missed; the m
 
 ## When to revise this skill
 
-Two thresholds, with different responses:
-
-- **A new notebook lands.** Add a row to the catalog table above (file, entry point, endpoint chain, viz). The Portfolio principle should already have flagged this as a deliberate axis-add, not a duplicate; if it's a duplicate, push back before merging.
-- **A function defined in nbN is imported by nbM.** Replace the four-column catalog table (entry / chain / viz) with a per-module table that lists each notebook's `@app.function` helpers and what they do, the way [jx's compose-notebook](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) does it. Until then, the helpers stay duplicated by design -- they're tiny and self-contained -- and the catalog stays compact.
+- **A new notebook lands.** Add a row to the catalog table. If the notebook introduces a reusable `@app.function` helper, fill the "Reusable functions" column. If it just composes existing helpers and adds a vignette, leave that column with `--`. The Portfolio principle stays implicit: if a *third* notebook reaches for a helper that lives in nbN, that helper has earned a row entry. If `from nb05_... import ...` ever appears in nb06+, update nb05's row to list the imported helpers.
+- **A canonical helper migrates between notebooks.** If `client / fetch_tsv / fetch_json` ever moves out of nb01 (e.g. nb01 gets renamed or split), update the import recipe snippet in this skill to point at the new home -- and update the import lines in every importer. There's no central library to grep, but there are only a handful of importers; `grep -rn "from nb01_" notebooks/` finds them all.
+- **A central library actually becomes warranted.** This skill currently *commits* to "no library." If five notebooks start importing the same three helpers from nb01 and nb01 itself becomes incidental scaffolding for those helpers, that's the moment to revisit -- and at that point, port to a `notebooks/_fgx.py` plus a single import line, not to a packaged `fgx/` directory. Keep the bar high; the cross-notebook import works fine for the foreseeable future.

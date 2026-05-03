@@ -7,7 +7,6 @@
 #     "httpx",
 #     "altair",
 #     "python-dotenv",
-#     "pyarrow==24.0.0",
 # ]
 # ///
 
@@ -17,8 +16,8 @@ __generated_with = "0.23.3"
 app = marimo.App(width="medium")
 
 with app.setup:
-    import io
     import os
+    import sys
     from pathlib import Path
 
     import altair as alt
@@ -31,35 +30,11 @@ with app.setup:
     FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
     BASE = "https://finngenie.fi/api/v1"
 
+    NOTEBOOK_DIR = Path(__file__).resolve().parent
+    if str(NOTEBOOK_DIR) not in sys.path:
+        sys.path.insert(0, str(NOTEBOOK_DIR))
 
-@app.function
-def client() -> httpx.Client:
-    """Authenticated httpx client. Bearer token comes from .env at the repo root."""
-    if not FINNGENIE_TOKEN:
-        raise RuntimeError(
-            "FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key."
-        )
-    return httpx.Client(
-        headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60
-    )
-
-
-@app.function
-def fetch_tsv(path: str, **params) -> pl.DataFrame:
-    """GET a FinnGenie endpoint as TSV and return a polars DataFrame."""
-    with client() as c:
-        r = c.get(f"{BASE}{path}", params=params)
-        r.raise_for_status()
-    return pl.read_csv(io.BytesIO(r.content), separator="\t", null_values="NA")
-
-
-@app.function
-def fetch_json(path: str, **params) -> list[dict]:
-    """GET a FinnGenie endpoint as JSON. Most endpoints accept ?format=json."""
-    with client() as c:
-        r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
-        r.raise_for_status()
-    return r.json()
+    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
 
 
 @app.cell
