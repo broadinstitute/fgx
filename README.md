@@ -16,6 +16,8 @@ Each notebook ships with a committed session snapshot under [`notebooks/__marimo
 | [`nb02_variant_phewas.py`](notebooks/nb02_variant_phewas.py) | Variant PheWAS across endpoints | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb02_variant_phewas.py) |
 | [`nb03_phenotype_locus_zoom.py`](notebooks/nb03_phenotype_locus_zoom.py) | Phenotype-driven locus zoom | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb03_phenotype_locus_zoom.py) |
 | [`nb04_gene_exome_burden.py`](notebooks/nb04_gene_exome_burden.py) | Gene-based exome burden results | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb04_gene_exome_burden.py) |
+| [`nb06_variant_pqtl_function.py`](notebooks/nb06_variant_pqtl_function.py) | Variant -> pQTL credible sets -> direction-of-effect across proteins (ADAM17 / IBD demo replay) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb06_variant_pqtl_function.py) |
+| [`nb07_data_catalog.py`](notebooks/nb07_data_catalog.py) | Catalog introspection (`/datasets`, `/resources`, `/resource_metadata`) for "what's available?" | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb07_data_catalog.py) |
 
 ## Getting started
 
@@ -42,6 +44,8 @@ fgx/
     nb02_variant_phewas.py           # variant PheWAS across endpoints
     nb03_phenotype_locus_zoom.py     # phenotype-driven locus zoom
     nb04_gene_exome_burden.py        # gene-based exome burden results
+    nb06_variant_pqtl_function.py    # variant -> pQTL credible sets -> direction-of-effect (ADAM17/IBD)
+    nb07_data_catalog.py             # /datasets + /resources introspection ("what's available?")
     __marimo__/session/              # committed session snapshots for molab previews
 ```
 
