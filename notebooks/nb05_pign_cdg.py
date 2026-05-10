@@ -35,7 +35,7 @@ with app.setup:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
     from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
-    from nb04_gene_exome_burden import prepare_deleterious  # noqa: F401
+    from nb04_gene_exome_burden import prepare_deleterious
 
 
 @app.cell
@@ -187,7 +187,7 @@ def _(GENE, top):
 @app.cell
 def _(GENE):
     mo.md(
-        rf"""
+        r"""
         ## Cross-check: curated gene-disease evidence
 
         The exome forest told one story (corneal biomechanics in heterozygotes); the

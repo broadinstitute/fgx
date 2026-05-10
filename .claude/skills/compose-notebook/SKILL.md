@@ -36,10 +36,12 @@ NOTEBOOK_DIR = Path(__file__).resolve().parent
 if str(NOTEBOOK_DIR) not in sys.path:
     sys.path.insert(0, str(NOTEBOOK_DIR))
 
-from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv
 ```
 
-The `noqa: F401` matters because ruff sees the imported names as unused -- `@app.function` and `@app.cell` cells reference them statically-invisibly. Importing nb01 also runs nb01's own `with app.setup:` block (idempotent: same `load_dotenv`, same `import polars`); cell *bodies* don't execute on import because `if __name__ == "__main__": app.run()` guards the kernel start. Local `BASE` and `FINNGENIE_TOKEN` constants stay in each notebook's setup so .env diagnostics surface locally rather than chasing imports.
+Ruff's static analysis can't see `@app.function` and `@app.cell` cells reference these symbols, so it would normally fire F401 (`unused-import`) on every notebook. Rather than peppering per-line `# noqa: F401` comments, fgx disables F401 for `notebooks/nb*.py` once via `[tool.ruff.lint.per-file-ignores]` in `pyproject.toml`. Per-line noqa comments are fragile -- a manual `ruff check --fix --unsafe-fixes` run, or an aggressive IDE save action, can strip them and re-trigger F401 on the next lint run. The pyproject-level rule survives both. Marimo's own format-on-save respects `pyproject.toml` after [marimo#8605](https://github.com/marimo-team/marimo/issues/8605) (closed 2026-03), so this is the durable pattern.
+
+Importing nb01 also runs nb01's own `with app.setup:` block (idempotent: same `load_dotenv`, same `import polars`); cell *bodies* don't execute on import because `if __name__ == "__main__": app.run()` guards the kernel start. Local `BASE` and `FINNGENIE_TOKEN` constants stay in each notebook's setup so .env diagnostics surface locally rather than chasing imports.
 
 ## Two paths: parameter swap vs compose
 
@@ -95,7 +97,7 @@ with app.setup:
     if str(NOTEBOOK_DIR) not in sys.path:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
-    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv
 
 
 @app.cell

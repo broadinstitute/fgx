@@ -1,0 +1,9 @@
+[tool.ruff.lint.per-file-ignores]
+# F401 (unused-import) fires on every import inside `with app.setup:` because
+# ruff's static analysis can't see references from `@app.function` and
+# `@app.cell` bodies. The cross-notebook import recipe (nb01-owned helpers
+# imported into nb02+) hits this on every notebook. Disable F401 here once
+# rather than sprinkling per-line `# noqa: F401` comments that get stripped
+# by aggressive `ruff --fix --unsafe-fixes` runs or IDE on-save actions.
+# See compose-notebook/SKILL.md for the full rationale.
+"notebooks/nb*.py" = ["F401"]

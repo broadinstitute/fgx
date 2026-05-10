@@ -34,7 +34,7 @@ with app.setup:
     if str(NOTEBOOK_DIR) not in sys.path:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
-    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv  # noqa: F401
+    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv
 
 
 @app.function
@@ -193,7 +193,7 @@ def _(pqtl):
             f"- Verdict: {readout}"
         )
     consensus_view
-    return (summary,)
+    return
 
 
 @app.cell
@@ -255,26 +255,24 @@ def _(VARIANT, pqtl):
 
 @app.cell
 def _(GENE_CONTEXT):
-    mo.md(
-        rf"""
-        ## Reading the panel
+    mo.md(rf"""
+    ## Reading the panel
 
-        A variant in **{GENE_CONTEXT}** that pushes a set of plasma proteins in one shared
-        direction is the signature of a single upstream mechanism. The interpretation step --
-        which the FinnGenie chatbot does via literature search -- is to ask whether the affected
-        proteins share a known relationship to {GENE_CONTEXT}'s function. For ADAM17 specifically,
-        the demo's reading was: ERBB4 and TNFRSF1A are documented ADAM17 substrates whose
-        ectodomains are cleaved off the cell surface; if the variant **reduces** ADAM17 sheddase
-        activity, fewer ectodomains are released into plasma, so plasma levels of the cleaved
-        forms drop -- consistent with the all-negative beta panel above.
+    A variant in **{GENE_CONTEXT}** that pushes a set of plasma proteins in one shared
+    direction is the signature of a single upstream mechanism. The interpretation step --
+    which the FinnGenie chatbot does via literature search -- is to ask whether the affected
+    proteins share a known relationship to {GENE_CONTEXT}'s function. For ADAM17 specifically,
+    the demo's reading was: ERBB4 and TNFRSF1A are documented ADAM17 substrates whose
+    ectodomains are cleaved off the cell surface; if the variant **reduces** ADAM17 sheddase
+    activity, fewer ectodomains are released into plasma, so plasma levels of the cleaved
+    forms drop -- consistent with the all-negative beta panel above.
 
-        That last step is not in this notebook on purpose. Substrate-level interpretation is a
-        literature task, not an API call -- if you want it agentic, point an LLM at the protein
-        list with `{GENE_CONTEXT}` as context and ask which are known substrates / regulated
-        partners. The notebook's job is to surface the panel and the direction; the biology call
-        is the reader's.
-        """
-    )
+    That last step is not in this notebook on purpose. Substrate-level interpretation is a
+    literature task, not an API call -- if you want it agentic, point an LLM at the protein
+    list with `{GENE_CONTEXT}` as context and ask which are known substrates / regulated
+    partners. The notebook's job is to surface the panel and the direction; the biology call
+    is the reader's.
+    """)
     return
 
 
