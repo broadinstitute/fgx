@@ -1,9 +1,9 @@
+[tool.ruff]
+line-length = 120
+
 [tool.ruff.lint.per-file-ignores]
-# F401 (unused-import) fires on every import inside `with app.setup:` because
-# ruff's static analysis can't see references from `@app.function` and
-# `@app.cell` bodies. The cross-notebook import recipe (nb01-owned helpers
-# imported into nb02+) hits this on every notebook. Disable F401 here once
-# rather than sprinkling per-line `# noqa: F401` comments that get stripped
-# by aggressive `ruff --fix --unsafe-fixes` runs or IDE on-save actions.
-# See compose-notebook/SKILL.md for the full rationale.
-"notebooks/nb*.py" = ["F401"]
+# Marimo notebooks intentionally use bare expressions for rendering, imports
+# from setup/cross-notebook helpers that ruff cannot always see statically, and
+# cell-private scratch values. Keep this centralized instead of scattering
+# fragile per-line noqa comments through notebooks.
+"notebooks/nb*.py" = ["B018", "F401", "F821", "F841"]
