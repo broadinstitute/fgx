@@ -150,6 +150,8 @@ env -u PYTHONPATH uvx marimo export session --sandbox notebooks/nbNN_<topic>.py
 
 This executes the notebook in an isolated venv (deps from the PEP 723 header) and writes `notebooks/__marimo__/session/nbNN_<topic>.py.json` -- ~40k of cell outputs that the marimo viewer can replay statelessly. Don't reach for the alternative (`marimo edit` + browser + Run all + autosave) -- it requires a live websocket session and is much heavier than this one-shot. Run it after every meaningful change to the notebook so the committed preview tracks the source. Skip if the notebook hits an endpoint that's slow or rate-limited; the cell will execute again on each export and a stale snapshot is worse than no snapshot for a flaky path.
 
+**Always export the snapshot AFTER the final source edit / `ruff format` pass.** Each cell in the snapshot carries a `code_hash` of the cell source it was generated from, and molab attaches the stored output to a source cell only if the hashes match -- otherwise the cell renders empty in the public preview. A whitespace-only reformat is enough to invalidate every snapshot in the file, so if you change *anything* about the `.py` (including running `ruff format`) you have to regenerate the `.json` too. Commit the refreshed snapshot in the same change that touched the source.
+
 ## Gotchas
 
 The first three are tooling traps that cost real session time when missed; the next three are API papercuts; the rest are biology / endpoint-semantics nuances.
