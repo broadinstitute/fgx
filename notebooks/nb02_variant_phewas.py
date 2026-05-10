@@ -193,7 +193,7 @@ def _(phewas, variant_id):
             title=f"PheWAS at {variant_id} (credible-set membership)",
         )
     )
-    chart
+    mo.ui.altair_chart(chart)
     return
 
 
