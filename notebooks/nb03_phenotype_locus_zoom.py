@@ -248,7 +248,7 @@ def _(PHENOTYPE, label_df, manhattan_df):
         width=820,
         title=f"Manhattan of credible-set leads for {PHENOTYPE} (FinnGen R13)",
     )
-    chart
+    mo.ui.altair_chart(chart)
     return
 
 

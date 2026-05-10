@@ -152,6 +152,8 @@ This executes the notebook in an isolated venv (deps from the PEP 723 header) an
 
 **Always export the snapshot AFTER the final source edit / `ruff format` pass.** Each cell in the snapshot carries a `code_hash` of the cell source it was generated from, and molab attaches the stored output to a source cell only if the hashes match -- otherwise the cell renders empty in the public preview. A whitespace-only reformat is enough to invalidate every snapshot in the file, so if you change *anything* about the `.py` (including running `ruff format`) you have to regenerate the `.json` too. Commit the refreshed snapshot in the same change that touched the source.
 
+**Wrap altair charts in `mo.ui.altair_chart(...)` or molab will not render them.** A bare `chart` expression emits the raw vega-lite spec as `application/vnd.vegalite.v6+json`, which expects the viewer to ship its own vega-lite renderer. The marimo live editor does; molab's static viewer does not bundle vega-lite v6, so the cell paints blank even though the spec is fully present in the snapshot. Wrapping in `mo.ui.altair_chart(chart)` flips the output to `text/html` containing a `<marimo-vega>` custom element, and the marimo runtime that molab *does* load brings its own vega renderer with it. The general rule: raw third-party mimetypes depend on the viewer's renderer registry, while marimo widgets carry their renderer with them. If a chart shows up in the live editor but not in molab, the first thing to try is the widget wrap.
+
 ## Gotchas
 
 The first three are tooling traps that cost real session time when missed; the next three are API papercuts; the rest are biology / endpoint-semantics nuances.

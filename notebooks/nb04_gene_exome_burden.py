@@ -192,7 +192,7 @@ def _(GENE, top):
         height=500,
         title=f"Forest plot: top deleterious exome variants in {GENE} (beta +/- 1.96 SE, sorted by effect size on x)",
     )
-    forest
+    mo.ui.altair_chart(forest)
     return
 
 

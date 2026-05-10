@@ -273,7 +273,7 @@ def _(VARIANT, pqtl):
             height=420,
             title=f"pQTL effects at {VARIANT} (top 20 by PIP)",
         )
-    chart
+    mo.ui.altair_chart(chart)
     return
 
 

@@ -160,7 +160,7 @@ def _(GENE, top_gwas):
         )
         .properties(height=400, title=f"Top traits associated near {GENE}")
     )
-    chart
+    mo.ui.altair_chart(chart)
     return
 
 
@@ -257,7 +257,7 @@ def _(coloc, variant_id):
             title=f"Top colocalizing trait pairs at {variant_id}",
         )
     )
-    coloc_chart
+    mo.ui.altair_chart(coloc_chart)
     return
 
 
