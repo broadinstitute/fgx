@@ -1,0 +1,191 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.3",
+    "script_metadata_hash": "8c7136a5b233f3955795dfa669fc4c72"
+  },
+  "cells": [
+    {
+      "id": "setup",
+      "code_hash": "6139297b9eff21f84fdfb1521f389802",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "38fe3918e5ce6c59c8f856ce45460bb8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "64cb1b384fe0adefa4e630cddab1fa02",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "7abddb655a92b11b26e585cf07d6e04c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "4c971fdc68d52c1d49a95c892a76baeb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"nb07-whats-in-the-catalog\">nb07: What's in the catalog?</h1>\n<span class=\"paragraph\">The FinnGenie demo (Karjalainen, VOA 2026-05-05) opened with a slide cataloguing all 29\ndatasets the API exposes -- GWAS, QTL families, exome / gene-based, expression, gene-disease,\nchromatin peaks, colocalization-only -- with phenotype counts and sample sizes. This notebook\nis the agentic equivalent: hit <code>/datasets</code> and <code>/resources</code>, group the response, and let an\nagent (or a human) introspect what's available before composing an analysis.</span>\n<span class=\"paragraph\">Use this as the <strong>first</strong> notebook to read when a new question lands. \"Can FinnGenie answer\nX for trait Y?\" reduces to \"is there a dataset whose <code>resource</code>/<code>type</code> covers Y?\" -- and the\nanswer is one cell away. The dataset names you find here are the strings you pass to the\n<code>resource=</code> parameter on most other endpoints (nb01-nb04 helpers).</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "b1b75afbaf609c6d00df1b5ac91bd798",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"datasets-returned-33-rows-with-columns-dataset_id-resource-version-data_type-trait_type-n_phenotypes-n_samples-has_credible_sets-has_summary_stats-n_coloc_partners-description-author-publication_date\"><code>/datasets</code> returned 33 rows with columns: <code>dataset_id, resource, version, data_type, trait_type, n_phenotypes, n_samples, has_credible_sets, has_summary_stats, n_coloc_partners, description, author, publication_date</code></h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "3c4ef6ffc3f37a868e1d1b92011940fb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"datasets-grouped-by-type\">Datasets grouped by type</h3>\n<span class=\"paragraph\">Maps the slide's category bands (GWAS / QTL / Exome / Expression / Gene-disease / Chromatin peaks / Colocalization-only) onto whatever category column the API actually exposes.</span></span><marimo-ui-element object-id='PKri-0' random-id='ad2408e6-550a-1dc3-339f-5582e3ef24a8'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:12,&#92;&quot;n_resources&#92;&quot;:7},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;gene_based&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:6,&#92;&quot;n_resources&#92;&quot;:4},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;pqtl&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:4,&#92;&quot;n_resources&#92;&quot;:3},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;gene_disease&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:2,&#92;&quot;n_resources&#92;&quot;:2},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;expression&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:2,&#92;&quot;n_resources&#92;&quot;:2},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:2,&#92;&quot;n_resources&#92;&quot;:2},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;metaboqtl&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:1,&#92;&quot;n_resources&#92;&quot;:1},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;exome&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:1,&#92;&quot;n_resources&#92;&quot;:1},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;caqtl&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:1,&#92;&quot;n_resources&#92;&quot;:1},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;chromatin_peaks&#92;&quot;,&#92;&quot;n_datasets&#92;&quot;:1,&#92;&quot;n_resources&#92;&quot;:1}]&quot;' data-total-rows='11' data-total-columns='3' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_datasets&quot;,[&quot;integer&quot;,&quot;u32&quot;]],[&quot;n_resources&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "28626524c071a18d02ecd4d881bdf9a5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Xref-0' random-id='ab158abc-e7ff-4235-544e-4df5f35e4b8d'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;_marimo_row_id&#92;&quot;:0,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_gwas&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;binary&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:2754,&#92;&quot;n_samples&#92;&quot;:477706,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:11},{&#92;&quot;_marimo_row_id&#92;&quot;:1,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_kanta&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;2025-03&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:388,&#92;&quot;n_samples&#92;&quot;:8476,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:3},{&#92;&quot;_marimo_row_id&#92;&quot;:2,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_drugs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R12&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:126,&#92;&quot;n_samples&#92;&quot;:459553,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:3,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:404,&#92;&quot;n_samples&#92;&quot;:1431887,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:4,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_mvp_ukbb_labs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:46,&#92;&quot;n_samples&#92;&quot;:991932,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:5,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:936,&#92;&quot;n_samples&#92;&quot;:872691,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:6,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_ukbb_labs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:48,&#92;&quot;n_samples&#92;&quot;:584163,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:7,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_pqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-4&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:3561,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:8,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;ukbb_pqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;PPP&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:42853,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:9,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_eqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-5&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;eqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:1108,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:true,&#92;&quot;n_coloc_partners&#92;&quot;:2},{&#92;&quot;_marimo_row_id&#92;&quot;:10,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_caqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-5&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;caqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:1108,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:2},{&#92;&quot;_marimo_row_id&#92;&quot;:11,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;eqtl_catalogue&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;eqtl_catalogue&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R7&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:175,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:12,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;25.12&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:19691,&#92;&quot;n_samples&#92;&quot;:7812,&#92;&quot;has_credible_sets&#92;&quot;:true,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:0},{&#92;&quot;_marimo_row_id&#92;&quot;:13,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_gwas_r12&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R12&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;binary&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:2502,&#92;&quot;n_samples&#92;&quot;:475666,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:2},{&#92;&quot;_marimo_row_id&#92;&quot;:14,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_nmr&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;metaboqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:34218,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:15,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_somascan&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-2&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:1000,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:16,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finnliver&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finnliver&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:131,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:17,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;generisk&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;generisk&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:7632,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:18,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;interval&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;interval&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;pqtl&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;quantitative&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:3301,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1},{&#92;&quot;_marimo_row_id&#92;&quot;:19,&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;ukbb_finucane&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb_finucane&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;data_type&#92;&quot;:&#92;&quot;gwas&#92;&quot;,&#92;&quot;trait_type&#92;&quot;:&#92;&quot;mixed&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:361194,&#92;&quot;has_credible_sets&#92;&quot;:false,&#92;&quot;has_summary_stats&#92;&quot;:false,&#92;&quot;n_coloc_partners&#92;&quot;:1}]&quot;' data-total-rows='33' data-total-columns='10' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='20' data-field-types='[[&quot;dataset_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;version&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;trait_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_phenotypes&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;n_samples&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;has_credible_sets&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;has_summary_stats&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;n_coloc_partners&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-selection='&quot;single&quot;' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='true' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "6ff7a4afffc84eefe3e01f3d6d8f54f2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>Select a row above to see per-phenotype metadata for that resource.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "86c3926362c8961c11f7d4fe74c9235c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "def77a0d9986c9b74178a24d9f708162",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><em>No rows to display.</em></span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "f24f13a86b0bcc3eb1124f7431a29fd5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"phenotype-counts-at-a-glance\">Phenotype counts at a glance</h2>\n<span class=\"paragraph\">The other introspection question the FinnGenie demo answered live was <em>\"how many phenotypes\nare in FinnGen R13?\"</em> -- 2,754 core GWAS, 388 Kanta lab, 126 drug-purchase. That number lives\ninside <code>stats.n_phenotypes</code> on each <code>/datasets</code> row, which <code>list_datasets()</code> has already\npulled out into the flat <code>n_phenotypes</code> column. The cell below filters to the FinnGen family;\nswap the filter to ask the same question for ukbb / open_targets / genebass.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "a190fca3406870eca4489e46c891629b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"finngen-family-phenotype-counts\">FinnGen-family phenotype counts</h3></span><marimo-ui-element object-id='emfo-0' random-id='43c88784-0e0b-9041-19aa-10b7ec4dab2d'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_gwas&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:2754,&#92;&quot;n_samples&#92;&quot;:477706},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_gwas_r12&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R12&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:2502,&#92;&quot;n_samples&#92;&quot;:475666},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:936,&#92;&quot;n_samples&#92;&quot;:872691},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:404,&#92;&quot;n_samples&#92;&quot;:1431887},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_kanta&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;2025-03&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:388,&#92;&quot;n_samples&#92;&quot;:8476},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_drugs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R12&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:126,&#92;&quot;n_samples&#92;&quot;:459553},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_ukbb_labs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:48,&#92;&quot;n_samples&#92;&quot;:584163},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_mvp_ukbb_labs&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen_mvp_ukbb&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;R13&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:46,&#92;&quot;n_samples&#92;&quot;:991932},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_pqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-4&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:3561},{&#92;&quot;dataset_id&#92;&quot;:&#92;&quot;finngen_eqtl&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;finngen&#92;&quot;,&#92;&quot;version&#92;&quot;:&#92;&quot;batch1-5&#92;&quot;,&#92;&quot;n_phenotypes&#92;&quot;:null,&#92;&quot;n_samples&#92;&quot;:1108}]&quot;' data-total-rows='14' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;dataset_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;version&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_phenotypes&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;n_samples&quot;,[&quot;integer&quot;,&quot;i64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "ad3dd7b011bd9ea460d7fe4a2079de13",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"to-extend\">To extend</h2>\n<ul>\n<li>Add a <code>mo.ui.dropdown</code> over the category column, wire its <code>.value</code> into the catalog table's\n  filter, and you've built a one-cell catalog browser an agent can drive in a single step.</li>\n<li>Pull <code>/trait_name_mapping</code> once and join it to the metadata table so phenotype codes\n  (<code>I9_CHD</code>, <code>T2D</code>, <code>K11_CROHN</code>, ...) resolve to human labels in place.</li>\n<li>Cache <code>/datasets</code> to a local parquet (it's small and changes only on FinnGenie releases).\n  An agent can then introspect the catalog without hitting the API on every cold start.</li>\n<li>When the OpenAPI spec adds a new endpoint family, the surface this notebook surveys still\n  stays one cell -- the spec at <code>/api/v1/openapi.json</code> is the source of truth, and adding a\n  <code>list_&lt;thing&gt;()</code> helper keeps the introspection pattern uniform.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

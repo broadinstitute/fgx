@@ -1,0 +1,152 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.3",
+    "script_metadata_hash": "8c7136a5b233f3955795dfa669fc4c72"
+  },
+  "cells": [
+    {
+      "id": "setup",
+      "code_hash": "4b32a757ae891cc6eecd62d827bfd655",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "58a512d7a8105e09a338728435b75f7b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "b0b679ca6e2da6ab7a51f56d7f753d10",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "3cd773a3ea2e1dc6cb53a6a8b1a5fbc2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"nb06-variant-pqtl-credible-sets-mechanism\">nb06: Variant -&gt; pQTL credible sets -&gt; mechanism</h1>\n<span class=\"paragraph\">The hero example from the FinnGenie demo (Karjalainen, VOA 2026-05-05): take a GWAS-significant\nvariant in a gene of interest, ask which <strong>plasma proteins</strong> have a credible set that includes\nthis variant, then read the <strong>direction of effect</strong> across those proteins. When a variant sits\nin a sheddase or a regulator and pushes multiple downstream proteins in the same direction,\nthat's a far cleaner functional read than any single colocalization test.</span>\n<span class=\"paragraph\">Companion to nb01 (gene-first, GWAS-&gt;coloc) and nb02 (variant PheWAS across all data types).\nWhere nb02 surveys the full PheWAS dot plot, nb06 zooms into the pQTL bucket and asks:\n<em>which proteins, in what direction, by how much?</em> The pQTL filter is what lets you go from\n\"this variant is associated with disease\" to a candidate molecular mechanism.</span>\n<span class=\"paragraph\">Note: this is <strong>not</strong> formal colocalization. We're using credible-set co-membership plus\nsign-of-effect as a lighter, faster proxy. Use <code>colocalization_by_variant</code> (see nb01) when\nyou need PP.H4 / CLPP for a regulatory claim.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "1a28a95a04002ae63df50d25278150b3",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"entry-point-29521321ag-in-adam17\">Entry point: <code>2:9521321:A:G</code> (in ADAM17)</h3>\n<span class=\"paragraph\">A splice-region variant in ADAM17, the canonical sheddase that cleaves extracellular domains off membrane-anchored proteins (TNF, EGFR ligands, several receptors). Carriers have higher risk of inflammatory bowel disease (IBD). The biological question: if ADAM17 activity is altered by this variant, which substrate proteins should we expect to move, and in what direction?</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "d210de7104cca52857d68124c01d3c6c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"29521321ag-sits-in-5-pqtl-credible-sets-across-1-resources-ukbb\"><code>2:9521321:A:G</code> sits in <strong>5 pQTL credible sets</strong> across 1 resource(s) (ukbb).</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "e994ecc8a5d90af355725655cdb1a8bf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Per-protein view.</strong> One row per credible set containing this variant. <code>pip</code> is the variant's posterior inclusion probability <em>within</em> the credible set -- high pip means the variant is plausibly the driver, low pip means it's one of several variants tagging the signal. <code>beta</code> is the per-allele effect on the protein's plasma level (alt allele relative to ref).</span></span><marimo-ui-element object-id='PKri-0' random-id='4eb2c3ec-549f-e035-e0d3-07f954f6a7a4'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait&#92;&quot;:&#92;&quot;ERBB4&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;cs_id&#92;&quot;:&#92;&quot;chr2:8012017-11012017_2&#92;&quot;,&#92;&quot;cs_size&#92;&quot;:2,&#92;&quot;pip&#92;&quot;:0.9366,&#92;&quot;beta&#92;&quot;:-0.2688,&#92;&quot;se&#92;&quot;:0.03795,&#92;&quot;mlog10p&#92;&quot;:11.8471},{&#92;&quot;trait&#92;&quot;:&#92;&quot;NTRK3&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;cs_id&#92;&quot;:&#92;&quot;chr2:8018896-11018896_2&#92;&quot;,&#92;&quot;cs_size&#92;&quot;:2,&#92;&quot;pip&#92;&quot;:0.8069,&#92;&quot;beta&#92;&quot;:-0.2235,&#92;&quot;se&#92;&quot;:0.03792,&#92;&quot;mlog10p&#92;&quot;:8.4196},{&#92;&quot;trait&#92;&quot;:&#92;&quot;AMIGO2&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;cs_id&#92;&quot;:&#92;&quot;chr2:8057243-11057243_2&#92;&quot;,&#92;&quot;cs_size&#92;&quot;:3,&#92;&quot;pip&#92;&quot;:0.4154,&#92;&quot;beta&#92;&quot;:-0.2181,&#92;&quot;se&#92;&quot;:0.03821,&#92;&quot;mlog10p&#92;&quot;:7.9405},{&#92;&quot;trait&#92;&quot;:&#92;&quot;TNFRSF1A&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;cs_id&#92;&quot;:&#92;&quot;chr2:8054491-11054491_2&#92;&quot;,&#92;&quot;cs_size&#92;&quot;:3,&#92;&quot;pip&#92;&quot;:0.3028,&#92;&quot;beta&#92;&quot;:-0.2244,&#92;&quot;se&#92;&quot;:0.03804,&#92;&quot;mlog10p&#92;&quot;:8.4367},{&#92;&quot;trait&#92;&quot;:&#92;&quot;TNFRSF11A&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;ukbb&#92;&quot;,&#92;&quot;cs_id&#92;&quot;:&#92;&quot;chr2:8054491-11054491_2&#92;&quot;,&#92;&quot;cs_size&#92;&quot;:3,&#92;&quot;pip&#92;&quot;:0.2269,&#92;&quot;beta&#92;&quot;:-0.1921,&#92;&quot;se&#92;&quot;:0.03796,&#92;&quot;mlog10p&#92;&quot;:6.3806}]&quot;' data-total-rows='5' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;trait&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;cs_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;cs_size&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;beta&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;se&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "9ef7d59ed977a326e06552f08cc8a5e8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"direction-consensus-across-5-pqtl-hits\">Direction consensus across 5 pQTL hits</h3>\n<ul>\n<li>5 negative beta(s), 0 positive, 0 zero</li>\n<li>Verdict: <strong>all proteins move down</strong> with the alt allele -- consistent with loss of a positive regulator (or gain of an inhibitor).</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "88962ec1a817eb470fbad9291803c4fe",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "application/vnd.vegalite.v6+json": "{\n  \"$schema\": \"https://vega.github.io/schema/vega-lite/v6.4.1.json\",\n  \"config\": {\n    \"view\": {\n      \"continuousHeight\": 300,\n      \"continuousWidth\": 300\n    }\n  },\n  \"datasets\": {\n    \"data-a91c6eea8926ed53b269f8587d29c0f2\": [\n      {\n        \"aaf\": 0.009349,\n        \"alt\": \"G\",\n        \"beta\": -0.2688,\n        \"cell_type\": \"plasma\",\n        \"chr\": 2,\n        \"ci_hi\": -0.19441799999999998,\n        \"ci_lo\": -0.343182,\n        \"cs_id\": \"chr2:8012017-11012017_2\",\n        \"cs_min_r2\": 0.9643,\n        \"cs_size\": 2,\n        \"data_type\": \"pQTL\",\n        \"dataset\": \"UKB_PPP\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"ADAM17\",\n        \"mlog10p\": 11.8471,\n        \"most_severe\": \"splice_region_variant\",\n        \"pip\": 0.9366,\n        \"pos\": 9521321,\n        \"ref\": \"A\",\n        \"resource\": \"ukbb\",\n        \"se\": 0.03795,\n        \"trait\": \"ERBB4\",\n        \"trait_original\": \"ERBB4\",\n        \"version\": \"3k\"\n      },\n      {\n        \"aaf\": 0.009355,\n        \"alt\": \"G\",\n        \"beta\": -0.2235,\n        \"cell_type\": \"plasma\",\n        \"chr\": 2,\n        \"ci_hi\": -0.1491768,\n        \"ci_lo\": -0.2978232,\n        \"cs_id\": \"chr2:8018896-11018896_2\",\n        \"cs_min_r2\": 0.963,\n        \"cs_size\": 2,\n        \"data_type\": \"pQTL\",\n        \"dataset\": \"UKB_PPP\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"ADAM17\",\n        \"mlog10p\": 8.4196,\n        \"most_severe\": \"splice_region_variant\",\n        \"pip\": 0.8069,\n        \"pos\": 9521321,\n        \"ref\": \"A\",\n        \"resource\": \"ukbb\",\n        \"se\": 0.03792,\n        \"trait\": \"NTRK3\",\n        \"trait_original\": \"NTRK3\",\n        \"version\": \"3k\"\n      },\n      {\n        \"aaf\": 0.00931,\n        \"alt\": \"G\",\n        \"beta\": -0.2181,\n        \"cell_type\": \"plasma\",\n        \"chr\": 2,\n        \"ci_hi\": -0.14320839999999999,\n        \"ci_lo\": -0.2929916,\n        \"cs_id\": \"chr2:8057243-11057243_2\",\n        \"cs_min_r2\": 0.7228,\n        \"cs_size\": 3,\n        \"data_type\": \"pQTL\",\n        \"dataset\": \"UKB_PPP\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"ADAM17\",\n        \"mlog10p\": 7.9405,\n        \"most_severe\": \"splice_region_variant\",\n        \"pip\": 0.4154,\n        \"pos\": 9521321,\n        \"ref\": \"A\",\n        \"resource\": \"ukbb\",\n        \"se\": 0.03821,\n        \"trait\": \"AMIGO2\",\n        \"trait_original\": \"AMIGO2\",\n        \"version\": \"3k\"\n      },\n      {\n        \"aaf\": 0.009339,\n        \"alt\": \"G\",\n        \"beta\": -0.2244,\n        \"cell_type\": \"plasma\",\n        \"chr\": 2,\n        \"ci_hi\": -0.1498416,\n        \"ci_lo\": -0.29895839999999996,\n        \"cs_id\": \"chr2:8054491-11054491_2\",\n        \"cs_min_r2\": 0.7229,\n        \"cs_size\": 3,\n        \"data_type\": \"pQTL\",\n        \"dataset\": \"UKB_PPP\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"ADAM17\",\n        \"mlog10p\": 8.4367,\n        \"most_severe\": \"splice_region_variant\",\n        \"pip\": 0.3028,\n        \"pos\": 9521321,\n        \"ref\": \"A\",\n        \"resource\": \"ukbb\",\n        \"se\": 0.03804,\n        \"trait\": \"TNFRSF1A\",\n        \"trait_original\": \"TNFRSF1A\",\n        \"version\": \"3k\"\n      },\n      {\n        \"aaf\": 0.009289,\n        \"alt\": \"G\",\n        \"beta\": -0.1921,\n        \"cell_type\": \"plasma\",\n        \"chr\": 2,\n        \"ci_hi\": -0.1176984,\n        \"ci_lo\": -0.2665016,\n        \"cs_id\": \"chr2:8054491-11054491_2\",\n        \"cs_min_r2\": 0.7237,\n        \"cs_size\": 3,\n        \"data_type\": \"pQTL\",\n        \"dataset\": \"UKB_PPP\",\n        \"direction\": \"lower in alt\",\n        \"gene_most_severe\": \"ADAM17\",\n        \"mlog10p\": 6.3806,\n        \"most_severe\": \"splice_region_variant\",\n        \"pip\": 0.2269,\n        \"pos\": 9521321,\n        \"ref\": \"A\",\n        \"resource\": \"ukbb\",\n        \"se\": 0.03796,\n        \"trait\": \"TNFRSF11A\",\n        \"trait_original\": \"TNFRSF11A\",\n        \"version\": \"3k\"\n      }\n    ],\n    \"data-cab89ea18155dec7d772e8112aba6047\": [\n      {\n        \"x\": 0.0\n      }\n    ]\n  },\n  \"height\": 420,\n  \"layer\": [\n    {\n      \"data\": {\n        \"name\": \"data-a91c6eea8926ed53b269f8587d29c0f2\"\n      },\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"ci_lo\",\n          \"type\": \"quantitative\"\n        },\n        \"x2\": {\n          \"field\": \"ci_hi\"\n        },\n        \"y\": {\n          \"field\": \"trait\",\n          \"sort\": \"-x\",\n          \"type\": \"nominal\"\n        }\n      },\n      \"mark\": {\n        \"opacity\": 0.5,\n        \"type\": \"rule\"\n      }\n    },\n    {\n      \"data\": {\n        \"name\": \"data-a91c6eea8926ed53b269f8587d29c0f2\"\n      },\n      \"encoding\": {\n        \"color\": {\n          \"field\": \"direction\",\n          \"scale\": {\n            \"domain\": [\n              \"lower in alt\",\n              \"higher in alt\"\n            ],\n            \"range\": [\n              \"#2b83ba\",\n              \"#d7191c\"\n            ]\n          },\n          \"title\": \"Effect direction\",\n          \"type\": \"nominal\"\n        },\n        \"size\": {\n          \"field\": \"pip\",\n          \"scale\": {\n            \"range\": [\n              60,\n              400\n            ]\n          },\n          \"title\": \"PIP\",\n          \"type\": \"quantitative\"\n        },\n        \"tooltip\": [\n          {\n            \"field\": \"trait\",\n            \"type\": \"nominal\"\n          },\n          {\n            \"field\": \"resource\",\n            \"type\": \"nominal\"\n          },\n          {\n            \"field\": \"cs_id\",\n            \"type\": \"nominal\"\n          },\n          {\n            \"field\": \"cs_size\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"pip\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"beta\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"se\",\n            \"type\": \"quantitative\"\n          },\n          {\n            \"field\": \"mlog10p\",\n            \"type\": \"quantitative\"\n          }\n        ],\n        \"x\": {\n          \"field\": \"beta\",\n          \"title\": \"Per-allele effect on plasma protein (beta)\",\n          \"type\": \"quantitative\"\n        },\n        \"y\": {\n          \"field\": \"trait\",\n          \"sort\": \"-x\",\n          \"title\": null,\n          \"type\": \"nominal\"\n        }\n      },\n      \"mark\": {\n        \"opacity\": 0.85,\n        \"size\": 140,\n        \"type\": \"circle\"\n      }\n    },\n    {\n      \"data\": {\n        \"name\": \"data-cab89ea18155dec7d772e8112aba6047\"\n      },\n      \"encoding\": {\n        \"x\": {\n          \"field\": \"x\",\n          \"type\": \"quantitative\"\n        }\n      },\n      \"mark\": {\n        \"color\": \"black\",\n        \"strokeDash\": [\n          4,\n          3\n        ],\n        \"type\": \"rule\"\n      }\n    }\n  ],\n  \"title\": \"pQTL effects at 2:9521321:A:G (top 20 by PIP)\",\n  \"usermeta\": {\n    \"embedOptions\": {}\n  }\n}"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f9476696eeca5543999d4dce7663e374",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"reading-the-panel\">Reading the panel</h2>\n<span class=\"paragraph\">A variant in <strong>ADAM17</strong> that pushes a set of plasma proteins in one shared\ndirection is the signature of a single upstream mechanism. The interpretation step --\nwhich the FinnGenie chatbot does via literature search -- is to ask whether the affected\nproteins share a known relationship to ADAM17's function. For ADAM17 specifically,\nthe demo's reading was: ERBB4 and TNFRSF1A are documented ADAM17 substrates whose\nectodomains are cleaved off the cell surface; if the variant <strong>reduces</strong> ADAM17 sheddase\nactivity, fewer ectodomains are released into plasma, so plasma levels of the cleaved\nforms drop -- consistent with the all-negative beta panel above.</span>\n<span class=\"paragraph\">That last step is not in this notebook on purpose. Substrate-level interpretation is a\nliterature task, not an API call -- if you want it agentic, point an LLM at the protein\nlist with <code>ADAM17</code> as context and ask which are known substrates / regulated\npartners. The notebook's job is to surface the panel and the direction; the biology call\nis the reader's.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "9250678bd2e1f40baece6a52374e1b7d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"to-extend\">To extend</h2>\n<ul>\n<li>Swap <code>2:9521321:A:G</code> for a variant in <strong>PCSK9</strong> (e.g. <code>1:55039974:G:T</code>, the LoF missense\n  from nb01) and re-run -- you should see plasma PCSK9 itself drop and downstream LDL-pathway\n  proteins shift, a different mechanism flavor than ADAM17's substrate panel.</li>\n<li>Take the top-PIP pQTL credible set above, pull its <code>cs_id</code>, and feed it into\n  <code>/colocalization_by_credible_set_id/{cs_id}</code> to get the formal coloc verdict\n  (PP.H4 / CLPP) for the protein vs the GWAS trait that motivated the lookup. That bridges\n  this view back to nb01's coloc step.</li>\n<li>Pivot to the <strong>eQTL</strong> bucket (filter <code>data_type == \"eQTL\"</code> instead of <code>\"pQTL\"</code>) and ask\n  whether the same variant moves the gene's <em>transcript</em> in the same direction as it moves\n  the protein. Disagreement is informative: post-translational regulation, splicing, or\n  protein stability rather than transcription.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
