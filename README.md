@@ -20,6 +20,8 @@ Each notebook ships with a committed session snapshot under [`notebooks/__marimo
 | [`nb06_variant_pqtl_function.py`](notebooks/nb06_variant_pqtl_function.py) | Variant -> pQTL credible sets -> direction-of-effect across proteins (ADAM17 / IBD demo replay) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb06_variant_pqtl_function.py) |
 | [`nb07_data_catalog.py`](notebooks/nb07_data_catalog.py) | Catalog introspection (`/datasets`, `/resources`, `/resource_metadata`) for "what's available?" | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb07_data_catalog.py) |
 
+Related public catalogs of the same pattern: [jx](https://github.com/broadinstitute/jx) for JUMP Cell Painting, [prx](https://github.com/broadinstitute/prx) for PROSPECT chemical genetics, and [dmx](https://github.com/broadinstitute/dmx) for DepMap Breadbox.
+
 ## Getting started
 
 1. Create an API key at [finngenie.broadinstitute.org](https://finngenie.broadinstitute.org/) (`MCP/API KEYS` -> `Create key`). The same key works for both the MCP and the REST API.
