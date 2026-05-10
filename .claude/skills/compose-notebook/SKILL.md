@@ -21,6 +21,7 @@ nb01-04 are the canonical core: each is a self-contained vignette that demonstra
 | `nb02_variant_phewas` | `alt_alleles(variant)` | rsID / variant -> `rsid/variants` -> `credible_sets_by_variant` -> `nearest_genes` -> PheWAS dot plot. `alt_alleles` returns strand/allele-fallback candidates when an rsID resolution misses the credible-set index under one alt allele. |
 | `nb03_phenotype_locus_zoom` | `pick_leads(cs)`, `annotate_with_nearest_gene(variants)` | Phenocode + resource -> `credible_sets_by_phenotype` -> Manhattan with gene labels. `pick_leads` reduces a credible-set DataFrame to one lead row per `cs_id`; `annotate_with_nearest_gene` joins each variant with its nearest protein-coding gene. |
 | `nb04_gene_exome_burden` | `prepare_deleterious(exome, ci_z=1.96)` | Gene (rare-variant arm) -> `exome_results_by_gene` -> `gene_disease` -> forest plot of pLoF/missense betas with CIs. `prepare_deleterious` is the polars prep pipeline (filter to pLoF/missense, drop `mlog10p` underflow rows, attach CI bounds + `trait_variant` label). nb05 imports it to avoid duplicating the pipeline. |
+| `nb05_pign_cdg` | -- | Gene (rare-variant arm, recessive Mendelian) -> `exome_results_by_gene` -> `gene_disease` -> forest plot + curated cross-check. Same shape as nb04, different story: where PCSK9's two arms *converge* on lipids, PIGN's *diverge* -- gencc/monarch converge on MCAHS1 ("Definitive" by ClinGen and G2P, autosomal recessive) while genebass surfaces corneal biomechanics in adult heterozygotes. UKB doesn't enroll affected MCAHS1 probands, so the rare-variant arm shows what one PIGN dose perturbs in carriers, not the recessive disease itself. First concrete demo of the cross-notebook composition pattern -- imports `prepare_deleterious` from nb04 rather than duplicating the polars chain. |
 | `nb06_variant_pqtl_function` | `pqtl_credible_sets(variant)`, `direction_consensus(df, beta_col)` | Variant -> `credible_sets_by_variant` filtered to `data_type == "pQTL"` -> per-protein PIP/beta panel + direction-of-effect summary. Hero replay of the FinnGenie demo (Karjalainen, 2026-05-05): `chr2:9521321:A:G` in ADAM17 -> 4 plasma proteins all with negative beta -> consistent loss-of-sheddase mechanism. Distinct from nb01 (gene-first) and nb02 (full PheWAS) by being variant-first AND pQTL-only AND by surfacing sign-of-effect across the panel rather than top-mlog10p across all data types. |
 | `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the FinnGenie demo. |
 
@@ -130,6 +131,16 @@ If the new notebook genuinely needs a fresh helper -- e.g. a region-around-gene 
 5. **End with extension prompts.** Every vignette closes with a `## To extend` markdown cell listing 2-3 concrete next prompts (e.g. "swap PCSK9 for LDLR", "add a second resource and stack the dot plots"). This turns each notebook into a launchpad rather than a dead end.
 6. **Plot when it adds signal.** Altair is in the PEP 723 deps; a one-cell chart is often more informative than a 20-row table head.
 7. **Don't fabricate.** If a helper doesn't exist or an endpoint returns an empty result, say so and ask the user how to proceed -- don't invent a fallback path.
+
+## Generate a session snapshot for the molab preview
+
+Once the notebook runs end-to-end, commit a session snapshot so the molab badge in the README serves cached outputs instead of triggering live re-execution. One-liner:
+
+```bash
+env -u PYTHONPATH uvx marimo export session --sandbox notebooks/nbNN_<topic>.py
+```
+
+This executes the notebook in an isolated venv (deps from the PEP 723 header) and writes `notebooks/__marimo__/session/nbNN_<topic>.py.json` -- ~40k of cell outputs that the marimo viewer can replay statelessly. Don't reach for the alternative (`marimo edit` + browser + Run all + autosave) -- it requires a live websocket session and is much heavier than this one-shot. Run it after every meaningful change to the notebook so the committed preview tracks the source. Skip if the notebook hits an endpoint that's slow or rate-limited; the cell will execute again on each export and a stale snapshot is worse than no snapshot for a flaky path.
 
 ## Gotchas
 
