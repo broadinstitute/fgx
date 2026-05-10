@@ -119,9 +119,7 @@ def _(RSID):
 @app.cell
 def _(cs_df):
     by_resource = (
-        cs_df.group_by(["resource", "data_type"])
-        .agg(pl.len().alias("n_rows"))
-        .sort("n_rows", descending=True)
+        cs_df.group_by(["resource", "data_type"]).agg(pl.len().alias("n_rows")).sort("n_rows", descending=True)
     )
     mo.vstack(
         [
@@ -151,9 +149,7 @@ def _(cs_df, variant_id):
             .then(pl.lit("higher in alt"))
             .otherwise(pl.lit("lower in alt"))
             .alias("direction"),
-            pl.concat_str(
-                [pl.col("trait"), pl.lit(" ("), pl.col("resource"), pl.lit(")")]
-            ).alias("trait_label"),
+            pl.concat_str([pl.col("trait"), pl.lit(" ("), pl.col("resource"), pl.lit(")")]).alias("trait_label"),
         )
     )
     mo.md(
@@ -209,9 +205,7 @@ def _(variant_id):
     mo.vstack(
         [
             mo.md(f"### Nearest protein-coding genes to `{variant_id}`"),
-            near.select(
-                "gene_name", "distance", "hgnc_name", "gene_strand", "gene_type"
-            ),
+            near.select("gene_name", "distance", "hgnc_name", "gene_strand", "gene_type"),
         ]
     )
     return

@@ -62,21 +62,23 @@ def list_datasets() -> pl.DataFrame:
         products = r.get("products") or {}
         stats = r.get("stats") or {}
         coloc = products.get("colocalization") or {}
-        flat.append({
-            "dataset_id": r.get("dataset_id"),
-            "resource": r.get("resource"),
-            "version": r.get("version"),
-            "data_type": r.get("data_type"),
-            "trait_type": r.get("trait_type"),
-            "n_phenotypes": stats.get("n_phenotypes"),
-            "n_samples": r.get("n_samples") or stats.get("n_samples_median"),
-            "has_credible_sets": bool(products.get("credible_sets")),
-            "has_summary_stats": bool(products.get("summary_stats")),
-            "n_coloc_partners": len(coloc.get("partners") or []) if isinstance(coloc, dict) else 0,
-            "description": r.get("description"),
-            "author": r.get("author"),
-            "publication_date": r.get("publication_date"),
-        })
+        flat.append(
+            {
+                "dataset_id": r.get("dataset_id"),
+                "resource": r.get("resource"),
+                "version": r.get("version"),
+                "data_type": r.get("data_type"),
+                "trait_type": r.get("trait_type"),
+                "n_phenotypes": stats.get("n_phenotypes"),
+                "n_samples": r.get("n_samples") or stats.get("n_samples_median"),
+                "has_credible_sets": bool(products.get("credible_sets")),
+                "has_summary_stats": bool(products.get("summary_stats")),
+                "n_coloc_partners": len(coloc.get("partners") or []) if isinstance(coloc, dict) else 0,
+                "description": r.get("description"),
+                "author": r.get("author"),
+                "publication_date": r.get("publication_date"),
+            }
+        )
     return pl.DataFrame(flat)
 
 
@@ -102,22 +104,30 @@ def list_resources() -> pl.DataFrame:
     for family, entries in payload.items():
         for e in entries or []:
             if isinstance(e, str):
-                flat.append({
-                    "family": family, "id": e, "resource": e,
-                    "gencode_version": None, "version_label": None,
-                    "author": None, "publication_date": None,
-                })
+                flat.append(
+                    {
+                        "family": family,
+                        "id": e,
+                        "resource": e,
+                        "gencode_version": None,
+                        "version_label": None,
+                        "author": None,
+                        "publication_date": None,
+                    }
+                )
                 continue
             meta = e.get("metadata") or {}
-            flat.append({
-                "family": family,
-                "id": e.get("id") or e.get("name"),
-                "resource": e.get("resource") or e.get("name"),
-                "gencode_version": e.get("gencode_version"),
-                "version_label": meta.get("version_label") or e.get("version"),
-                "author": meta.get("author"),
-                "publication_date": meta.get("publication_date"),
-            })
+            flat.append(
+                {
+                    "family": family,
+                    "id": e.get("id") or e.get("name"),
+                    "resource": e.get("resource") or e.get("name"),
+                    "gencode_version": e.get("gencode_version"),
+                    "version_label": meta.get("version_label") or e.get("version"),
+                    "author": meta.get("author"),
+                    "publication_date": meta.get("publication_date"),
+                }
+            )
     return pl.DataFrame(flat) if flat else pl.DataFrame()
 
 
@@ -164,10 +174,7 @@ def _():
     if datasets.is_empty():
         header = mo.md("`/datasets` returned no rows -- check `FINNGENIE_TOKEN` and `BASE`.")
     else:
-        header = mo.md(
-            f"### `/datasets` returned {len(datasets):,} rows "
-            f"with columns: `{', '.join(datasets.columns)}`"
-        )
+        header = mo.md(f"### `/datasets` returned {len(datasets):,} rows with columns: `{', '.join(datasets.columns)}`")
     header
     return (datasets,)
 
@@ -191,20 +198,18 @@ def _(datasets):
             agg_exprs = [pl.len().alias("n_datasets")]
             if "resource" in datasets.columns:
                 agg_exprs.append(pl.col("resource").n_unique().alias("n_resources"))
-            summary = (
-                datasets.group_by(group_col)
-                .agg(agg_exprs)
-                .sort("n_datasets", descending=True)
-            )
+            summary = datasets.group_by(group_col).agg(agg_exprs).sort("n_datasets", descending=True)
             note = (
                 "Maps the slide's category bands (GWAS / QTL / Exome / Expression / "
                 "Gene-disease / Chromatin peaks / Colocalization-only) onto whatever "
                 "category column the API actually exposes."
             )
-        category_view = mo.vstack([
-            mo.md(f"### Datasets grouped by type\n\n{note}"),
-            summary,
-        ])
+        category_view = mo.vstack(
+            [
+                mo.md(f"### Datasets grouped by type\n\n{note}"),
+                summary,
+            ]
+        )
     category_view
     return
 
@@ -214,11 +219,22 @@ def _(datasets):
     if datasets.is_empty():
         catalog_table = None
     else:
-        cols = [c for c in (
-            "dataset_id", "resource", "version", "data_type", "trait_type",
-            "n_phenotypes", "n_samples", "has_credible_sets", "has_summary_stats",
-            "n_coloc_partners",
-        ) if c in datasets.columns]
+        cols = [
+            c
+            for c in (
+                "dataset_id",
+                "resource",
+                "version",
+                "data_type",
+                "trait_type",
+                "n_phenotypes",
+                "n_samples",
+                "has_credible_sets",
+                "has_summary_stats",
+                "n_coloc_partners",
+            )
+            if c in datasets.columns
+        ]
         catalog_view = datasets.select(cols) if cols else datasets
         catalog_table = mo.ui.table(catalog_view, selection="single", page_size=20)
     catalog_table
@@ -229,16 +245,12 @@ def _(datasets):
 def _(catalog_table, datasets):
     if catalog_table is None or datasets.is_empty():
         selected_resource = None
-        selection_note = mo.md(
-            "_Select a row above to see per-phenotype metadata for that resource._"
-        )
+        selection_note = mo.md("_Select a row above to see per-phenotype metadata for that resource._")
     else:
         sel = catalog_table.value
         if sel is None or sel.is_empty():
             selected_resource = None
-            selection_note = mo.md(
-                "_Select a row above to see per-phenotype metadata for that resource._"
-            )
+            selection_note = mo.md("_Select a row above to see per-phenotype metadata for that resource._")
         else:
             row = sel.row(0, named=True)
             selected_resource = row.get("resource") or row.get("dataset_id")
@@ -292,24 +304,21 @@ def _():
 @app.cell
 def _(datasets):
     if datasets.is_empty() or "n_phenotypes" not in datasets.columns:
-        finngen_view = mo.md(
-            "_No `n_phenotypes` column on `/datasets` -- skip this cell or update the schema._"
-        )
+        finngen_view = mo.md("_No `n_phenotypes` column on `/datasets` -- skip this cell or update the schema._")
     else:
         if "resource" in datasets.columns:
-            finngen = datasets.filter(
-                pl.col("resource").str.contains("finngen", literal=False)
-            )
+            finngen = datasets.filter(pl.col("resource").str.contains("finngen", literal=False))
         else:
             finngen = datasets
         finngen = finngen.select(
-            [c for c in ("dataset_id", "resource", "version", "n_phenotypes", "n_samples")
-             if c in datasets.columns]
+            [c for c in ("dataset_id", "resource", "version", "n_phenotypes", "n_samples") if c in datasets.columns]
         ).sort("n_phenotypes", descending=True, nulls_last=True)
-        finngen_view = mo.vstack([
-            mo.md("### FinnGen-family phenotype counts"),
-            finngen,
-        ])
+        finngen_view = mo.vstack(
+            [
+                mo.md("### FinnGen-family phenotype counts"),
+                finngen,
+            ]
+        )
     finngen_view
     return
 

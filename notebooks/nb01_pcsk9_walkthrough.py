@@ -35,12 +35,8 @@ with app.setup:
 def client() -> httpx.Client:
     """Authenticated httpx client. Bearer token comes from .env at the repo root."""
     if not FINNGENIE_TOKEN:
-        raise RuntimeError(
-            "FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key."
-        )
-    return httpx.Client(
-        headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60
-    )
+        raise RuntimeError("FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key.")
+    return httpx.Client(headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60)
 
 
 @app.function
@@ -121,11 +117,7 @@ def _():
 
 @app.cell
 def _(cs):
-    by_type = (
-        cs.group_by("data_type")
-        .agg(pl.len().alias("n_rows"))
-        .sort("n_rows", descending=True)
-    )
+    by_type = cs.group_by("data_type").agg(pl.len().alias("n_rows")).sort("n_rows", descending=True)
     mo.vstack([mo.md("**Rows by data type:**"), by_type])
     return
 
@@ -189,9 +181,7 @@ def _(cs):
         .sort("mlog10p", descending=True)
         .head(1)
     )
-    variant_id = (
-        f"{lead['chr'][0]}:{lead['pos'][0]}:{lead['ref'][0]}:{lead['alt'][0]}"
-    )
+    variant_id = f"{lead['chr'][0]}:{lead['pos'][0]}:{lead['ref'][0]}:{lead['alt'][0]}"
     mo.md(
         f"**Lead missense variant:** `{variant_id}` "
         f"(PIP={lead['pip'][0]:.3f}, -log10p={lead['mlog10p'][0]:.0f}, "
@@ -203,10 +193,7 @@ def _(cs):
 @app.cell
 def _(variant_id):
     coloc = pl.DataFrame(fetch_json(f"/colocalization_by_variant/{variant_id}"))
-    mo.md(
-        f"### {len(coloc):,} colocalization pairs at `{variant_id}`"
-        " (across all dataset combinations)"
-    )
+    mo.md(f"### {len(coloc):,} colocalization pairs at `{variant_id}` (across all dataset combinations)")
     return (coloc,)
 
 
@@ -245,11 +232,7 @@ def _(coloc):
 def _(coloc, variant_id):
     pairs = (
         coloc.filter(pl.col("hit1_mlog10p").is_not_null())
-        .with_columns(
-            pl.concat_str([pl.col("trait1"), pl.lit(" / "), pl.col("trait2")]).alias(
-                "pair"
-            )
-        )
+        .with_columns(pl.concat_str([pl.col("trait1"), pl.lit(" / "), pl.col("trait2")]).alias("pair"))
         .sort("hit1_mlog10p", descending=True)
         .head(25)
     )

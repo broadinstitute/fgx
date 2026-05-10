@@ -187,15 +187,10 @@ def _(GENE, top):
         x="ci_lo:Q",
         x2="ci_hi:Q",
     )
-    zero = (
-        alt.Chart(pl.DataFrame({"x": [0.0]}))
-        .mark_rule(strokeDash=[4, 3], color="black")
-        .encode(x="x:Q")
-    )
+    zero = alt.Chart(pl.DataFrame({"x": [0.0]})).mark_rule(strokeDash=[4, 3], color="black").encode(x="x:Q")
     forest = (bars + points + zero).properties(
         height=500,
-        title=f"Forest plot: top deleterious exome variants in {GENE} "
-        f"(beta +/- 1.96 SE, sorted by effect size on x)",
+        title=f"Forest plot: top deleterious exome variants in {GENE} (beta +/- 1.96 SE, sorted by effect size on x)",
     )
     forest
     return

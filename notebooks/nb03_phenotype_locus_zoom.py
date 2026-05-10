@@ -82,9 +82,7 @@ def annotate_with_nearest_gene(variants: list[str]) -> pl.DataFrame:
                 }
             )
         except httpx.HTTPStatusError:
-            rows.append(
-                {"variant_id": v, "nearest_gene": None, "distance": None}
-            )
+            rows.append({"variant_id": v, "nearest_gene": None, "distance": None})
     return pl.DataFrame(rows)
 
 
@@ -193,9 +191,9 @@ def _(leads, top10_annotated):
         .sort("chr_rank")
     )
     # Cumulative offset = sum of all prior chromosome lengths.
-    offsets = chr_max.with_columns(
-        pl.col("chr_len").cum_sum().shift(1, fill_value=0).alias("offset")
-    ).select("chr_str", "chr_rank", "offset")
+    offsets = chr_max.with_columns(pl.col("chr_len").cum_sum().shift(1, fill_value=0).alias("offset")).select(
+        "chr_str", "chr_rank", "offset"
+    )
 
     manhattan_df = (
         leads_str.join(offsets, on="chr_str", how="left")
@@ -210,11 +208,7 @@ def _(leads, top10_annotated):
             on="variant_id",
             how="inner",
         )
-        .with_columns(
-            pl.coalesce([pl.col("nearest_gene"), pl.col("gene_most_severe")]).alias(
-                "label"
-            )
-        )
+        .with_columns(pl.coalesce([pl.col("nearest_gene"), pl.col("gene_most_severe")]).alias("label"))
         .filter(pl.col("label").is_not_null())
     )
     return label_df, manhattan_df
@@ -265,7 +259,7 @@ def _(top10):
     top_variant = top10["variant_id"][0]
     coloc = pl.DataFrame(fetch_json(f"/colocalization_by_variant/{top_variant}"))
     if len(coloc) == 0:
-        mo.md(f"### No colocalization pairs found at `{top_variant}`")
+        coloc_display = mo.md(f"### No colocalization pairs found at `{top_variant}`")
     else:
         top_coloc = (
             coloc.filter(pl.col("trait1") != pl.col("trait2"))
@@ -282,7 +276,7 @@ def _(top10):
                 "hit2_mlog10p",
             )
         )
-        mo.vstack(
+        coloc_display = mo.vstack(
             [
                 mo.md(
                     f"### Strongest coloc pairs at the top locus `{top_variant}`\n\n"
@@ -292,6 +286,7 @@ def _(top10):
                 top_coloc,
             ]
         )
+    coloc_display
     return
 
 

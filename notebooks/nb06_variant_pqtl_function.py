@@ -152,20 +152,33 @@ def _(pqtl):
     if pqtl.is_empty():
         per_protein_view = mo.md("No pQTL rows -- skipping table.")
     else:
-        cols = [c for c in (
-            "trait", "resource", "cs_id", "cs_size", "pip", "beta", "se", "mlog10p",
-        ) if c in pqtl.columns]
+        cols = [
+            c
+            for c in (
+                "trait",
+                "resource",
+                "cs_id",
+                "cs_size",
+                "pip",
+                "beta",
+                "se",
+                "mlog10p",
+            )
+            if c in pqtl.columns
+        ]
         ranked = pqtl.sort("pip", descending=True).select(cols)
-        per_protein_view = mo.vstack([
-            mo.md(
-                "**Per-protein view.** One row per credible set containing this variant. "
-                "`pip` is the variant's posterior inclusion probability *within* the credible "
-                "set -- high pip means the variant is plausibly the driver, low pip means it's "
-                "one of several variants tagging the signal. `beta` is the per-allele effect on "
-                "the protein's plasma level (alt allele relative to ref)."
-            ),
-            ranked,
-        ])
+        per_protein_view = mo.vstack(
+            [
+                mo.md(
+                    "**Per-protein view.** One row per credible set containing this variant. "
+                    "`pip` is the variant's posterior inclusion probability *within* the credible "
+                    "set -- high pip means the variant is plausibly the driver, low pip means it's "
+                    "one of several variants tagging the signal. `beta` is the per-allele effect on "
+                    "the protein's plasma level (alt allele relative to ref)."
+                ),
+                ranked,
+            ]
+        )
     per_protein_view
     return
 
@@ -179,11 +192,11 @@ def _(pqtl):
         summary = direction_consensus(pqtl)
         readout = {
             "all_negative": "**all proteins move down** with the alt allele -- consistent with "
-                            "loss of a positive regulator (or gain of an inhibitor).",
+            "loss of a positive regulator (or gain of an inhibitor).",
             "all_positive": "**all proteins move up** with the alt allele -- consistent with "
-                            "gain of a positive regulator (or loss of an inhibitor).",
+            "gain of a positive regulator (or loss of an inhibitor).",
             "mixed": "proteins move in **mixed directions** -- not a single shared mechanism, "
-                     "or the panel is heterogeneous.",
+            "or the panel is heterogeneous.",
             "empty": "no rows to summarize.",
         }[summary["verdict"]]
         consensus_view = mo.md(
@@ -201,11 +214,15 @@ def _(VARIANT, pqtl):
     if pqtl.is_empty():
         chart = mo.md("No data to plot.")
     else:
-        plot_df = pqtl.sort("pip", descending=True).head(20).with_columns(
-            pl.when(pl.col("beta") > 0)
-            .then(pl.lit("higher in alt"))
-            .otherwise(pl.lit("lower in alt"))
-            .alias("direction"),
+        plot_df = (
+            pqtl.sort("pip", descending=True)
+            .head(20)
+            .with_columns(
+                pl.when(pl.col("beta") > 0)
+                .then(pl.lit("higher in alt"))
+                .otherwise(pl.lit("lower in alt"))
+                .alias("direction"),
+            )
         )
         if "se" in plot_df.columns:
             plot_df = plot_df.with_columns(
@@ -227,16 +244,23 @@ def _(VARIANT, pqtl):
                     title="Effect direction",
                 ),
                 size=alt.Size("pip:Q", scale=alt.Scale(range=[60, 400]), title="PIP"),
-                tooltip=[c for c in (
-                    "trait", "resource", "cs_id", "cs_size", "pip", "beta", "se", "mlog10p",
-                ) if c in plot_df.columns],
+                tooltip=[
+                    c
+                    for c in (
+                        "trait",
+                        "resource",
+                        "cs_id",
+                        "cs_size",
+                        "pip",
+                        "beta",
+                        "se",
+                        "mlog10p",
+                    )
+                    if c in plot_df.columns
+                ],
             )
         )
-        zero = (
-            alt.Chart(pl.DataFrame({"x": [0.0]}))
-            .mark_rule(strokeDash=[4, 3], color="black")
-            .encode(x="x:Q")
-        )
+        zero = alt.Chart(pl.DataFrame({"x": [0.0]})).mark_rule(strokeDash=[4, 3], color="black").encode(x="x:Q")
         layers = [points, zero]
         if "ci_lo" in plot_df.columns:
             bars = (
