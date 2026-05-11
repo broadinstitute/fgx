@@ -4,14 +4,13 @@ An experiment in agent-driven scientific data exploration, built around [FinnGen
 
 fgx is a curated catalog of [marimo](https://marimo.io) notebooks for human-genetics analysis, plus a thin skill that lets an agent compose new analyses from them.
 Each notebook is both a runnable demonstration and a source of pure functions other notebooks can [import and reuse](https://docs.marimo.io/guides/reusing_functions/) directly.
-Given a new genetics question, the agent picks relevant notebooks, composes their functions into a new notebook, executes it in a live kernel, and hands back a self-contained, re-runnable result.
+Given a new human-genetics question, the agent picks relevant notebooks, composes their functions into a new notebook, executes it in a live kernel, and hands back a self-contained, re-runnable result.
 
 Unlike [jx](https://github.com/broadinstitute/jx), which queries local DuckDB files, fgx hits a REST API: FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
 
 ## The catalog
 
-Each notebook ships with a committed session snapshot under [`notebooks/__marimo__/session/`](notebooks/__marimo__/session/) so the molab preview renders cell outputs (plots, tables) without re-executing.
-Click a badge to view the rendered notebook in [molab](https://docs.marimo.io/guides/molab/), or fork it from there.
+Each notebook ships with a committed session snapshot under [`notebooks/__marimo__/session/`](notebooks/__marimo__/session/) so the molab preview renders cell outputs without re-executing.
 
 | Notebook | Role | Preview |
 |---|---|---|
@@ -22,6 +21,8 @@ Click a badge to view the rendered notebook in [molab](https://docs.marimo.io/gu
 | [`nb05_pign_cdg.py`](notebooks/nb05_pign_cdg.py) | Gene -> exome + curated `gene_disease` -> recessive-Mendelian companion to nb04 (PIGN-CDG / MCAHS1); imports `prepare_deleterious` from nb04 | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb05_pign_cdg.py) |
 | [`nb06_variant_pqtl_function.py`](notebooks/nb06_variant_pqtl_function.py) | Variant -> pQTL credible sets -> direction-of-effect across proteins (ADAM17 / IBD demo replay) | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb06_variant_pqtl_function.py) |
 | [`nb07_data_catalog.py`](notebooks/nb07_data_catalog.py) | Catalog introspection (`/datasets`, `/resources`, `/resource_metadata`) for "what's available?" | [![Open in molab](https://marimo.io/molab-shield.svg)](https://molab.marimo.io/github/broadinstitute/fgx/blob/main/notebooks/nb07_data_catalog.py) |
+
+The agent-facing catalog table in `.claude/skills/compose-notebook/SKILL.md` is the detailed contract: it lists reusable helpers, import patterns, and current gotchas.
 
 Related public catalogs of the same pattern: [jx](https://github.com/broadinstitute/jx) for JUMP Cell Painting, [prx](https://github.com/broadinstitute/prx) for PROSPECT chemical genetics, and [dmx](https://github.com/broadinstitute/dmx) for DepMap Breadbox.
 
