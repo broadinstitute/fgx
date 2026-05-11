@@ -1,10 +1,12 @@
 # fgx — FinnGen eXplore
 
-An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API (FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch -- 29 datasets at last count).
+An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API — FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
 
-Same shape as [jx](https://github.com/broadinstitute/jx) -- a catalog of marimo notebooks plus thin operational skills -- with one difference: jx queries local DuckDB files, fgx hits a REST API.
-FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default.
-That collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache -- nb01's first cell shows the bare-`curl` equivalent of every API call below it.
+fgx is a curated catalog of [marimo](https://marimo.io) notebooks for human-genetics analysis, plus a thin skill that lets an agent compose new analyses from them.
+Each notebook is both a runnable demonstration and a source of pure functions other notebooks can [import and reuse](https://docs.marimo.io/guides/reusing_functions/) directly.
+Given a new genetics question, the agent picks relevant notebooks, composes their functions into a new notebook, executes it in a live kernel, and hands back a self-contained, re-runnable result.
+
+Unlike [jx](https://github.com/broadinstitute/jx), which queries local DuckDB files, fgx hits a REST API: FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
 
 ## The catalog
 
