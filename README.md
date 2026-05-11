@@ -1,8 +1,6 @@
-# fgx - FinnGen eXplore
+# fgx — FinnGen eXplore
 
 An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API (FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch -- 29 datasets at last count).
-
-## The hypothesis
 
 Same shape as [jx](https://github.com/broadinstitute/jx) -- a catalog of marimo notebooks plus thin operational skills -- with one difference: jx queries local DuckDB files, fgx hits a REST API.
 FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default.
@@ -11,6 +9,8 @@ That collapses the data-access layer to `httpx.get`, so there is no Python SDK, 
 
 A Python SDK would be lighter in syntax (`finngenie.credible_sets_by_gene("PCSK9")` vs three lines of `httpx`), but it adds a packaging layer that has to keep up with the API.
 The TSV-by-default response means [`duckdb`](https://duckdb.org)'s `read_csv_auto` over HTTPS turns "API access" into "SQL access" without an SDK -- we accept the extra `httpx.get` lines per notebook in exchange for not maintaining a dependency.
+
+## The catalog
 
 Each notebook ships with a committed session snapshot under [`notebooks/__marimo__/session/`](notebooks/__marimo__/session/) so the molab preview renders cell outputs (plots, tables) without re-executing.
 Click a badge to view the rendered notebook in [molab](https://docs.marimo.io/guides/molab/), or fork it from there.
@@ -65,12 +65,11 @@ That's the whole repo.
 `getting-started` walks a fresh clone to a running marimo kernel; `compose-notebook` covers picking the right path (edit-in-place vs copy-fork) and the right endpoint when the user asks for a new genetics analysis.
 Both skills are intentionally thin -- as the catalog grows and cross-file function reuse appears, `compose-notebook` will need to grow into a per-module catalog table the way [jx's compose-notebook](https://github.com/broadinstitute/jx/blob/main/.claude/skills/compose-notebook/SKILL.md) does.
 
-## License
-
-BSD 3-Clause.
-See [LICENSE](LICENSE).
-
 ## Citation
 
 If fgx is useful in your work, please cite both fgx and the underlying FinnGenie service.
 CITATION.cff TBD.
+
+## License
+
+BSD 3-Clause — see [LICENSE](LICENSE).
