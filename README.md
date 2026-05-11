@@ -6,7 +6,7 @@ fgx is a curated catalog of [marimo](https://marimo.io) notebooks for human-gene
 Each notebook is both a runnable demonstration and a source of pure functions other notebooks can [import and reuse](https://docs.marimo.io/guides/reusing_functions/) directly.
 Given a new human-genetics question, the agent picks relevant notebooks, composes their functions into a new notebook, executes it in a live kernel, and hands back a self-contained, re-runnable result.
 
-Unlike [jx](https://github.com/broadinstitute/jx), which queries local DuckDB files, fgx hits a REST API: FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
+FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
 
 ## The catalog
 
