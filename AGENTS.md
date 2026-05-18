@@ -7,6 +7,17 @@ Planning and cross-instance coordination live in the primary [`jx`](https://gith
 `README.md` is the human entry point.
 The skills under `.claude/skills/` are the operational entry points: `getting-started` for first-run setup and `compose-notebook` for adding or composing analyses.
 
+## Launching notebooks
+
+Always use `--sandbox` so the PEP 723 inline metadata is provisioned:
+
+```bash
+uvx marimo edit --sandbox notebooks/nbNN_*.py
+```
+
+Do not improvise alternative launch commands.
+`--sandbox` is what makes `uvx marimo` read each notebook's `/// script` dependency block; without it every notebook fails with `ModuleNotFoundError`.
+
 ## Validation Rule
 
 After composing or editing any notebook in `notebooks/`, launch it in a marimo sandbox kernel and run all cells before reporting the task complete.
