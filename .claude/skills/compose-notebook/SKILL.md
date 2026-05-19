@@ -29,6 +29,7 @@ Future explorations are nb05+ -- they import from this core and are not expected
 | `nb05_pign_cdg` | -- | Gene (rare-variant arm, recessive Mendelian) -> `exome_results_by_gene` -> `gene_disease` -> forest plot + curated cross-check. Same shape as nb04, different story: where PCSK9's two arms *converge* on lipids, PIGN's *diverge* -- gencc/monarch converge on MCAHS1 ("Definitive" by ClinGen and G2P, autosomal recessive) while genebass surfaces corneal biomechanics in adult heterozygotes. UKB doesn't enroll affected MCAHS1 probands, so the rare-variant arm shows what one PIGN dose perturbs in carriers, not the recessive disease itself. First concrete demo of the cross-notebook composition pattern -- imports `prepare_deleterious` from nb04 rather than duplicating the polars chain. |
 | `nb06_variant_pqtl_function` | `pqtl_credible_sets(variant)`, `direction_consensus(df, beta_col)` | Variant -> `credible_sets_by_variant` filtered to `data_type == "pQTL"` -> per-protein PIP/beta panel + direction-of-effect summary. Hero replay of the FinnGenie demo (Karjalainen, 2026-05-05): `chr2:9521321:A:G` in ADAM17 -> 4 plasma proteins all with negative beta -> consistent loss-of-sheddase mechanism. Distinct from nb01 (gene-first) and nb02 (full PheWAS) by being variant-first AND pQTL-only AND by surfacing sign-of-effect across the panel rather than top-mlog10p across all data types. |
 | `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the FinnGenie demo. |
+| `nb08_genetics_primer` | -- | Educational walkthrough: LDLR as a case study through GWAS, fine-mapping, colocalization, exome, eQTL/pQTL, and gene-disease curation. Imports `prepare_deleterious` from nb04. Teaches genetics concepts by showing what a clean signal looks like for a well-understood gene. |
 
 When the user's question matches a row's "demonstrates" column with only a parameter changed, see Path A below.
 When it matches the *shape* of a row but tells a different story, or when it doesn't match any row, compose -- see Path C.
@@ -124,7 +125,25 @@ def _():
     return
 
 
-# analysis cells: call fetch_tsv / fetch_json directly, no boilerplate.
+# Pattern for cells that combine narrative with data output:
+# WRONG - intro markdown is silently dropped:
+#   mo.md("## Section title\n\nExplanation...")
+#   result = fetch_tsv(...)
+#   mo.vstack([mo.md("### Subtitle"), result])  # only this renders
+#
+# RIGHT - everything in one mo.vstack:
+#   result = fetch_tsv(...)
+#   mo.vstack([
+#       mo.md("## Section title\n\nExplanation..."),
+#       mo.md("### Subtitle"),
+#       result,
+#   ])
+#
+# Also RIGHT - split into separate cells:
+#   Cell 1: mo.md("## Section title\n\nExplanation...")
+#   Cell 2: result = fetch_tsv(...); mo.vstack([mo.md("### Subtitle"), result])
+
+# Use unique variable names across cells (trait_chart, coloc_chart, not chart).
 
 
 if __name__ == "__main__":
@@ -161,6 +180,11 @@ It then becomes importable by future composers via the same `from nbNN_<topic> i
    This turns each notebook into a launchpad rather than a dead end.
 6. **Plot when it adds signal.** Altair is in the PEP 723 deps; a one-cell chart is often more informative than a 20-row table head.
 7. **Don't fabricate.** If a helper doesn't exist or an endpoint returns an empty result, say so and ask the user how to proceed -- don't invent a fallback path.
+8. **Verify the rendered output via HTML export.** After the notebook runs end-to-end, export it as static HTML and inspect the rendered accessibility tree to confirm every section's narrative text, tables, and charts actually appear. The command is:
+   ```bash
+   env -u PYTHONPATH uvx marimo export html --sandbox notebooks/nbNN_<topic>.py -o /tmp/nbNN_<topic>.html
+   ```
+   Then open the HTML in agent-browser and run `agent-browser snapshot` to get the full accessibility tree. Walk the tree and confirm: (a) every section heading appears, (b) every `mo.md()` intro is visible (not silently dropped by a subsequent expression), (c) every table has data rows, (d) every chart renders as a "Vega visualization" node. This catches the silent-drop bug from the cell-output gotcha above, which is invisible in the live editor (where the user scrolls past) but glaring in the exported HTML (where sections are simply missing). Do this before declaring the notebook done.
 
 ## Generate a session snapshot for the molab preview
 
@@ -195,8 +219,10 @@ Same principle for tooltips: a `tooltip=[...]` list on a many-row chart is dead 
 
 ## Gotchas
 
-The first three are tooling traps that cost real session time when missed; the next three are API papercuts; the rest are biology / endpoint-semantics nuances.
+The first five are marimo cell-authoring traps that silently produce wrong output; the next two are tooling traps; then API papercuts; then biology / endpoint-semantics nuances.
 
+- **Only the last expression before `return` renders as cell output.** If a cell has `mo.md(intro_text)` on line 1, then `mo.vstack([header, table])` on line 10, the intro markdown is evaluated but its result is silently discarded -- the reader never sees it. The fix: wrap everything in a single `mo.vstack([mo.md(intro_text), header, table])` so both the explanation and the data appear together, or split the intro into its own cell. This is the single most common composition bug. Every cell that mixes narrative markdown with a data output must use `mo.vstack()` to combine them into one rendered element.
+- **Each top-level variable name must be unique across all cells.** Marimo tracks every name assigned in a cell; if two cells both define `chart = alt.Chart(...)`, the second cell errors with `MultipleDefinitionError` even though neither cell exports `chart` via `return`. The fix: give each chart a descriptive name scoped to its section -- `trait_chart`, `coloc_chart`, `eqtl_chart`, `forest`. This applies to any commonly reused name: `df`, `top`, `summary`, `chart`, `table`. Underscore-prefixed names (`_chart`) are cell-local and don't collide, but can't be referenced from other cells.
 - **Validate via marimo-pair against a live kernel, never via a standalone `uv run python3` script.** A parallel script can't see `@app.function` mangling, can't catch auto-formatter rewrites, and gives you a false green that costs more than no signal.
   If `execute-code.sh` reports `No active sessions`, the fix is to ask the user to open the browser URL -- not to bypass.
 - **Polars-only; never call `.to_pandas()`.** Altair 6+ accepts polars DataFrames directly via narwhals (`alt.Chart(df_polars)` works -- no conversion).

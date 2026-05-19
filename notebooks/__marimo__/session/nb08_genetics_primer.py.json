@@ -1,0 +1,308 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.3",
+    "script_metadata_hash": "8c7136a5b233f3955795dfa669fc4c72"
+  },
+  "cells": [
+    {
+      "id": "setup",
+      "code_hash": "e01db14fbd8ad0d75005e094a1940fdf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "a1d40a749243fd2cc0337f6e85eb7be2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"nb08-how-human-genetics-works\">nb08: How human genetics works</h1>\n<span class=\"paragraph\">This notebook walks through the core ideas behind modern human genetics using one gene\nas a running example. Every concept is grounded in real data from FinnGen and collaborating\nbiobanks, queried live through the FinnGenie API.</span>\n<span class=\"paragraph\">The approach is bottom-up: start with a gene, ask what the genome tells us about it, and\nbuild up the layers of evidence that connect a stretch of DNA to a disease and a drug.\nBy the end, you'll have seen:</span>\n<ul>\n<li><strong>GWAS</strong> - scanning genomes for statistical associations between common variants and traits</li>\n<li><strong>Fine-mapping</strong> - resolving which variant at a locus is likely causal</li>\n<li><strong>Credible sets</strong> - the probabilistic framework behind fine-mapping</li>\n<li><strong>Colocalization</strong> - testing whether two traits share the same causal variant</li>\n<li><strong>Rare-variant evidence</strong> - large-effect coding mutations that complement GWAS</li>\n<li><strong>QTL layers</strong> - connecting variants to gene expression and protein levels</li>\n<li><strong>Gene-disease curation</strong> - expert clinical classifications</li>\n</ul>\n<span class=\"paragraph\">Each section is one or two API calls plus a chart. The concepts generalize to any gene;\nLDLR is chosen because its biology is clear, its data is rich, and its story ends with\none of the most prescribed drug classes in medicine.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "1460239e3a0f3a5fe3eba89e51081eee",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-the-gene-ldlr\">1. The gene: LDLR</h2>\n<span class=\"paragraph\">LDLR encodes the low-density lipoprotein receptor, a cell-surface protein that pulls\nLDL cholesterol out of the bloodstream and into cells for degradation. When LDLR works\nwell, circulating LDL stays low. When it doesn't - through inherited mutations or reduced\nexpression - LDL accumulates in the blood, deposits in artery walls, and drives\natherosclerosis.</span>\n<span class=\"paragraph\">This is not a hypothesis. Familial hypercholesterolemia (FH), caused by loss-of-function\nmutations in LDLR, was one of the first genetic diseases understood at the molecular level\n(Goldstein and Brown, Nobel Prize 1985). Statins - the most prescribed drug class for\ncardiovascular prevention - work by upregulating LDLR expression. The gene is a textbook\ncase where genetics led directly to therapy.</span>\n<span class=\"paragraph\">Let's see what population-scale genomic data adds to that picture.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "210c08dde00cf47932b5f5ea59b550ea",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Target gene:</strong> <code>LDLR</code> (chromosome 19, ~44 kb)</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "028fc1360fdeec084ef7d8cd84f4f193",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-what-do-experts-already-know\">2. What do experts already know?</h2>\n<span class=\"paragraph\">Before looking at statistical associations, check what clinical expert panels have\ncurated about this gene. The <code>gene_disease</code> endpoint pulls classifications from\nGenCC (Gene Curation Coalition) and Monarch - organizations that formally evaluate\nwhether a gene causes a disease based on published evidence, family studies, and\nfunctional data. Classifications range from \"Definitive\" (overwhelming evidence)\nto \"Limited\" (suggestive but incomplete).</span></span><marimo-ui-element object-id='bkHC-0' random-id='5b9eee8c-78ac-5050-074a-e29c0bf8fb53'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;resource&#92;&quot;:&#92;&quot;gencc&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;hypercholesterolemia, familial, 1&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;Strong&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;Autosomal dominant&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;Genomics England PanelApp&#92;&quot;},{&#92;&quot;resource&#92;&quot;:&#92;&quot;gencc&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;hypercholesterolemia, familial, 1&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;Definitive&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;Autosomal dominant&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;Laboratory for Molecular Medicine&#92;&quot;},{&#92;&quot;resource&#92;&quot;:&#92;&quot;gencc&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;homozygous familial hypercholesterolemia&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;Supportive&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;Autosomal recessive&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;Orphanet&#92;&quot;},{&#92;&quot;resource&#92;&quot;:&#92;&quot;gencc&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;hypercholesterolemia, familial, 1&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;Strong&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;Autosomal dominant&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;Labcorp Genetics (formerly Invitae)&#92;&quot;},{&#92;&quot;resource&#92;&quot;:&#92;&quot;gencc&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;hypercholesterolemia, familial, 1&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;Definitive&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;Semidominant&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;ClinGen&#92;&quot;},{&#92;&quot;resource&#92;&quot;:&#92;&quot;monarch&#92;&quot;,&#92;&quot;disease_title&#92;&quot;:&#92;&quot;hypercholesterolemia, familial, 1&#92;&quot;,&#92;&quot;classification&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;mode_of_inheritance&#92;&quot;:&#92;&quot;NA&#92;&quot;,&#92;&quot;submitter&#92;&quot;:&#92;&quot;infores:omim&#92;&quot;}]&quot;' data-total-rows='6' data-total-columns='5' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;disease_title&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;classification&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;mode_of_inheritance&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;submitter&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "7c38a2b3fc3e6578d896427e0d2f55c8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">ClinGen rates LDLR as <strong>\"Definitive\"</strong> for familial hypercholesterolemia with\nautosomal dominant inheritance. Multiple independent panels agree. The genetics\ncommunity considers this settled.</span>\n<span class=\"paragraph\">The rest of this notebook shows what population-scale data looks like when the\nanswer is already known. That's the point: by seeing what a clean signal looks like\nfor a well-understood gene, you'll know what to look for in genes where the answer\nisn't settled yet.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "341135598f21da1d7c111290647ba82f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-gwas-scanning-for-common-variant-associations\">3. GWAS: scanning for common-variant associations</h2>\n<span class=\"paragraph\">A genome-wide association study (GWAS) tests hundreds of thousands of genetic variants\nacross hundreds of thousands of people, asking: does carrying a particular allele\ncorrelate with a measurable trait? Each test produces a p-value. With ~10 million\nvariants tested, only signals surviving a stringent threshold (p &lt; 5e-8, or\n-log10(p) &gt; 7.3) count as genome-wide significant.</span>\n<span class=\"paragraph\">FinnGenie stores the results of fine-mapped GWAS as <strong>credible sets</strong> - groups of\nvariants that, together, have high probability of containing the true causal variant.</span></span><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"6130-credible-set-rows-for-ldlr-across-all-data-types\">6,130 credible-set rows for <strong>LDLR</strong> across all data types</h3></span><marimo-ui-element object-id='PKri-0' random-id='15ce0ad1-1e90-1d71-4024-8fc6fbc8529f'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;data_type&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:4877},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;caQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:607},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;eQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:601},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;sQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:27},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:18}]&quot;' data-total-rows='5' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_rows&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "edbd5aaa16d750992d232a46332afcb2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Most rows are GWAS - common-variant associations with disease and lab-measured traits.\nBut notice the other data types: <strong>eQTL</strong> (variants affecting gene expression),\n<strong>pQTL</strong> (variants affecting protein levels), <strong>caQTL</strong> (chromatin accessibility),\n<strong>sQTL</strong> (splicing). These are the molecular layers that explain <em>how</em> a variant\naffects biology, not just <em>whether</em> it correlates with a phenotype. We will come back\nto them.</span>\n<h3 id=\"which-traits-light-up\">Which traits light up?</h3>\n<span class=\"paragraph\">Filter to GWAS rows from FinnGen resources and rank traits by their strongest signal.</span></span><marimo-ui-element object-id='Xref-0' random-id='8fa1fda8-b8c8-faf7-89c8-f1a992016572'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////qAAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAgAAADwAAAAEAAAAuP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQACwAAAG1heF9tbG9nMTBwAOz///8sAAAAIAAAABgAAAABGAAAEAASAAQAEAARAAgAAAAMAAAAAAD8////BAAEAAUAAAB0cmFpdAAAAP/////YAAAABAAAAOz///8ABAAAAAAAABQAAAAEAAMADAATABAAEgAMAAQA5v///w8AAAAAAAAAhAAAACgAAAAUAAAAAAAOABgABAAMABAAAAAUAAEAAAABAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAQAAAAAAAIACAAAAAAAAgAMAAAAAAAAAAAAAAAAAAIADAAAAAAAAeAAAAAAAAAAAAAAAAgAAAA8AAAAAAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAAAAAABwAAADMwMTk5MDAAAAAAAAcAAAAzMDAxMzA4AAAAAAA5AAAARGlzbwAAAABwAQAABwAAADMwMTQ3OTEAAAAAAAkAAABSWF9TVEFUSU4AAAAaAAAAUHVyZQAAAABrAAAAEwAAAE1ldGEAAAAAWAAAAAsAAABFNF9MSVBPUFJPVAAoAAAASXNjaAAAAADCAQAAGAAAAENvcm8AAAAAWAEAAA0AAABBVENfAAAAALYAAAAdAAAATXlvYwAAAAA7AAAAFQAAAE1peGUAAAAAAAAAAA8AAABBbmdpAAAAAIUAAAAqAAAAQ29ybwAAAADmAAAAAAAAAAAAAAAAAAAAAAAAAE1peGVkX2h5cGVybGlwaWRhZW1pYU90aGVyX2FydGhyb3Npc1B1cmVfaHlwZXJnbHljZXJpZGFlbWlhTXlvY2FyZGlhbF9pbmZhcmN0aW9uLF9zdHJpY3RNZXRhYm9saWNfZGlzb3JkZXJzUHVyZV9oeXBlcmNob2xlc3Rlcm9sYWVtaWFBbmdpbmFfcGVjdG9yaXNNYWpvcl9jb3JvbmFyeV9oZWFydF9kaXNlYXNlX2V2ZW50QVRDX0MxMEFBX0lSTkFUQ19OT05fSjAxX1RPVEFMX0lSTkU0X0hZUEVSTElQTkFTQ29yb25hcnlfcmV2YXNjdWxhcml6YXRpb25fKEFOR0lPX29yX0NBQkcpRGlzb3JkZXJfb2ZfbGlwb3Byb3RlaW5fbWV0YWJvbGlzbSxfdW5zcGVjaWZpZWRQZXJpcGhlcmFsX2FydGVyeV9kaXNlYXNlQ29yb25hcnlfYXRoZXJvc2NsZXJvc2lzRGlzb3JkZXJzX29mX2xpcG9wcm90ZWluX21ldGFib2xpc21fYW5kX290aGVyX2xpcGlkYWVtaWFzVHJhbnNpZW50X2lzY2hlbWljX2F0dGFja0lzY2hhZW1pY19oZWFydF9kaXNlYXNlLF93aWRlX2RlZmluaXRpb25Bb3J0aWNfYW5ldXJ5c21BdGhlcm9zY2xlcm9zaXMsX2V4Y2x1ZGluZ19jZXJlYnJhbF9hbmRfY29yb25hcnlfc2NsZXJvc2lzQ2FycGFsX3R1bm5lbF9zeW5kcm9tZVVuc3RhYmxlX2FuZ2luYV9wZWN0b3Jpc0FiZG9taW5hbF9hb3J0aWNfYW5ldXJ5c21fKEFBQSlmZmZmZkCCQLgehetRdIBA9ihcj8JRd0BSuB6F60l3QKkT0ETYrHRASOF6FK6XakCPwvUoXL9fQEtZhjjWlVdAZmZmZmZGUUDsUbgehTtRQGUZ4lgXv0dA4XoUrkeBRUAzMzMzM3NFQFK4HoXrkUBAuB6F61F4QEAAAAAAAAAAAP////8AAAAABAAAAOz///9AAAAAOAAAABQAAAAEAAAADAASABAABAAIAAwAAQAAALgAAAAAAAAA4AAAAAAAAAAABAAAAAAAAAAAAAAAAAAA+P///wwAAAAIAAgAAAAEAAIAAAA8AAAABAAAALj///8gAAAAEAAAAAgAAAABAwAAAAAAAPr///8CAAYABgAEAAsAAABtYXhfbWxvZzEwcADs////LAAAACAAAAAYAAAAARgAABAAEgAEABAAEQAIAAAADAAAAAAA/P///wQABAAFAAAAdHJhaXQA0gAAAEFSUk9XMQ==&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;bar&quot;},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;max_mlog10p&quot;,&quot;title&quot;:&quot;-log10(p)&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;trait&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;title&quot;:null,&quot;type&quot;:&quot;nominal&quot;}},&quot;height&quot;:380,&quot;title&quot;:&quot;Top FinnGen traits associated near LDLR&quot;,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "92a5465ea4567550fc6252c5266c7996",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Read that chart as a causal chain made visible by genetics:</span>\n<ol>\n<li><strong>Lipid lab values</strong> (3019900, 3001308, nonHDL) - the direct biochemical consequence\n   of LDLR function. These are the strongest signals because they're closest to the gene's\n   molecular role.</li>\n<li><strong>Diagnostic codes</strong> (Disorders of lipoprotein metabolism, Pure hypercholesterolaemia,\n   E4_LIPOPROT) - clinical recognition of the same biology, one step removed.</li>\n<li><strong>Drug prescriptions</strong> (RX_STATIN, ATC_C10AA) - statins prescribed <em>because</em> of high\n   cholesterol. The drug signal follows the diagnosis signal.</li>\n<li><strong>Disease endpoints</strong> (Ischaemic heart disease, Coronary atherosclerosis, Myocardial\n   infarction, Angina) - the downstream consequences of decades of elevated LDL.</li>\n</ol>\n<span class=\"paragraph\">This is the power of biobank-scale genetics: the entire pathway from molecule to disease\nto treatment is encoded in the association statistics of one gene.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "b876bafd8274cc173ad201f68443fda8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-fine-mapping-which-variant-is-causal\">4. Fine-mapping: which variant is causal?</h2>\n<span class=\"paragraph\">GWAS identifies a <em>region</em> where a signal lives, but neighboring variants are correlated\n(in linkage disequilibrium, or LD) and all show association. Fine-mapping uses statistical\nmodels to assign each variant a <strong>posterior inclusion probability (PIP)</strong> - the probability\nthat <em>this</em> variant, not its neighbors, is the true causal one.</span>\n<span class=\"paragraph\">A <strong>credible set</strong> is the smallest group of variants whose PIPs sum to a target (typically\n95%). A credible set of size 1 with PIP near 1.0 means fine-mapping has pinpointed the\ncausal variant with high confidence. A credible set of size 50 means the signal is real\nbut the causal variant is ambiguous.</span>\n<h3 id=\"highest-pip-gwas-variants-near-ldlr\">Highest-PIP GWAS variants near LDLR</h3></span><marimo-ui-element object-id='BYtC-0' random-id='892eb036-e3bf-5605-7b55-378979f69a9e'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90024626&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11091630,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:11.2734,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90691894&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095299,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:301.3167,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90692815&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095299,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:299.6535,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90692973&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095299,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:286.3322,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90002412&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095364,&#92;&quot;ref&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:26.1115,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90239670&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095364,&#92;&quot;ref&#92;&quot;:&#92;&quot;C&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:35.0095,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90692027&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095854,&#92;&quot;ref&#92;&quot;:&#92;&quot;T&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:7.8238,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90445842&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095899,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:9.2993,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90445844&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095899,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:46.9158,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;},{&#92;&quot;trait&#92;&quot;:&#92;&quot;GCST90445860&#92;&quot;,&#92;&quot;resource&#92;&quot;:&#92;&quot;open_targets&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:11095899,&#92;&quot;ref&#92;&quot;:&#92;&quot;G&#92;&quot;,&#92;&quot;alt&#92;&quot;:&#92;&quot;A&#92;&quot;,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;mlog10p&#92;&quot;:23.3871,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;}]&quot;' data-total-rows='15' data-total-columns='10' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;trait&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;resource&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;ref&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;alt&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;cs_size&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "af3e7a168197a6d5d2f21d3253de6445",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Variants with PIP close to 1.0 in small credible sets are the ones fine-mapping is most\nconfident about. Notice the <code>most_severe</code> column: it tells you the predicted consequence\nof each variant on the protein (missense, intron_variant, etc.). An intronic variant with\nhigh PIP might affect gene regulation rather than protein structure - that's where the\nQTL layers (eQTL, caQTL) become essential for interpretation.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "577dbdeddbcfba8374b3f2c16ce58743",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-from-variant-to-gene-closing-the-loop\">5. From variant to gene: closing the loop</h2>\n<span class=\"paragraph\">A GWAS hit is a genomic coordinate, not a gene name. The variant with the strongest\nsignal might sit between two genes, inside an intron, or in a regulatory element far\nfrom its target. Assigning the right gene is one of the hardest problems in genetics.</span>\n<span class=\"paragraph\">The simplest heuristic: which protein-coding gene is nearest?</span></span><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"nearest-genes-to-lead-variant-1911097101ct\">Nearest genes to lead variant <code>19:11097101:C:T</code></h3></span><marimo-ui-element object-id='Kclp-0' random-id='dd56d9eb-ec6c-be6e-38b5-9f1f686a6ba5'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;LDLR&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;,&#92;&quot;distance&#92;&quot;:0,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;low density lipoprotein receptor&#92;&quot;},{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;SMARCA4&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;,&#92;&quot;distance&#92;&quot;:17675,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;SWI/SNF related BAF chromatin remodeling complex subunit ATPase 4&#92;&quot;},{&#92;&quot;gene_name&#92;&quot;:&#92;&quot;SPC24&#92;&quot;,&#92;&quot;gene_type&#92;&quot;:&#92;&quot;protein_coding&#92;&quot;,&#92;&quot;distance&#92;&quot;:34419,&#92;&quot;hgnc_name&#92;&quot;:&#92;&quot;SPC24 component of NDC80 kinetochore complex&#92;&quot;}]&quot;' data-total-rows='3' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;gene_name&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;distance&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;hgnc_name&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "9821c08d453ac92a4412b6431a03d0d5",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Distance zero means the variant falls <em>inside</em> the gene body. For LDLR, the answer is\nstraightforward: the top variant is in the gene itself. But for many GWAS loci, the\nnearest gene isn't the causal one - the signal may act through a distal enhancer. That's\nwhy nearest-gene assignment is a starting point, not a conclusion, and why the QTL and\ncolocalization layers below add real information.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "e60cb7d9e3ce9ee18f58690309443956",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"6-colocalization-do-two-traits-share-a-causal-variant\">6. Colocalization: do two traits share a causal variant?</h2>\n<span class=\"paragraph\">When two traits both show a GWAS signal at the same locus, are they driven by the\n<em>same</em> causal variant, or by two different variants that happen to be nearby?\nColocalization tests answer this by comparing the fine-mapped credible sets.</span>\n<span class=\"paragraph\">High colocalization (PP.H4 &gt; 0.8, or high CLPP) means the two traits likely share a\nmechanism at this locus. This is how genetics connects risk factors to disease outcomes:\nif LDL cholesterol and coronary heart disease colocalize at LDLR, the shared variant\nprovides Mendelian randomization-style evidence that LDL <em>causes</em> heart disease, not\njust that the two are correlated.</span></span><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"128-colocalization-pairs-at-1911097101ct\">128 colocalization pairs at <code>19:11097101:C:T</code></h3></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "69e0b2707a93af068f00ab18ae3a389a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "8d87c2d5320abd07141d7d99958a8494",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">The colocalization results read like the causal chain from section 3, but now with\nstatistical backing: lipid lab values colocalize with statin prescriptions, which\ncolocalize with cardiovascular endpoints. The shared causal variant at LDLR ties\nthem together mechanistically, not just statistically.</span>\n<span class=\"paragraph\">When you see eQTL traits in the coloc list, that's especially informative: it means\nthe same variant that drives disease risk <em>also</em> changes LDLR gene expression, pointing\nto a regulatory mechanism rather than a protein-coding change.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "d9714845593791b457b8ae78b1b80299",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"7-rare-variants-the-other-end-of-the-frequency-spectrum\">7. Rare variants: the other end of the frequency spectrum</h2>\n<span class=\"paragraph\">GWAS finds common variants (carried by &gt;1% of people) with small effects. But the same\ngene can also harbor rare variants (carried by &lt;0.1%) with much larger effects.</span>\n<span class=\"paragraph\">Exome sequencing catalogs coding variants - the ones that change the protein sequence.\nThese come in flavors:</span>\n<ul>\n<li><strong>pLoF</strong> (predicted loss of function) - stop-gains, frameshifts, splice donors -\n  variants expected to break the protein entirely</li>\n<li><strong>missense</strong> - single amino acid changes that may or may not impair function</li>\n<li><strong>synonymous</strong> - no protein change; useful as negative controls</li>\n</ul>\n<span class=\"paragraph\">For LDLR, rare pLoF variants cause familial hypercholesterolemia with large effect sizes.</span></span><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"516-exome-variant-trait-rows-for-ldlr\">516 exome variant-trait rows for <strong>LDLR</strong></h3></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "1f9a5b0d741f82071f92eeb6cbc1d6d6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='ROlb-0' random-id='d389685f-38e4-6033-08ce-e2a653b34110'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;layer&quot;:[{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////4AAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAwAAAGgAAAA0AAAABAAAAJD///8cAAAAEAAAAAgAAAABAwAAAAAAAM7///8CAAAABQAAAGNpX2hpAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABQAAAGNpX2xvAAAA7P///ywAAAAgAAAAGAAAAAEYAAAQABIABAAQABEACAAAAAwAAAAAAPz///8EAAQADQAAAHRyYWl0X3ZhcmlhbnQAAAAAAAAA/////wgBAAAEAAAA7P///0AHAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////FAAAAAAAAACkAAAAKAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAQAAAAEAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAQAAAAAAAEABAAAAAAAATgQAAAAAAADABQAAAAAAAAAAAAAAAAAAwAUAAAAAAACgAAAAAAAAAIAGAAAAAAAAAAAAAAAAAACABgAAAAAAAKAAAAAAAAAAAAAAAAMAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAABJAAAAY29udAAAAAAAAAAASAAAAGNvbnQAAAAASQAAADsAAABpY2RfAAAAAJEAAAA0AAAAY29udAAAAADMAAAANQAAAGNhdGUAAAAAAAEAADsAAABpY2RfAAAAADUBAAA1AAAAY2F0ZQAAAABwAQAAOwAAAGljZF8AAAAApQEAADsAAABpY2RfAAAAAOABAAA1AAAAY2F0ZQAAAAAbAgAANQAAAGNhdGUAAAAAUAIAADAAAABjb250AAAAAIUCAAAwAAAAY29udAAAAAC1AgAAMAAAAGNvbnQAAAAA5QIAADsAAABpY2RfAAAAABUDAAA0AAAAY29udAAAAABQAwAANAAAAGNvbnQAAAAAhAMAADEAAABjYXRlAAAAALgDAAA0AAAAY29udAAAAADpAwAAMQAAAGNhdGUAAAAAHQQAAGNvbnRpbnVvdXNfSU9QX0Nvcm5lYWxfcmlnaHRfY3VzdG9tX2JvdGhfc2V4ZXNfX2N1c3RvbSAgKDE5OjExMTAyNzg3Okc6Qyljb250aW51b3VzX0lPUF9Db3JuZWFsX2xlZnRfY3VzdG9tX2JvdGhfc2V4ZXNfX2N1c3RvbSAgKDE5OjExMTA1NDA3OkM6QSlpY2RfZmlyc3Rfb2NjdXJyZW5jZV8xMzA4MTRfYm90aF9zZXhlc19fICAoMTk6MTExMDI3NzQ6RzpBKWNvbnRpbnVvdXNfMzA3ODBfYm90aF9zZXhlc19faXJudCAgKDE5OjExMTEzNjIwOkc6QSljYXRlZ29yaWNhbF8yMDAwMl9ib3RoX3NleGVzXzE0NzNfICAoMTk6MTExMDI3NzQ6RzpBKWljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOToxMTExMzYyMDpHOkEpY2F0ZWdvcmljYWxfMjAwMDJfYm90aF9zZXhlc18xNDczXyAgKDE5OjExMTEzNjIwOkc6QSlpY2RfZmlyc3Rfb2NjdXJyZW5jZV8xMzA4MTRfYm90aF9zZXhlc19fICAoMTk6MTExMDI3ODc6RzpBKWljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOToxMTEyMDQzNjpDOlQpY2F0ZWdvcmljYWxfMjAwMDJfYm90aF9zZXhlc18xNDczXyAgKDE5OjExMTIwNDM2OkM6VCljYXRlZ29yaWNhbF8yMDAwMl9ib3RoX3NleGVzXzE0NzNfICAoMTk6MTExMDI3ODc6RzpBKWNvbnRpbnVvdXNfMjA0MDdfYm90aF9zZXhlc19fICAoMTk6MTExMTM3MDU6QzpUKWNvbnRpbnVvdXNfMjA1MThfYm90aF9zZXhlc19fICAoMTk6MTExMjMzNDI6QTpDKWNvbnRpbnVvdXNfMjA1MThfYm90aF9zZXhlc19fICAoMTk6MTExMjk1NzM6QTpUKWljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOToxMTExMzYxMjpUOkMpY29udGludW91c18zMDY0MF9ib3RoX3NleGVzX19pcm50ICAoMTk6MTExMTE2MjQ6RzpBKWNvbnRpbnVvdXNfMzA2OTBfYm90aF9zZXhlc19faXJudCAgKDE5OjExMTEzNjIwOkc6QSljYXRlZ29yaWNhbF82MTUzX2JvdGhfc2V4ZXNfMV8gICgxOToxMTEwMjc3NDpHOkEpY29udGludW91c18zMDY0MF9ib3RoX3NleGVzX19pcm50ICAoMTk6MTExMTM2MjA6RzpBKWNhdGVnb3JpY2FsXzYxNTNfYm90aF9zZXhlc18xXyAgKDE5OjExMTEzNjIwOkc6QSkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACXMtP0re1BA0VeQZizKR0DYgAhx5WwHQFiCe1SyUuc/Oq3boPZbCECDiT+KOnP4Py44g79fzPo/oE/kSdK1DUATKc3mcRgEQHWRQln4+gRA6L0xBADHC0D0GVBvRs0BQAQ5KGGm7QFAxQPKplzhAUDKi0zAr9ETQIljn/gYSZ4/AlL28Ssx4j/5K2SuDKoHQGkaFM0DWOI/qRQ7Gof6+z8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEtxVdl3tVRAIatbPSclUEBjt88qM+URQHu4if/g6PE/DRtl/WbiEkDx2M9iKRIDQE/KpIY2AAVAokCfyJNkF0BFEOfhBKYPQDm1M0xtqRBAFM0DWORXFkCygXSxaaUMQHKFd7mI7wxAM1AZ/z7jDEB3SZwVUXMgQC54sEmnQ6k/APuNGyN+7j+QgTy7fOsTQCeG5GTiVu8/Vme1wB4TCEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////8AAAAABAAAAOz///9AAAAAOAAAABQAAAAEAAAADAASABAABAAIAAwAAQAAAPAAAAAAAAAAEAEAAAAAAABABwAAAAAAAAAAAAAAAAAA+P///wwAAAAIAAgAAAAEAAMAAABoAAAANAAAAAQAAACQ////HAAAABAAAAAIAAAAAQMAAAAAAADO////AgAAAAUAAABjaV9oaQAAALz///8gAAAAEAAAAAgAAAABAwAAAAAAAPr///8CAAYABgAEAAUAAABjaV9sbwAAAOz///8sAAAAIAAAABgAAAABGAAAEAASAAQAEAARAAgAAAAMAAAAAAD8////BAAEAA0AAAB0cmFpdF92YXJpYW50AAYBAABBUlJPVzE=&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;rule&quot;},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;ci_lo&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;x2&quot;:{&quot;field&quot;:&quot;ci_hi&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;trait_variant&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;type&quot;:&quot;nominal&quot;}}},{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////QAEAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQABQAAAMgAAACUAAAAZAAAADQAAAAEAAAAOP///xgAAAAQAAAACAAAAAEYAAAAAAAAOP///woAAABhbm5vdGF0aW9uAABk////HAAAABAAAAAIAAAAAQMAAAAAAACi////AgAAAAUAAABjaV9oaQAAAJD///8cAAAAEAAAAAgAAAABAwAAAAAAAM7///8CAAAABQAAAGNpX2xvAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABAAAAGJldGEAAAAA7P///ywAAAAgAAAAGAAAAAEYAAAQABIABAAQABEACAAAAAwAAAAAAPz///8EAAQADQAAAHRyYWl0X3ZhcmlhbnQAAAAAAAAA/////3ABAAAEAAAA7P///0AJAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////FAAAAAAAAADsAAAAMAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAgAAAAEAAAAAAAAAAAAAAAAAAAAAAAAACwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEABAAAAAAAAQAEAAAAAAABOBAAAAAAAAMAFAAAAAAAAAAAAAAAAAADABQAAAAAAAKAAAAAAAAAAgAYAAAAAAAAAAAAAAAAAAIAGAAAAAAAAoAAAAAAAAABABwAAAAAAAAAAAAAAAAAAQAcAAAAAAACgAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAEABAAAAAAAAAAAAAAUAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAAEkAAABjb250AAAAAAAAAABIAAAAY29udAAAAABJAAAAOwAAAGljZF8AAAAAkQAAADQAAABjb250AAAAAMwAAAA1AAAAY2F0ZQAAAAAAAQAAOwAAAGljZF8AAAAANQEAADUAAABjYXRlAAAAAHABAAA7AAAAaWNkXwAAAAClAQAAOwAAAGljZF8AAAAA4AEAADUAAABjYXRlAAAAABsCAAA1AAAAY2F0ZQAAAABQAgAAMAAAAGNvbnQAAAAAhQIAADAAAABjb250AAAAALUCAAAwAAAAY29udAAAAADlAgAAOwAAAGljZF8AAAAAFQMAADQAAABjb250AAAAAFADAAA0AAAAY29udAAAAACEAwAAMQAAAGNhdGUAAAAAuAMAADQAAABjb250AAAAAOkDAAAxAAAAY2F0ZQAAAAAdBAAAY29udGludW91c19JT1BfQ29ybmVhbF9yaWdodF9jdXN0b21fYm90aF9zZXhlc19fY3VzdG9tICAoMTk6MTExMDI3ODc6RzpDKWNvbnRpbnVvdXNfSU9QX0Nvcm5lYWxfbGVmdF9jdXN0b21fYm90aF9zZXhlc19fY3VzdG9tICAoMTk6MTExMDU0MDc6QzpBKWljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOToxMTEwMjc3NDpHOkEpY29udGludW91c18zMDc4MF9ib3RoX3NleGVzX19pcm50ICAoMTk6MTExMTM2MjA6RzpBKWNhdGVnb3JpY2FsXzIwMDAyX2JvdGhfc2V4ZXNfMTQ3M18gICgxOToxMTEwMjc3NDpHOkEpaWNkX2ZpcnN0X29jY3VycmVuY2VfMTMwODE0X2JvdGhfc2V4ZXNfXyAgKDE5OjExMTEzNjIwOkc6QSljYXRlZ29yaWNhbF8yMDAwMl9ib3RoX3NleGVzXzE0NzNfICAoMTk6MTExMTM2MjA6RzpBKWljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOToxMTEwMjc4NzpHOkEpaWNkX2ZpcnN0X29jY3VycmVuY2VfMTMwODE0X2JvdGhfc2V4ZXNfXyAgKDE5OjExMTIwNDM2OkM6VCljYXRlZ29yaWNhbF8yMDAwMl9ib3RoX3NleGVzXzE0NzNfICAoMTk6MTExMjA0MzY6QzpUKWNhdGVnb3JpY2FsXzIwMDAyX2JvdGhfc2V4ZXNfMTQ3M18gICgxOToxMTEwMjc4NzpHOkEpY29udGludW91c18yMDQwN19ib3RoX3NleGVzX18gICgxOToxMTExMzcwNTpDOlQpY29udGludW91c18yMDUxOF9ib3RoX3NleGVzX18gICgxOToxMTEyMzM0MjpBOkMpY29udGludW91c18yMDUxOF9ib3RoX3NleGVz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&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;size&quot;:80},&quot;encoding&quot;:{&quot;color&quot;:{&quot;field&quot;:&quot;annotation&quot;,&quot;scale&quot;:{&quot;domain&quot;:[&quot;pLoF&quot;,&quot;missense&quot;],&quot;range&quot;:[&quot;#d62728&quot;,&quot;#1f77b4&quot;]},&quot;title&quot;:&quot;VEP class&quot;,&quot;type&quot;:&quot;nominal&quot;},&quot;x&quot;:{&quot;field&quot;:&quot;beta&quot;,&quot;title&quot;:&quot;Per-allele effect (beta)&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;trait_variant&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;title&quot;:null,&quot;type&quot;:&quot;nominal&quot;}}},{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////cAAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAQAAAAQAAADs////MAAAACAAAAAYAAAAAQMAABAAEgAEABAAEQAIAAAADAAAAAAA+v///wIABgAGAAQAAQAAAHgAAAD/////gAAAAAQAAADs////QAAAAAAAAAAUAAAABAADAAwAEwAQABIADAAEAOr///8BAAAAAAAAADwAAAAQAAAAAAAKABQABAAMABAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////8AAAAABAAAAOz///9AAAAAOAAAABQAAAAEAAAADAASABAABAAIAAwAAQAAAIAAAAAAAAAAiAAAAAAAAABAAAAAAAAAAAAAAAAAAAAA+P///wwAAAAIAAgAAAAEAAEAAAAEAAAA7P///zAAAAAgAAAAGAAAAAEDAAAQABIABAAQABEACAAAAAwAAAAAAPr///8CAAYABgAEAAEAAAB4AJoAAABBUlJPVzE=&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;rule&quot;,&quot;color&quot;:&quot;black&quot;,&quot;strokeDash&quot;:[4,3]},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;x&quot;,&quot;type&quot;:&quot;quantitative&quot;}}}],&quot;height&quot;:500,&quot;title&quot;:&quot;Forest plot: top rare coding variants in LDLR (beta +/- 1.96 SE)&quot;,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "67a5f92c1f29445254e867c5147b652a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Compare this forest plot to the GWAS bar chart above. The GWAS common variants have\ntiny effect sizes (betas in the hundredths). The rare coding variants have effects\n10-100x larger - a single pLoF allele can shift cholesterol by a full standard deviation.</span>\n<span class=\"paragraph\">This is the <strong>allelic series</strong>: the same gene, a spectrum of variant frequencies and\neffect sizes, all pointing at the same biology. Common variants nudge LDLR expression;\nrare variants break it. Both end up at cholesterol. This complementarity is why modern\ngenetics uses both GWAS and exome analysis together - each fills gaps the other can't.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "399fc62ebeefd795db0c3a15edafe3d4",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"8-molecular-layers-eqtl-pqtl-and-chromatin\">8. Molecular layers: eQTL, pQTL, and chromatin</h2>\n<span class=\"paragraph\">The data types beyond GWAS in the credible-set table are <strong>quantitative trait loci</strong>\n(QTLs) - variants associated not with disease, but with molecular measurements:</span>\n<ul>\n<li><strong>eQTL</strong>: gene expression levels (mRNA) in specific tissues or cell types</li>\n<li><strong>pQTL</strong>: protein levels in plasma</li>\n<li><strong>sQTL</strong>: splicing patterns</li>\n<li><strong>caQTL</strong>: chromatin accessibility (whether DNA is open for transcription)</li>\n</ul>\n<span class=\"paragraph\">When a GWAS variant also shows up as an eQTL for the same gene, it suggests a regulatory\nmechanism: the variant changes how much protein the cell makes, which changes the trait.</span>\n<h3 id=\"qtl-layers-available-near-ldlr\">QTL layers available near LDLR</h3></span><marimo-ui-element object-id='TqIu-0' random-id='bf0c70ca-f07a-2952-8007-2da9e002072a'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;data_type&#92;&quot;:&#92;&quot;caQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:607,&#92;&quot;n_resources&#92;&quot;:1,&#92;&quot;n_distinct_traits&#92;&quot;:14},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;eQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:601,&#92;&quot;n_resources&#92;&quot;:2,&#92;&quot;n_distinct_traits&#92;&quot;:14},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;sQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:27,&#92;&quot;n_resources&#92;&quot;:1,&#92;&quot;n_distinct_traits&#92;&quot;:2},{&#92;&quot;data_type&#92;&quot;:&#92;&quot;pQTL&#92;&quot;,&#92;&quot;n_rows&#92;&quot;:18,&#92;&quot;n_resources&#92;&quot;:1,&#92;&quot;n_distinct_traits&#92;&quot;:4}]&quot;' data-total-rows='4' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;data_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;n_rows&quot;,[&quot;integer&quot;,&quot;u32&quot;]],[&quot;n_resources&quot;,[&quot;integer&quot;,&quot;u32&quot;]],[&quot;n_distinct_traits&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Vxnm",
+      "code_hash": "c34c5d932e798604d196e32f3fc0bbc9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"in-which-cell-types-does-this-locus-regulate-ldlr-expression\">In which cell types does this locus regulate LDLR expression?</h3>\n<span class=\"paragraph\">Each bar is the strongest eQTL PIP in that cell type. High PIP in liver would be the expected biology (hepatocytes are where LDLR clears LDL), but context-specific eQTL data is patchy - the absence of liver here reflects data availability, not biology.</span></span><marimo-ui-element object-id='Vxnm-0' random-id='0e16d843-4cdd-bf32-f09b-eaceba681b1c'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,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&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;bar&quot;},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;max_pip&quot;,&quot;title&quot;:&quot;Max PIP (eQTL)&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;cell_type&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;title&quot;:null,&quot;type&quot;:&quot;nominal&quot;}},&quot;height&quot;:350,&quot;title&quot;:&quot;Cell types with eQTL signal near LDLR&quot;,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "DnEU",
+      "code_hash": "e83e34433c8d76002b54db3d645ae09b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"9-synthesis-convergent-evidence\">9. Synthesis: convergent evidence</h2>\n<span class=\"paragraph\">Step back and see what one gene query produced:</span>\n<table>\n<thead>\n<tr>\n<th>Layer</th>\n<th>What it shows</th>\n<th>LDLR result</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>Gene-disease curation</td>\n<td>Expert clinical classification</td>\n<td>\"Definitive\" for familial hypercholesterolemia</td>\n</tr>\n<tr>\n<td>GWAS</td>\n<td>Common-variant associations</td>\n<td>Lipids, statin Rx, heart disease - the full causal chain</td>\n</tr>\n<tr>\n<td>Fine-mapping</td>\n<td>Which variant is causal</td>\n<td>High-PIP variants inside the gene body</td>\n</tr>\n<tr>\n<td>Colocalization</td>\n<td>Shared mechanism across traits</td>\n<td>Lipid labs and cardiovascular endpoints share a signal</td>\n</tr>\n<tr>\n<td>Exome</td>\n<td>Rare coding variants</td>\n<td>pLoF with 10-100x larger effect on cholesterol</td>\n</tr>\n<tr>\n<td>eQTL/pQTL</td>\n<td>Molecular mechanism</td>\n<td>Variants affect gene expression in relevant tissues</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">No single layer is conclusive on its own. GWAS gives association, not causation.\nFine-mapping gives a variant, not a gene. Exome gives a gene, not a mechanism. eQTL\ngives a mechanism, not a disease. But when all layers converge on the same story -\nLDLR variants reduce receptor function, raise LDL, cause atherosclerosis - the\ncombined evidence is far stronger than any single line.</span>\n<span class=\"paragraph\">This convergence is exactly what drug developers look for when evaluating a new target.\nPCSK9 inhibitors (nb01's story) went through the same logic: GWAS found the locus,\nrare-variant studies confirmed the direction of effect, and the drug was designed to\nmimic what loss-of-function carriers get for free.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ulZA",
+      "code_hash": "f2ea3538d03720743a29bf22d2ffa751",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"to-extend\">To extend</h2>\n<ul>\n<li><strong>Swap LDLR for PCSK9</strong> and re-run. PCSK9 loss-of-function <em>lowers</em> LDL (opposite\n  direction from LDLR loss-of-function) because PCSK9 normally degrades LDLR. Same\n  pathway, opposite allelic-series direction - visible in the forest plot.</li>\n<li><strong>Try a gene with weaker evidence</strong> - e.g. <code>SORT1</code>, <code>HMGCR</code>, or <code>NPC1L1</code> - and see\n  how the layers look when the signal is noisier or the biology less clear.</li>\n<li><strong>Start from a phenotype instead of a gene.</strong> Use nb03's approach: pick a FinnGen\n  phenocode like <code>I9_CHD</code> (coronary heart disease) and pull all credible sets for that\n  trait. You'll find LDLR alongside dozens of other loci - that's the genome-wide view\n  this notebook deliberately avoided to keep the focus on one gene.</li>\n<li><strong>Explore the full FinnGenie catalog.</strong> nb07 lists all 29 datasets the API exposes.\n  This notebook touched GWAS, exome, colocalization, gene-disease, eQTL, and\n  nearest-genes - there are more (summary stats, peak-to-genes, chromatin peaks).</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
