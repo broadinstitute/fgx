@@ -138,11 +138,7 @@ def _():
 @app.cell
 def _(GENE):
     cs = fetch_tsv(f"/credible_sets_by_gene/{GENE}")
-    by_type = (
-        cs.group_by("data_type")
-        .agg(pl.len().alias("n_rows"))
-        .sort("n_rows", descending=True)
-    )
+    by_type = cs.group_by("data_type").agg(pl.len().alias("n_rows")).sort("n_rows", descending=True)
     mo.vstack(
         [
             mo.md(r"""
@@ -157,9 +153,7 @@ def _(GENE):
     FinnGenie stores the results of fine-mapped GWAS as **credible sets** - groups of
     variants that, together, have high probability of containing the true causal variant.
     """),
-            mo.md(
-                f"### {len(cs):,} credible-set rows for **{GENE}** across all data types"
-            ),
+            mo.md(f"### {len(cs):,} credible-set rows for **{GENE}** across all data types"),
             by_type,
         ]
     )
@@ -296,9 +290,7 @@ def _(cs):
         .sort("mlog10p", descending=True)
         .head(1)
     )
-    lead_variant = (
-        f"{lead['chr'][0]}:{lead['pos'][0]}:{lead['ref'][0]}:{lead['alt'][0]}"
-    )
+    lead_variant = f"{lead['chr'][0]}:{lead['pos'][0]}:{lead['ref'][0]}:{lead['alt'][0]}"
     near = pl.DataFrame(fetch_json(f"/nearest_genes/{lead_variant}", n=3))
     mo.vstack(
         [
@@ -333,17 +325,11 @@ def _():
 @app.cell
 def _(lead_variant):
     try:
-        coloc = pl.DataFrame(
-            fetch_json(f"/colocalization_by_variant/{lead_variant}")
-        )
-        coloc_header = mo.md(
-            f"### {len(coloc):,} colocalization pairs at `{lead_variant}`"
-        )
+        coloc = pl.DataFrame(fetch_json(f"/colocalization_by_variant/{lead_variant}"))
+        coloc_header = mo.md(f"### {len(coloc):,} colocalization pairs at `{lead_variant}`")
     except Exception as e:
         coloc = pl.DataFrame()
-        coloc_header = mo.md(
-            f"### Colocalization lookup failed for `{lead_variant}` ({e})"
-        )
+        coloc_header = mo.md(f"### Colocalization lookup failed for `{lead_variant}` ({e})")
 
     mo.vstack(
         [
@@ -368,32 +354,31 @@ def _(lead_variant):
 
 @app.cell
 def _(coloc, lead_variant):
-    if coloc.is_empty():
-        mo.md("_No colocalization data available for this variant._")
-    else:
-        top_coloc = (
-            coloc.filter(pl.col("hit1_mlog10p").is_not_null())
-            .sort("hit1_mlog10p", descending=True)
-            .head(20)
-            .with_columns(
-                pl.concat_str(
-                    [pl.col("trait1"), pl.lit(" / "), pl.col("trait2")]
-                ).alias("pair")
-            )
+    mo.stop(
+        coloc.is_empty(),
+        mo.md("_No colocalization data available for this variant._"),
+    )
+    top_coloc = (
+        coloc.filter(pl.col("hit1_mlog10p").is_not_null())
+        .sort("hit1_mlog10p", descending=True)
+        .head(20)
+        .with_columns(pl.concat_str([pl.col("trait1"), pl.lit(" / "), pl.col("trait2")]).alias("pair"))
+    )
+    coloc_chart = (
+        alt.Chart(top_coloc.select("pair", "hit1_mlog10p", "data_type1"))
+        .mark_bar()
+        .encode(
+            x=alt.X("hit1_mlog10p:Q", title="-log10(p) for trait 1"),
+            y=alt.Y("pair:N", sort="-x", title=None),
+            color=alt.Color("data_type1:N", title="Data type"),
         )
-        coloc_chart = (
-            alt.Chart(top_coloc.select("pair", "hit1_mlog10p", "data_type1"))
-            .mark_bar()
-            .encode(
-                x=alt.X("hit1_mlog10p:Q", title="-log10(p) for trait 1"),
-                y=alt.Y("pair:N", sort="-x", title=None),
-                color=alt.Color("data_type1:N", title="Data type"),
-            )
-            .properties(
-                height=450, title=f"Top colocalizing trait pairs at {lead_variant}"
-            )
-        )
-        mo.ui.altair_chart(coloc_chart)
+        .properties(height=450, title=f"Top colocalizing trait pairs at {lead_variant}")
+    )
+    mo.vstack(
+        [
+            mo.ui.altair_chart(coloc_chart),
+        ]
+    )
     return
 
 
@@ -468,7 +453,11 @@ def _(exome):
         height=500,
         title="Forest plot: top rare coding variants in LDLR (beta +/- 1.96 SE)",
     )
-    mo.ui.altair_chart(forest)
+    mo.vstack(
+        [
+            mo.ui.altair_chart(forest),
+        ]
+    )
     return
 
 

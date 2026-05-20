@@ -1,0 +1,269 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.3",
+    "script_metadata_hash": "8c7136a5b233f3955795dfa669fc4c72"
+  },
+  "cells": [
+    {
+      "id": "setup",
+      "code_hash": "a07de0bdf2a145c27ff235405075e33f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hbol",
+      "code_hash": "0d484745808bda2a504a3d6d87d1e168",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h1 id=\"nb09-what-is-the-evidence-that-heart-disease-is-polygenic\">nb09: What is the evidence that heart disease is polygenic?</h1>\n<span class=\"paragraph\">A disease is <strong>monogenic</strong> when one gene breaks and the disease follows \u2014 cystic fibrosis,\nsickle cell, Huntington's. A disease is <strong>polygenic</strong> when hundreds of genetic variants,\neach with a tiny effect, collectively shift risk across the population. Heart disease is\nthe textbook polygenic case.</span>\n<span class=\"paragraph\">This notebook builds that argument from data, using coronary heart disease (<code>I9_CHD</code>) on\nFinnGen R13:</span>\n<ol>\n<li><strong>Many independent loci</strong> \u2014 a Manhattan plot showing dozens of genome-wide significant\n   signals spread across chromosomes, not clustered at one gene.</li>\n<li><strong>Small individual effects</strong> \u2014 a histogram showing that most lead variants nudge risk\n   by fractions of a percent.</li>\n<li><strong>Diverse biological pathways</strong> \u2014 colocalization revealing that CHD loci overlap with\n   lipid metabolism, blood pressure, inflammation, and coagulation \u2014 not one mechanism.</li>\n<li><strong>Multiple genes in the rare-variant layer</strong> \u2014 exome data showing that rare coding\n   mutations in several different genes (LDLR, PCSK9, APOB, LPA) independently affect\n   cardiovascular risk.</li>\n</ol>\n<span class=\"paragraph\">If heart disease were monogenic, you'd see one locus, one pathway, one gene. Instead,\nyou see the opposite at every layer.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "7fbe084915ed0946798b66d21b3514bb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"2654-credible-set-rows-for-i9_chd-on-finngen-spanning-80-independent-credible-sets\">2,654 credible-set rows for <strong>I9_CHD</strong> on <strong>finngen</strong>, spanning <strong>80</strong> independent credible sets</h3></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "8de5bd10ce3364fe95484f648a3b5f29",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"1-many-independent-loci-across-the-genome\">1. Many independent loci across the genome</h2>\n<span class=\"paragraph\">If a disease is driven by one gene, fine-mapping finds one or two credible sets on one\nchromosome. Coronary heart disease has dozens of independent credible sets scattered\nacross the genome. Each credible set represents a statistically independent signal \u2014\na distinct region of the genome contributing to disease risk.</span>\n<span class=\"paragraph\">The Manhattan plot below shows one dot per lead variant (the highest -log10p variant in\neach credible set), positioned by genomic coordinate. The horizontal spread IS the\nevidence: heart disease lives everywhere in the genome, not in one place.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "d049590b80710b8e50e90056eb622269",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"80-lead-variants-one-per-credible-set\">80 lead variants (one per credible set)</h3>\n<span class=\"paragraph\">Each row is the top variant from one independent fine-mapped signal.</span></span><marimo-ui-element object-id='bkHC-0' random-id='42a559bc-997d-123c-d659-802298e1e523'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;9:22103814:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:9,&#92;&quot;pos&#92;&quot;:22103814,&#92;&quot;mlog10p&#92;&quot;:121.65,&#92;&quot;pip&#92;&quot;:0.1516,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;CDKN2B-AS1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:12903725,&#92;&quot;mlog10p&#92;&quot;:35.548,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PHACTR1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160564494,&#92;&quot;mlog10p&#92;&quot;:34.8607,&#92;&quot;pip&#92;&quot;:0.4013,&#92;&quot;cs_size&#92;&quot;:4,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:88887075:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:88887075,&#92;&quot;mlog10p&#92;&quot;:28.5051,&#92;&quot;pip&#92;&quot;:0.4005,&#92;&quot;cs_size&#92;&quot;:5,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;HAPLN3&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:1,&#92;&quot;pos&#92;&quot;:55039974,&#92;&quot;mlog10p&#92;&quot;:28.0455,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;PCSK9&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:78762558:C:G&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:78762558,&#92;&quot;mlog10p&#92;&quot;:25.679,&#92;&quot;pip&#92;&quot;:0.0265,&#92;&quot;cs_size&#92;&quot;:69,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;ADAMTS7&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;19:44908822:C:T&#92;&quot;,&#92;&quot;chr&#92;&quot;:19,&#92;&quot;pos&#92;&quot;:44908822,&#92;&quot;mlog10p&#92;&quot;:24.4415,&#92;&quot;pip&#92;&quot;:0.8992,&#92;&quot;cs_size&#92;&quot;:2,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;missense_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;APOE&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;4:147443768:G:A&#92;&quot;,&#92;&quot;chr&#92;&quot;:4,&#92;&quot;pos&#92;&quot;:147443768,&#92;&quot;mlog10p&#92;&quot;:24.2646,&#92;&quot;pip&#92;&quot;:0.0706,&#92;&quot;cs_size&#92;&quot;:16,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intergenic_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:null},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;15:89036690:G:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:15,&#92;&quot;pos&#92;&quot;:89036690,&#92;&quot;mlog10p&#92;&quot;:24.2123,&#92;&quot;pip&#92;&quot;:0.041,&#92;&quot;cs_size&#92;&quot;:45,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;upstream_gene_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;AC013565.1&#92;&quot;},{&#92;&quot;variant_id&#92;&quot;:&#92;&quot;6:160591981:T:C&#92;&quot;,&#92;&quot;chr&#92;&quot;:6,&#92;&quot;pos&#92;&quot;:160591981,&#92;&quot;mlog10p&#92;&quot;:23.7277,&#92;&quot;pip&#92;&quot;:1.0,&#92;&quot;cs_size&#92;&quot;:1,&#92;&quot;most_severe&#92;&quot;:&#92;&quot;intron_variant&#92;&quot;,&#92;&quot;gene_most_severe&#92;&quot;:&#92;&quot;LPA&#92;&quot;}]&quot;' data-total-rows='10' data-total-columns='8' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;variant_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;chr&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;pos&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;mlog10p&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;pip&quot;,[&quot;number&quot;,&quot;f64&quot;]],[&quot;cs_size&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;gene_most_severe&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "54a74709471722dd2f547fe9f985b311",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "3feb62362ff948562476ecf34932b2c6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "e6c7a35948172032ece07ed1f2c8b4be",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Xref-0' random-id='1dbb6d06-6126-37ee-0e2c-e4f6834b6325'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;layer&quot;:[{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////4AAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAwAAAGgAAAA0AAAABAAAAJD///8cAAAAEAAAAAgAAAABGAAAAAAAAPz///8EAAQABAAAAGJhbmQAAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABwAAAG1sb2cxMHAA7P///zgAAAAgAAAAGAAAAAECAAAQABIABAAQABEACAAAAAwAAAAAAPT///9AAAAAAQAAAAgACQAEAAgABwAAAGN1bV9wb3MA//////gAAAAEAAAA7P///wAKAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////UAAAAAAAAACUAAAAKAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAQAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAgAAAAAAAIACAAAAAAAAAAAAAAAAAACAAgAAAAAAAIACAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAUAAAAAAAAAAAAAAwAAAFAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAA3MykEAAAAAX11ZLQAAAABAfSY2AAAAACUcb20AAAAA5tdHAwAAAABAn9RsAAAAAOor4XgAAAAAvpMWLAAAAACUZHFtAAAAAJ/oJjYAAAAAKXQKYgAAAADqrsZBAAAAADh5gwYAAAAAcrYiaAAAAABZ4Nx2AAAAAILHXgMAAAAAG/TVbAAAAADMRNJUAAAAAB1UDHIAAAAAsuxgGQAAAAC5rwF9AAAAANH023IAAAAAGXr3egAAAADN7HVbAAAAAE+uXgMAAAAAy7wfhQAAAACSJUk3AAAAAD2FjzQAAAAArRQnNgAAAADCyo1tAAAAAM01DFQAAAAANJ4iaAAAAAAHhXlAAAAAAEXnGCwAAAAAg6zIdgAAAADige0tAAAAAIFIhDwAAAAAUSHELgAAAAC21VYZAAAAADJ4lCwAAAAAhsNMIwAAAAAlU1hAAAAAAG0NJz8AAAAAleYQLAAAAAC/FOcpAAAAAOQhXCIAAAAA/8m5RwAAAAAbdYByAAAAALjMRQ0AAAAAfkOESQAAAACrv4Z1AAAAADawNAkAAAAAAs0iaAAAAACX0kICAAAAAKdduXIAAAAAlRXnPQAAAAAyIspPAAAAAP40WUoAAAAAbHUIYgAAAAAqHII3AAAAAOlyvYAAAAAAspQXCgAAAAC+yeE2AAAAADY3b4AAAAAArBzdDwAAAACdbk9mAAAAAMjC7R0AAAAABM0xYgAAAABq1MNOAAAAAA/mXhIAAAAAinc2IgAAAAApDB0aAAAAALOfHXMAAAAA1OozdgAAAAB3g9xLAAAAALTisSYAAAAAyCcVKAAAAADzX9xNAAAAAO+u4g8AAAAAYESNdQAAAACamZmZmWleQKAaL90kxkFAZ9XnaituQUCoNc07ToE8QM/3U+OlCzxA5/up8dKtOUAbL90kBnE4QIiFWtO8QzhA2PD0Slk2OECYTBWMSro3QG1Wfa62YjRA16NwPQrHM0Aydy0hHyQzQI0o7Q2+cDFAHVpkO99vMUAdWmQ73w8xQLgehetR+DBANIC3QILCMEC4rwPnjIguQMdLN4lBgC1A4C2QoPiRLEBxGw3gLXAsQK62Yn/ZHSxAGCZTBaPSK0CqYFRSJ2ArQM07TtGRXCtAHThnRGnvKkCh1jTvOIUqQAYSFD/GfCpAWKg1zTsOKkAbnl4py5AoQFOWIY51MShAfT81XrrpJ0BPQBNhw9MnQDY8vVKWgSdA/Knx0k2CJkDysFBrmlcmQMgHPZtVPyZAmSoYldTpJUDHKTqSy78lQEATYcPT6yRATmIQWDlUJECEDU+vlEUkQC1DHOvi9iNAxf6ye/LwIkAdWmQ7388iQH6MuWsJuSJAoBov3STmIUDG3LWEfNAhQCNKe4MvbCFAdQKaCBseIUA/V1uxv+wgQNNNYhBY2SBAvw6cM6LUIEB7gy9MpsogQJzEILByyCBAylTBqKSuIEA+eVioNW0gQFwgQfFjbCBAayv2l91TIEDAWyBB8UMgQCBB8WPMHSBAfa62Yn8ZIEBUUiegifAfQM3MzMzMjB9Asp3vp8aLH0BU46WbxGAfQDm0yHa+Xx9AppvEILAyH0Dn+6nx0g0fQJ0Rpb3Blx5AWmQ730+NHkBKDAIrh1YeQEdy+Q/pNx5APL1SliGOHUDswDkjSnsdQPjCZKpgVB1ATtGRXP5DHUB/+zpwzsgbQEXY8PRK2RVAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMAAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADAAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAxAAAAAAAAAAAAAAABAAAAMQAAAAAAAAAAAAAAAQAAADEAAAAAAAAAAAAAAAEAAAAwAAAAAAAAAAAAAAD/////AAAAAAQAAADs////QAAAADgAAAAUAAAABAAAAAwAEgAQAAQACAAMAAEAAADwAAAAAAAAAAABAAAAAAAAAAoAAAAAAAAAAAAAAAAAAPj///8MAAAACAAIAAAABAADAAAAaAAAADQAAAAEAAAAkP///xwAAAAQAAAACAAAAAEYAAAAAAAA/P///wQABAAEAAAAYmFuZAAAAAC8////IAAAABAAAAAIAAAAAQMAAAAAAAD6////AgAGAAYABAAHAAAAbWxvZzEwcADs////OAAAACAAAAAYAAAAAQIAABAAEgAEABAAEQAIAAAADAAAAAAA9P///0AAAAABAAAACAAJAAQACAAHAAAAY3VtX3BvcwAMAQAAQVJST1cx&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;opacity&quot;:0.85,&quot;size&quot;:55},&quot;encoding&quot;:{&quot;color&quot;:{&quot;field&quot;:&quot;band&quot;,&quot;legend&quot;:null,&quot;scale&quot;:{&quot;domain&quot;:[&quot;0&quot;,&quot;1&quot;],&quot;range&quot;:[&quot;#1f77b4&quot;,&quot;#9ecae1&quot;]},&quot;type&quot;:&quot;nominal&quot;},&quot;x&quot;:{&quot;axis&quot;:{&quot;labels&quot;:false,&quot;ticks&quot;:false},&quot;field&quot;:&quot;cum_pos&quot;,&quot;title&quot;:&quot;Genome position&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;mlog10p&quot;,&quot;title&quot;:&quot;-log10(p)&quot;,&quot;type&quot;:&quot;quantitative&quot;}}},{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////4AAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAwAAAGgAAAA0AAAABAAAAJD///8cAAAAEAAAAAgAAAABGAAAAAAAAPz///8EAAQABQAAAGxhYmVsAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABwAAAG1sb2cxMHAA7P///zgAAAAgAAAAGAAAAAECAAAQABIABAAQABEACAAAAAwAAAAAAPT///9AAAAAAQAAAAgACQAEAAgABwAAAGN1bV9wb3MA//////gAAAAEAAAA7P///8ABAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////CgAAAAAAAACUAAAAKAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAQAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAIAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAFAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAoAAAAAAAAAAAAAAAAwAAAAoAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAAAAAAACgAAAAAAAAAAAAAAAAAAAA3MykEAAAAAX11ZLQAAAABAfSY2AAAAACUcb20AAAAA5tdHAwAAAABAn9RsAAAAAOor4XgAAAAAvpMWLAAAAACUZHFtAAAAAJ/oJjYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAmpmZmZlpXkCgGi/dJMZBQGfV52orbkFAqDXNO06BPEDP91PjpQs8QOf7qfHSrTlAGy/dJAZxOECIhVrTvEM4QNjw9EpZNjhAmEwVjEq6N0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAAAAQ0RLTjJCAAAAAAAABwAAAFBIQUNUUjEAAAAAAAMAAABMUEEAAAAAAAAAAAAGAAAASEFQTE4zAAAAAAAABQAAAFBDU0s5AAAAAAAAAAcAAABBREFNVFM3AAAAAAAEAAAAQVBPRQAAAAAAAAAABQAAAEVETlJBAAAAAAAAAAUAAABBQkhEMgAAAAAAAAADAAAATFBBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/////AAAAAAQAAADs////QAAAADgAAAAUAAAABAAAAAwAEgAQAAQACAAMAAEAAADwAAAAAAAAAAABAAAAAAAAwAEAAAAAAAAAAAAAAAAAAPj///8MAAAACAAIAAAABAADAAAAaAAAADQAAAAEAAAAkP///xwAAAAQAAAACAAAAAEYAAAAAAAA/P///wQABAAFAAAAbGFiZWwAAAC8////IAAAABAAAAAIAAAAAQMAAAAAAAD6////AgAGAAYABAAHAAAAbWxvZzEwcADs////OAAAACAAAAAYAAAAAQIAABAAEgAEABAAEQAIAAAADAAAAAAA9P///0AAAAABAAAACAAJAAQACAAHAAAAY3VtX3BvcwAMAQAAQVJST1cx&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;text&quot;,&quot;align&quot;:&quot;left&quot;,&quot;dx&quot;:6,&quot;dy&quot;:-4,&quot;fontSize&quot;:11,&quot;fontWeight&quot;:&quot;bold&quot;},&quot;encoding&quot;:{&quot;text&quot;:{&quot;field&quot;:&quot;label&quot;,&quot;type&quot;:&quot;nominal&quot;},&quot;x&quot;:{&quot;field&quot;:&quot;cum_pos&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;mlog10p&quot;,&quot;type&quot;:&quot;quantitative&quot;}}}],&quot;height&quot;:380,&quot;title&quot;:&quot;Manhattan of credible-set leads for I9_CHD (FinnGen R13)&quot;,&quot;width&quot;:820,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "becad3effc87927c35981385a73b3114",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>80 independent signals across 20 chromosomes.</strong> A monogenic disease would show one cluster on one chromosome. Instead, nearly every chromosome hosts at least one fine-mapped credible set for coronary heart disease. This genome-wide spread is the first line of evidence for polygenicity.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "d405d46806b3fe961d7235cc437326e9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"2-small-individual-effects\">2. Small individual effects</h2>\n<span class=\"paragraph\">The second hallmark of a polygenic disease: each variant contributes very little on its\nown. Monogenic diseases have variants with large effects (odds ratios of 5-50x). Polygenic\ndiseases have variants with tiny effects (odds ratios of 1.01-1.15x).</span>\n<span class=\"paragraph\">The histogram below shows the distribution of effect sizes (absolute beta) across all lead\nvariants. If heart disease were driven by a few large-effect loci, you'd see a long right\ntail. Instead, the effects cluster near zero \u2014 each variant nudges risk by a fraction of\na standard deviation.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "ff3b2e2fd569d315af94d944a7786ac2",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='RGSE-0' random-id='515d9b2b-8c87-8bb8-7d0f-8c848278a3cf'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////eAAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAQAAAAQAAADs////MAAAACAAAAAYAAAAAQMAABAAEgAEABAAEQAIAAAADAAAAAAA+v///wIABgAGAAQACAAAAGFic19iZXRhAAAAAP////+AAAAABAAAAOz///+AAgAAAAAAABQAAAAEAAMADAATABAAEgAMAAQA6v///1AAAAAAAAAAPAAAABAAAAAAAAoAFAAEAAwAEAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAIAAAAAAAAAAAAAAQAAAFAAAAAAAAAAAAAAAAAAAABnRGlv8IXBP8yXF2AfnbI/CmgibHh6xT8TYcPTK2XJP7pJDAIrh8Y/GyrG+ZtQsD8Cmggbnl7BP2uCqPsApLY/K6T8pNqnsz9LyAc9m1XTP+fj2lAxzq8/KZZbWg2Jqz9Of/YjRWSwPy6QoPgx5s4/m3KFd7mIrz8BamrZWl+0Pxk5C3va4a8/t+7mqQ65sT/HRiBe1y+oP93qOel947M/l8rbEU4Lrj/dtYR80LOpP8NkqmBUUqc/8YCyKVd4pz/RkVz+Q/qtP+PfZ1w4EKI/r5RliGNdrD+y9KEL6lumP+jZrPpcbc0/DkqYaftXpj/lCu9yEd+pPwYSFD/G3M0/uOS4UzpYrz99PzVeukmsPy2yne+nxvM/x53Swfo/pz93Sgfr/xymP3ehuU4jLaU/liGOdXEb0T/YnlkSoKamPwe2SrA4nKk/vp8aL90kpj8aNPRPcLGyP4guqG+Z06U/1NSytb5IqD/Q7SWN0TqqP0loy7kUV6U/Yi0+BcB4pj+YhuEjYkqkP2HgufdwyaE/nZ0MjpJXpz/9wcBz7+GiP5z51RwgmKM/FW9kHvmDoT/j32dcOBCiP8ZQTrSrkKI/aW/whclUoT8r+64I/reiPyCYo8fvbao/KowtBDkooT8STgte9BW0Pz+MEB5tHKE/JjYf14aKoT+RJ0nXTL6xP/D5YYTwaKM/zvxqDhDMoT9uNIC3QIKiP2H9n8N8eaE/Dwu1pnnH6z8qqRPQRNigP/FG5pE/GKg/JxQi4BCqpD92N091yM2gP23i5H6HoqA/K6T8pNqnoz8r3sg88gejP2WNeohGd6A/kuhlFMstrT8xsfm4NlSsP1OWIY51cZs//////wAAAAAEAAAA7P///0AAAAA4AAAAFAAAAAQAAAAMABIAEAAEAAgADAABAAAAiAAAAAAAAACIAAAAAAAAAIACAAAAAAAAAAAAAAAAAAD4////DAAAAAgACAAAAAQAAQAAAAQAAADs////MAAAACAAAAAYAAAAAQMAABAAEgAEABAAEQAIAAAADAAAAAAA+v///wIABgAGAAQACAAAAGFic19iZXRhAKEAAABBUlJPVzE=&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;bar&quot;,&quot;cornerRadiusTopLeft&quot;:3,&quot;cornerRadiusTopRight&quot;:3},&quot;encoding&quot;:{&quot;x&quot;:{&quot;bin&quot;:{&quot;maxbins&quot;:30},&quot;field&quot;:&quot;abs_beta&quot;,&quot;title&quot;:&quot;|beta| (per-allele effect size)&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;aggregate&quot;:&quot;count&quot;,&quot;title&quot;:&quot;Number of lead variants&quot;,&quot;type&quot;:&quot;quantitative&quot;}},&quot;height&quot;:300,&quot;title&quot;:&quot;Distribution of effect sizes across CHD lead variants&quot;,&quot;width&quot;:600,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\"><strong>Median |beta| = 0.0473.</strong> Most lead variants shift CHD risk by less than a tenth of a standard deviation. No single variant comes close to explaining the disease \u2014 but collectively, hundreds of these small nudges add up to substantial heritable risk.</span></span></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "3561cf5f2c29a65b13bdb840aa801346",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"3-diverse-biological-pathways\">3. Diverse biological pathways</h2>\n<span class=\"paragraph\">If heart disease were polygenic but mechanistically simple \u2014 say, all loci acted through\none pathway \u2014 it would be \"polygenic but mono-mechanistic.\" The stronger claim is that\nCHD is polygenic AND pleiotropic: the contributing loci span fundamentally different\nbiological pathways.</span>\n<span class=\"paragraph\">We can test this with <strong>colocalization</strong>. For each of the top CHD loci, ask: what <em>other</em>\ntraits share the same causal variant? If the answers span lipids, blood pressure,\ninflammation, and coagulation, the disease is driven by multiple independent biological\nprocesses.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "bcb6d57475a457451247d6c36b99e906",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "61e4a42ad74b101cf3ac2b5b79922d66",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"cross-pathway-colocalizations-at-the-top-5-chd-loci\">Cross-pathway colocalizations at the top 5 CHD loci</h3>\n<span class=\"paragraph\">CHD-on-CHD self-colocalizations filtered out to surface the diverse biology. Each row is a non-CHD trait sharing a causal variant with coronary heart disease. Notice the spread: lipid labs, blood pressure, migraine, stroke, drug prescriptions, and molecular QTL layers (eQTL, caQTL, metaboQTL) \u2014 each pointing at a different mechanism feeding into the same disease.</span></span><marimo-ui-element object-id='Hstk-0' random-id='8d11ac06-607a-508c-7534-4c3975af5125'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;ENSG00000272379&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;eQTL&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;I9_PAD&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;MI&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:12903725:A:G&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;MIGRAINE_TRIPTAN&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;nonHDL&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;3001308&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_FC&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;metaboQTL&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;1:55039974:G:T&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;S_LDL_PL&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;metaboQTL&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:1.0},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;LDLC&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:0.999},{&#92;&quot;chd_variant&#92;&quot;:&#92;&quot;6:160564494:G:A&#92;&quot;,&#92;&quot;trait2&#92;&quot;:&#92;&quot;TC&#92;&quot;,&#92;&quot;data_type2&#92;&quot;:&#92;&quot;GWAS&#92;&quot;,&#92;&quot;PP_H4&#92;&quot;:0.999}]&quot;' data-total-rows='20' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;chd_variant&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;trait2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;data_type2&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;PP_H4&quot;,[&quot;number&quot;,&quot;f64&quot;]]]' data-show-filters='true' data-show-download='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "f2c3d00b52b3de8ec2978a36c76c6fd6",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Each dot is a trait that shares a causal variant with a CHD locus (PP_H4 &gt; 0.5, CHD self-colocs removed). The x-axis groups traits by data type \u2014 GWAS phenotypes, metabolomic QTLs, expression/splicing/chromatin QTLs. The colors spread across columns: no single locus explains every mechanism, and no single mechanism captures every locus.</span></span><marimo-ui-element object-id='nWHF-0' random-id='c2a00ac1-0992-8af8-542c-a949d91e7e7d'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,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&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;opacity&quot;:0.9,&quot;size&quot;:120},&quot;encoding&quot;:{&quot;color&quot;:{&quot;field&quot;:&quot;locus_gene&quot;,&quot;title&quot;:&quot;CHD locus&quot;,&quot;type&quot;:&quot;nominal&quot;},&quot;x&quot;:{&quot;field&quot;:&quot;data_type2&quot;,&quot;sort&quot;:[&quot;GWAS&quot;,&quot;metaboQTL&quot;,&quot;eQTL&quot;,&quot;pQTL&quot;,&quot;sQTL&quot;,&quot;caQTL&quot;],&quot;title&quot;:&quot;Data type&quot;,&quot;type&quot;:&quot;nominal&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;trait_label&quot;,&quot;sort&quot;:{&quot;field&quot;:&quot;data_type2&quot;,&quot;order&quot;:&quot;ascending&quot;},&quot;title&quot;:null,&quot;type&quot;:&quot;nominal&quot;}},&quot;height&quot;:480,&quot;title&quot;:&quot;Each CHD locus connects to different traits through different mechanisms&quot;,&quot;width&quot;:550,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "iLit",
+      "code_hash": "e719ab259a6a90789925d7d8813fa911",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"4-multiple-genes-in-the-rare-variant-layer\">4. Multiple genes in the rare-variant layer</h2>\n<span class=\"paragraph\">Common-variant GWAS is one half of the genetic architecture. The other half is rare\ncoding variants \u2014 mutations that change or break a protein, carried by &lt;0.1% of people\nbut with much larger individual effects.</span>\n<span class=\"paragraph\">If heart disease were monogenic, rare-variant evidence would point at one gene. Instead,\nloss-of-function and missense variants in <strong>multiple genes</strong> independently shift\ncardiovascular risk: LDLR (LDL receptor), PCSK9 (LDL receptor recycling), APOB\n(LDL particle protein), and LPA (lipoprotein(a)). Each gene tells a different mechanistic\nstory, and all four now have FDA-approved or late-stage therapies.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ZHCJ",
+      "code_hash": "d91dccbe0e40383a20f4bf7c9d7a20c9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "ROlb",
+      "code_hash": "3f640e181645d2932ccf6b1ba8f5b89a",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><span class=\"markdown prose dark:prose-invert contents\"><h3 id=\"forest-plot-top-rare-coding-variants-across-ldlr-pcsk9-apob-lpa\">Forest plot: top rare coding variants across LDLR, PCSK9, APOB, LPA</h3>\n<span class=\"paragraph\">Each color is a different gene. The fact that multiple genes carry rare variants with measurable cardiovascular effects \u2014 and that those genes operate in different parts of lipid biology \u2014 is rare-variant evidence for polygenicity.</span></span><marimo-ui-element object-id='ROlb-0' random-id='3e8afbf7-3b93-7f34-1704-90019a0039da'><marimo-vega data-initial-value='{}' data-label='null' data-spec='{&quot;config&quot;:{&quot;view&quot;:{&quot;continuousWidth&quot;:300,&quot;continuousHeight&quot;:300}},&quot;layer&quot;:[{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////4AAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAwAAAGgAAAA0AAAABAAAAJD///8cAAAAEAAAAAgAAAABAwAAAAAAAM7///8CAAAABQAAAGNpX2hpAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABQAAAGNpX2xvAAAA7P///ywAAAAgAAAAGAAAAAEYAAAQABIABAAQABEACAAAAAwAAAAAAPz///8EAAQAEgAAAGdlbmVfdHJhaXRfdmFyaWFudAAA/////wgBAAAEAAAA7P///8AHAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////FAAAAAAAAACkAAAAKAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAQAAAAEAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAQAAAAAAAEABAAAAAAAA4AQAAAAAAABABgAAAAAAAAAAAAAAAAAAQAYAAAAAAACgAAAAAAAAAAAHAAAAAAAAAAAAAAAAAAAABwAAAAAAAKAAAAAAAAAAAAAAAAMAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAABCAAAAQVBPQgAAAAAAAAAAOQAAAEFQT0IAAAAAQgAAAEkAAABBUE9CAAAAAHsAAABJAAAAQVBPQgAAAADEAAAAOQAAAEFQT0IAAAAADQEAADkAAABMUEEgAAAAAEYBAAA5AAAATFBBIAAAAAB/AQAAOQAAAExQQSAAAAAAuAEAAEEAAABQQ1NLAAAAAPEBAAA5AAAATFBBIAAAAAAyAgAAOwAAAFBDU0sAAAAAawIAADkAAABMUEEgAAAAAKYCAABPAAAATERMUgAAAADfAgAAOgAAAFBDU0sAAAAALgMAADoAAABQQ1NLAAAAAGgDAAA6AAAAUENTSwAAAACiAwAATgAAAExETFIAAAAA3AMAAEEAAABMRExSAAAAACoEAAA6AAAATERMUgAAAABrBAAAOwAAAExETFIAAAAApQQAAEFQT0IgIGNvbnRpbnVvdXNfMzA3ODBfYm90aF9zZXhlc19faXJudCAgKDI6MjEwNDM5MDI6R0dDQUdDR0NDQTpHKUFQT0IgIGNvbnRpbnVvdXNfMzA3ODBfYm90aF9zZXhlc19faXJudCAgKDI6MjEwNDEwMjg6RzpBKUFQT0IgIGNvbnRpbnVvdXNfcmF0aW9fVEdfSERMX2N1c3RvbV9ib3RoX3NleGVzX19jdXN0b20gICgyOjIxMDA4NjUyOkc6QSlBUE9CICBjb250aW51b3VzX3JhdGlvX1RHX0hETF9jdXN0b21fYm90aF9zZXhlc19fY3VzdG9tICAoMjoyMTAwMjQwOTpDOlQpQVBPQiAgY29udGludW91c18zMDY0MF9ib3RoX3NleGVzX19pcm50ICAoMjoyMTAxMTEwMDpUOkMpTFBBICBjb250aW51b3VzXzMwNzkwX2JvdGhfc2V4ZXNfX2lybnQgICg2OjE2MDU4NTA1MjpHOkEpTFBBICBjb250aW51b3VzXzMwNzkwX2JvdGhfc2V4ZXNfX2lybnQgICg2OjE2MDYwMTA3NTpDOlQpTFBBICBjb250aW51b3VzXzMwNzkwX2JvdGhfc2V4ZXNfX2lybnQgICg2OjE2MDYzNTE1NTpHOkEpUENTSzkgIGljZF9maXJzdF9vY2N1cnJlbmNlXzEzMDgxNF9ib3RoX3NleGVzX18gICgxOjU1MDM5OTc0Okc6VClMUEEgIGNvbnRpbnVvdXNfMzA3OTBfYm90aF9zZXhlc19faXJudCAgKDY6MTYwNTc3MTY3Okc6QSlQQ1NLOSAgY2F0ZWdvcmljYWxfMjAwMDJfYm90aF9zZXhlc18xNDczXyAgKDE6NTUwMzk5NzQ6RzpUKUxQQSAgY29udGludW91c18zMDc5MF9ib3RoX3NleGVzX19pcm50ICAoNjoxNjA1OTUzOTU6RzpBKUxETFIgIGNvbnRpbnVvdXNfSU9QX0Nvcm5lYWxfcmlnaHRfY3VzdG9tX2JvdGhfc2V4ZXNfX2N1c3RvbSAgKDE5OjExMTAyNzg3Okc6QylQQ1NLOSAgY29udGludW91c18zMDc4MF9ib3RoX3NleGVzX19pcm50ICAoMTo1NTA2MTU1NzpHOkEpUENTSzkgIGNvbnRpbnVvdXNfMzA2NDBfYm90aF9zZXhlc19faXJudCAgKDE6NTUwNjE1NTc6RzpBKVBDU0s5ICBjb250aW51b3VzXzMwNzgwX2JvdGhfc2V4ZXNfX2lybnQgICgxOjU1MDUyNzAxOkM6VClMRExSICBjb250aW51b3VzX0lPUF9Db3JuZWFsX2xlZnRfY3VzdG9tX2JvdGhfc2V4ZXNfX2N1c3RvbSAgKDE5OjExMTA1NDA3OkM6QSlMRExSICBpY2RfZmlyc3Rfb2NjdXJyZW5jZV8xMzA4MTRfYm90aF9zZXhlc19fICAoMTk6MTExMDI3NzQ6RzpBKUxETFIgIGNvbnRpbnVvdXNfMzA3ODBfYm90aF9zZXhlc19faXJudCAgKDE5OjExMTEzNjIwOkc6QSlMRExSICBjYXRlZ29yaWNhbF8yMDAwMl9ib3RoX3NleGVzXzE0NzNfICAoMTk6MTExMDI3NzQ6RzpBKQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA7MD3Bng1tT9QpSTz4by0P3Ybs3CCBLu/BER3/w77tz/LibDA26zJv831bAzwk92/RXzMrErH2b/Hy+Tl+ojRP5FsZA3NK92/LqKS30fa4r/UI7K0+Lnev1Af3PhuTvA/Jcy0/St7UECLcJNRZZjyv4b4LHTKyPG/bMFBMWjX37/RV5BmLMpHQNiACHHlbAdAWIJ7VLJS5z86rdug9lsIQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA9gu434iLtz9a8OTL8hK3P0A0FPODJbi/Dn4sjhTbuj+FA+etNtbGvzu2r010p9m/q7x4micy1r+TKdX0j3TUP9/QpcnWRNi/G6UBcnj33r+6wEBr2bXYvyjKSjiZXfQ/S3FV2Xe1VEB64c6FkV7tv79s8d9yq+u/KhPINrqU2L8hq1s9JyVQQGO3zyoz5RFAe7iJ/+Do8T8NG2X9ZuISQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/////wAAAAAEAAAA7P///0AAAAA4AAAAFAAAAAQAAAAMABIAEAAEAAgADAABAAAA8AAAAAAAAAAQAQAAAAAAAMAHAAAAAAAAAAAAAAAAAAD4////DAAAAAgACAAAAAQAAwAAAGgAAAA0AAAABAAAAJD///8cAAAAEAAAAAgAAAABAwAAAAAAAM7///8CAAAABQAAAGNpX2hpAAAAvP///yAAAAAQAAAACAAAAAEDAAAAAAAA+v///wIABgAGAAQABQAAAGNpX2xvAAAA7P///ywAAAAgAAAAGAAAAAEYAAAQABIABAAQABEACAAAAAwAAAAAAPz///8EAAQAEgAAAGdlbmVfdHJhaXRfdmFyaWFudAALAQAAQVJST1cx&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;rule&quot;},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;ci_lo&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;x2&quot;:{&quot;field&quot;:&quot;ci_hi&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;gene_trait_variant&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;type&quot;:&quot;nominal&quot;}}},{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////EAEAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQABAAAAJQAAABgAAAAMAAAAAQAAABo////GAAAABAAAAAIAAAAARgAAAAAAABo////BAAAAGdlbmUAAAAAkP///xgAAAAQAAAACAAAAAEYAAAAAAAAkP///woAAABhbm5vdGF0aW9uAAC8////IAAAABAAAAAIAAAAAQMAAAAAAAD6////AgAGAAYABAAEAAAAYmV0YQAAAADs////LAAAACAAAAAYAAAAARgAABAAEgAEABAAEQAIAAAADAAAAAAA/P///wQABAASAAAAZ2VuZV90cmFpdF92YXJpYW50AAAAAAAA/////0gBAAAEAAAA7P///4AJAAAAAAAAFAAAAAQAAwAMABMAEAASAAwABADm////FAAAAAAAAADUAAAAOAAAABQAAAAAAA4AGAAEAAwAEAAAABQAAwAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAEAAAAAAABAAQAAAAAAAOAEAAAAAAAAQAYAAAAAAAAAAAAAAAAAAEAGAAAAAAAAoAAAAAAAAAAABwAAAAAAAAAAAAAAAAAAAAcAAAAAAABAAQAAAAAAAEAIAAAAAAAAAAAAAAAAAABACAAAAAAAAEABAAAAAAAAAAAAAAQAAAAUAAAAAAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAAAAAABQAAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAAAAAAQgAAAEFQT0IAAAAAAAAAADkAAABBUE9CAAAAAEIAAABJAAAAQVBPQgAAAAB7AAAASQAAAEFQT0IAAAAAxAAAADkAAABBUE9CAAAAAA0BAAA5AAAATFBBIAAAAABGAQAAOQAAAExQQSAAAAAAfwEAADkAAABMUEEgAAAAALgBAABBAAAAUENTSwAAAADxAQAAOQAAAExQQSAAAAAAMgIAADsAAABQQ1NLAAAAAGsCAAA5AAAATFBBIAAAAACmAgAATwAAAExETFIAAAAA3wIAADoAAABQQ1NLAAAAAC4DAAA6AAAAUENTSwAAAABoAwAAOgAAAFBDU0sAAAAAogMAAE4AAABMRExSAAAAANwDAABBAAAATERMUgAAAAAqBAAAOgAAAExETFIAAAAAawQAADsAAABMRExSAAAAAKUEAABBUE9CICBjb250aW51b3VzXzMwNzgwX2JvdGhfc2V4ZXNfX2lybnQgICgyOjIxMDQzOTAyOkdHQ0FHQ0dDQ0E6RylBUE9CICBjb250aW51b3VzXzMwNzgwX2JvdGhfc2V4ZXNfX2lybnQgICgyOjIxMDQxMDI4Okc6QSlBUE9CICBjb250aW51b3VzX3JhdGlvX1RHX0hETF9jdXN0b21fYm90aF9zZXhlc19fY3VzdG9tICAoMjoyMTAwODY1MjpHOkEpQVBPQiAgY29udGludW91c19yYXRpb19UR19IRExfY3VzdG9tX2JvdGhfc2V4ZXNfX2N1c3RvbSAgKDI6MjEwMDI0MDk6QzpUKUFQT0IgIGNvbnRpbnVvdXNfMzA2NDBfYm90aF9zZXhlc19faXJudCAgKDI6MjEwMTExMDA6VDpDKUxQQSAgY29udGludW91c18zMDc5MF9ib3RoX3NleGVzX19pcm50ICAoNjoxNjA1ODUwNTI6RzpBKUxQQSAgY29udGludW91c18zMDc5MF9ib3RoX3NleGVzX19pcm50ICAoNjoxNjA2MDEwNzU6QzpUKUxQQSAgY29udGludW91c18zMDc5MF9ib3RoX3NleGVzX19pcm50ICAoNjoxNjA2MzUxNTU6RzpBKVBDU0s5ICBpY2RfZmlyc3Rfb2NjdXJyZW5jZV8xMzA4MTRfYm90aF9zZXhlc19fICAoMTo1NTAzOTk3NDpHOlQpTFBBICBjb250aW51b3VzXzMwNzkwX2JvdGhfc2V4ZXNfX2lybnQgICg2OjE2MDU3NzE2NzpHOkEpUENTSzkgIGNhdGVnb3JpY2FsXzIwMDAyX2JvdGhfc2V4ZXNfMTQ3M18gICgxOjU1MDM5OTc0Okc6VClMUEEgIGNvbnRpbnVvdXNfMzA3OTBfYm90aF9zZXhlc19faXJudCAgKDY6MTYwNTk1Mzk1Okc6QSlMRExSICBjb250aW51b3VzX0lPUF9Db3JuZWFsX3JpZ2h0X2N1c3RvbV9ib3RoX3NleGVzX19jdXN0b20gICgxOToxMTEwMjc4NzpHOkMpUENTSzkgIGNvbnRpbnVvdXNfMzA3ODBfYm90aF9zZXhlc19faXJudCAg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&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;circle&quot;,&quot;size&quot;:80},&quot;encoding&quot;:{&quot;color&quot;:{&quot;field&quot;:&quot;gene&quot;,&quot;title&quot;:&quot;Gene&quot;,&quot;type&quot;:&quot;nominal&quot;},&quot;x&quot;:{&quot;field&quot;:&quot;beta&quot;,&quot;title&quot;:&quot;Per-allele effect (beta)&quot;,&quot;type&quot;:&quot;quantitative&quot;},&quot;y&quot;:{&quot;field&quot;:&quot;gene_trait_variant&quot;,&quot;sort&quot;:&quot;-x&quot;,&quot;title&quot;:null,&quot;type&quot;:&quot;nominal&quot;}}},{&quot;data&quot;:{&quot;url&quot;:&quot;data:text/plain;base64,QVJST1cxAAD/////cAAAAAQAAADy////FAAAAAQAAQAAAAoACwAIAAoABAD4////DAAAAAgACAAAAAQAAQAAAAQAAADs////MAAAACAAAAAYAAAAAQMAABAAEgAEABAAEQAIAAAADAAAAAAA+v///wIABgAGAAQAAQAAAHgAAAD/////gAAAAAQAAADs////QAAAAAAAAAAUAAAABAADAAwAEwAQABIADAAEAOr///8BAAAAAAAAADwAAAAQAAAAAAAKABQABAAMABAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAEAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP////8AAAAABAAAAOz///9AAAAAOAAAABQAAAAEAAAADAASABAABAAIAAwAAQAAAIAAAAAAAAAAiAAAAAAAAABAAAAAAAAAAAAAAAAAAAAA+P///wwAAAAIAAgAAAAEAAEAAAAEAAAA7P///zAAAAAgAAAAGAAAAAEDAAAQABIABAAQABEACAAAAAwAAAAAAPr///8CAAYABgAEAAEAAAB4AJoAAABBUlJPVzE=&quot;,&quot;format&quot;:{&quot;type&quot;:&quot;arrow&quot;}},&quot;mark&quot;:{&quot;type&quot;:&quot;rule&quot;,&quot;color&quot;:&quot;black&quot;,&quot;strokeDash&quot;:[4,3]},&quot;encoding&quot;:{&quot;x&quot;:{&quot;field&quot;:&quot;x&quot;,&quot;type&quot;:&quot;quantitative&quot;}}}],&quot;height&quot;:500,&quot;title&quot;:&quot;Rare coding variants across 4 cardiovascular genes (beta \u00b1 1.96 SE)&quot;,&quot;width&quot;:650,&quot;&#36;schema&quot;:&quot;https://vega.github.io/schema/vega-lite/v6.4.1.json&quot;}' data-chart-selection='true' data-field-selection='true' data-embed-options='{}'></marimo-vega></marimo-ui-element></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "qnkX",
+      "code_hash": "a1b3e56dc22471d9b2d6fbb9738ee9a8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"5-synthesis-four-layers-of-polygenic-evidence\">5. Synthesis: four layers of polygenic evidence</h2>\n<table>\n<thead>\n<tr>\n<th>Layer</th>\n<th>What a monogenic disease looks like</th>\n<th>What CHD looks like</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td><strong>GWAS loci</strong></td>\n<td>1-2 signals on one chromosome</td>\n<td>Dozens of signals across nearly every chromosome</td>\n</tr>\n<tr>\n<td><strong>Effect sizes</strong></td>\n<td>Large (OR &gt; 5)</td>\n<td>Small (median</td>\n</tr>\n<tr>\n<td><strong>Colocalizing traits</strong></td>\n<td>One trait, one pathway</td>\n<td>Lipids, blood pressure, inflammation, coagulation</td>\n</tr>\n<tr>\n<td><strong>Rare-variant genes</strong></td>\n<td>One gene</td>\n<td>LDLR, PCSK9, APOB, LPA, and more</td>\n</tr>\n</tbody>\n</table>\n<span class=\"paragraph\">This is what polygenic means in practice: no single variant, gene, or pathway explains\nthe disease. Instead, genetic risk is distributed across hundreds of common variants with\ntiny effects spanning diverse biology, plus rarer coding variants in multiple genes that\neach contribute larger but still incomplete effects.</span>\n<span class=\"paragraph\">The clinical implication is direct: polygenic risk scores (PRS) aggregate all these small\nsignals into a single per-person number. People in the top few percent of a CHD PRS have\nheart attack risk comparable to carriers of monogenic familial hypercholesterolemia\nmutations \u2014 but the mechanism is fundamentally different. FH is one broken gene; high\npolygenic risk is the unlucky end of a distribution shaped by hundreds of small pushes.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "TqIu",
+      "code_hash": "207ae2b6a2a32a8063830d4e219f8ea0",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><h2 id=\"to-extend\">To extend</h2>\n<ul>\n<li><strong>Compare with a truly monogenic disease.</strong> Run nb03 for a Mendelian phenotype (if one\n  is available in FinnGen) and see how the Manhattan changes: fewer loci, larger effects,\n  concentrated on one chromosome.</li>\n<li><strong>Add more genes to the exome panel.</strong> Try <code>HMGCR</code> (statin target), <code>NPC1L1</code>\n  (ezetimibe target), or <code>ANGPTL3</code> (emerging target) to see how deep the multi-gene\n  architecture goes.</li>\n<li><strong>Break out colocalizations by data type.</strong> Filter the coloc table to eQTL or pQTL\n  pairs only \u2014 these tell you not just <em>that</em> a locus is shared, but <em>how</em> the variant\n  acts (through gene expression or protein levels).</li>\n<li><strong>Build a polygenic risk score.</strong> Collect all lead variant betas from the Manhattan\n  and weight them into a single score \u2014 that's the conceptual foundation of a PRS,\n  and the reason polygenic architecture matters clinically.</li>\n</ul></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

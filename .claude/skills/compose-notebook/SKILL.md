@@ -30,6 +30,7 @@ Future explorations are nb05+ -- they import from this core and are not expected
 | `nb06_variant_pqtl_function` | `pqtl_credible_sets(variant)`, `direction_consensus(df, beta_col)` | Variant -> `credible_sets_by_variant` filtered to `data_type == "pQTL"` -> per-protein PIP/beta panel + direction-of-effect summary. Hero replay of the FinnGenie demo (Karjalainen, 2026-05-05): `chr2:9521321:A:G` in ADAM17 -> 4 plasma proteins all with negative beta -> consistent loss-of-sheddase mechanism. Distinct from nb01 (gene-first) and nb02 (full PheWAS) by being variant-first AND pQTL-only AND by surfacing sign-of-effect across the panel rather than top-mlog10p across all data types. |
 | `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the FinnGenie demo. |
 | `nb08_genetics_primer` | -- | Educational walkthrough: LDLR as a case study through GWAS, fine-mapping, colocalization, exome, eQTL/pQTL, and gene-disease curation. Imports `prepare_deleterious` from nb04. Teaches genetics concepts by showing what a clean signal looks like for a well-understood gene. |
+| `nb09_polygenic_heart_disease` | -- | Phenotype (CHD) -> `credible_sets_by_phenotype` -> Manhattan + effect-size histogram + cross-pathway colocalization + multi-gene exome forest plot. Builds the case that heart disease is polygenic from four layers of evidence: many independent loci, small individual effects, diverse colocalizing traits (with CHD self-coloc filtering), and rare coding variants in LDLR/PCSK9/APOB/LPA. Imports `pick_leads` and `annotate_with_nearest_gene` from nb03, `prepare_deleterious` from nb04. |
 
 When the user's question matches a row's "demonstrates" column with only a parameter changed, see Path A below.
 When it matches the *shape* of a row but tells a different story, or when it doesn't match any row, compose -- see Path C.
@@ -166,7 +167,13 @@ It then becomes importable by future composers via the same `from nbNN_<topic> i
    Read the spec before guessing; the description's path list is a reminder, not a contract.
    If you're unsure of the response shape, run `curl -fsS -H "Authorization: Bearer $FINNGENIE_TOKEN" "https://finngenie.fi/api/v1/<path>?format=json"` once to confirm, then write the cell.
 3. **Pick the path.** Parameter-swap on a canonical -> Path A. Anything else -> Path C.
-4. **Validate against the live kernel via marimo-pair.** This is non-negotiable, and the rest of this step exists because there are three failure modes that look like shortcuts but aren't. - **Browser session is a prerequisite, not optional.** `uvx marimo edit --headless` launches a kernel, but `execute-code.sh` won't attach until the user opens the URL in a browser tab and a websocket session is alive.
+4. **See the data before writing the story.** Run the key API calls and inspect the actual values *before* drafting narrative cells.
+   Characterize what the data contains: unique value counts, group-by distributions, range of the column you plan to sort or color by.
+   If the notebook's thesis is "X is diverse / spread / multi-pathway," confirm the data actually shows diversity — not the same category repeated under different labels.
+   If the data doesn't support the planned narrative, either adjust the query (filter, deduplicate, sort by a different column, widen the search) or rewrite the story to match what the data actually says.
+   Narratives written before seeing data are hypotheses; narratives written after are observations.
+   The notebook should contain observations.
+5. **Validate against the live kernel via marimo-pair.** This is non-negotiable, and the rest of this step exists because there are three failure modes that look like shortcuts but aren't. - **Browser session is a prerequisite, not optional.** `uvx marimo edit --headless` launches a kernel, but `execute-code.sh` won't attach until the user opens the URL in a browser tab and a websocket session is alive.
    If you call `execute-code.sh` and see `No active sessions on the server`, the right move is to tell the user "open `http://127.0.0.1:<port>/` in your browser, then ping me" -- not to fall back to running the same logic in a standalone `uv run python3` script.
    A parallel script imports nothing from the notebook and runs with its own module scope, so it can't catch `@app.function` vs `@app.cell` scoping bugs, marimo auto-formatter rewrites, or stale compiled cells.
    False green there is worse than no signal. - **Hot-reload reloads the file but does not re-run cells.** When you edit a `.py` file, marimo notices and re-imports module-level definitions, but the kernel still holds the old compiled cell objects in memory until something triggers a rerun.
@@ -178,9 +185,18 @@ It then becomes importable by future composers via the same `from nbNN_<topic> i
    The setup block (`with app.setup:`) is already provisioned by the PEP 723 header, and `fetch_tsv` / `fetch_json` are visible in the scratchpad's namespace via the import recipe; a single cell returns a `polars.DataFrame` you can summarize inline.
 5. **End with extension prompts.** Every vignette closes with a `## To extend` markdown cell listing 2-3 concrete next prompts (e.g. "swap PCSK9 for LDLR", "add a second resource and stack the dot plots").
    This turns each notebook into a launchpad rather than a dead end.
-6. **Plot when it adds signal.** Altair is in the PEP 723 deps; a one-cell chart is often more informative than a 20-row table head.
-7. **Don't fabricate.** If a helper doesn't exist or an endpoint returns an empty result, say so and ask the user how to proceed -- don't invent a fallback path.
-8. **Verify the rendered output via HTML export.** After the notebook runs end-to-end, export it as static HTML and inspect the rendered accessibility tree to confirm every section's narrative text, tables, and charts actually appear. The command is:
+6. **Match chart encodings to the narrative claim.** If the prose says "diverse" or "spread across," the chart must encode the *diversity dimension* visually — not a metric that happens to be uniform.
+   A bar chart where every bar is the same length carries no information.
+   Before choosing a chart type, ask: what is the visual variable the reader should compare?
+   If it's categorical spread (which loci, which data types, which pathways), use color, position, or faceting on those categories — not a quantitative axis that's uniformly high.
+   If every value in a quantitative column falls within a narrow band (e.g. all PP_H4 between 0.95 and 1.0), that column is not informative as an axis — it's a filter criterion, not an encoding.
+7. **Plot when it adds signal.** Altair is in the PEP 723 deps; a one-cell chart is often more informative than a 20-row table head.
+8. **Don't fabricate.** If a helper doesn't exist or an endpoint returns an empty result, say so and ask the user how to proceed -- don't invent a fallback path.
+9. **Visually verify every chart, not just its presence.** The accessibility tree confirms a chart *renders* ("Vega visualization" node) but not that it's *readable*.
+   After the notebook runs end-to-end, save each chart standalone from the kernel (`chart.save("/tmp/chart_name.html")`), open it in agent-browser, and screenshot it.
+   Check: (a) bars/dots/lines are visually distinguishable, (b) colors in the legend actually appear in the chart, (c) axis ranges make the data variation visible, (d) the chart tells the story the caption claims.
+   A chart that renders but shows uniform bars, a single color, or an axis that hides all variation is worse than no chart — it looks like it was never looked at.
+10. **Verify structural completeness via HTML export.** After the notebook runs end-to-end, export it as static HTML and inspect the rendered accessibility tree to confirm every section's narrative text, tables, and charts actually appear. The command is:
    ```bash
    env -u PYTHONPATH uvx marimo export html --sandbox notebooks/nbNN_<topic>.py -o /tmp/nbNN_<topic>.html
    ```
@@ -219,7 +235,14 @@ Same principle for tooltips: a `tooltip=[...]` list on a many-row chart is dead 
 
 ## Gotchas
 
-The first five are marimo cell-authoring traps that silently produce wrong output; the next two are tooling traps; then API papercuts; then biology / endpoint-semantics nuances.
+The first one is the most important and applies to every notebook. The next five are marimo cell-authoring traps that silently produce wrong output; then tooling traps; then API papercuts; then biology / endpoint-semantics nuances.
+
+- **Narrative must follow from data, not precede it.** The most damaging composition bug isn't a code error — it's prose that claims something the data doesn't show.
+  The failure pattern: decide on a story, write markdown that asserts the conclusion, write code that fetches data, and never check whether the output matches.
+  Any time a cell's narrative makes a qualitative claim — "diverse," "spread across," "multiple pathways," "large effect," "concentrated" — the data in that cell or its chart must visibly support it.
+  The fix is process, not code: after the fetch-and-filter pipeline runs, inspect the actual values (unique counts, group-by distributions, the column you plan to sort or color by) and confirm they match the story.
+  Common traps: a sort-and-head(N) selection surfaces N copies of the dominant category, not N diverse categories; overlapping ontology codes inflate apparent variety while carrying the same signal; a single group's entries crowd out the rest when per-group counts are uneven.
+  When the data contradicts the planned narrative, either fix the query (filter, deduplicate, re-sort, widen the search) or rewrite the prose. A chart that contradicts its own caption is worse than no chart.
 
 - **Only the last expression before `return` renders as cell output.** If a cell has `mo.md(intro_text)` on line 1, then `mo.vstack([header, table])` on line 10, the intro markdown is evaluated but its result is silently discarded -- the reader never sees it. The fix: wrap everything in a single `mo.vstack([mo.md(intro_text), header, table])` so both the explanation and the data appear together, or split the intro into its own cell. This is the single most common composition bug. Every cell that mixes narrative markdown with a data output must use `mo.vstack()` to combine them into one rendered element.
 - **Each top-level variable name must be unique across all cells.** Marimo tracks every name assigned in a cell; if two cells both define `chart = alt.Chart(...)`, the second cell errors with `MultipleDefinitionError` even though neither cell exports `chart` via `return`. The fix: give each chart a descriptive name scoped to its section -- `trait_chart`, `coloc_chart`, `eqtl_chart`, `forest`. This applies to any commonly reused name: `df`, `top`, `summary`, `chart`, `table`. Underscore-prefixed names (`_chart`) are cell-local and don't collide, but can't be referenced from other cells.
@@ -247,17 +270,18 @@ The first five are marimo cell-authoring traps that silently produce wrong outpu
   Filter or summarize in-cell (`pl.DataFrame.filter`, `.head(20)`, `group_by + agg`) before printing the result -- and never let raw API output land in the chat transcript at full size.
 - **No data caching.** Every notebook run hits the API live.
   If a parameter is fixed (e.g. you're iterating on the plotting code, not the gene), bind the dataframe to a variable in an upstream cell so reactive cells downstream don't re-fetch.
-- **`exome_results_by_*` returns per-variant exome scores, not collapsed burden tests.** The path name reads like "gene-level burden" but each row is one (variant, trait) pair from genebass single-variant association testing -- there's no SKAT/SKAT-O/burden statistic in the response.
-  If you need a per-gene rare-variant headline (one beta per gene-trait), aggregate the variant rows yourself: filter to `pLoF` and/or `missense` annotation classes, drop rows where `mlog10p` saturates at the floating-point cap (`mlog10p == 324` with `se == 0`), and either pick the top variant or do a meta-analytic combine.
-  Don't promise the user "burden test results" in the notebook intro -- frame it as "per-variant exome scores" and let the reader see the allelic series. nb04 is the worked example.
-- **Lead-variant logic is per-context.** nb01 picks the highest-PIP missense in the GWAS bucket for PCSK9; nb03 picks the highest-`mlog10p` variant per `cs_id`.
-  Neither is universally right.
-  For a new gene or phenotype, pick the strategy that matches the question: "what's the canonical coding hit?" -> missense filter; "what's the lead variant in each independent locus?" -> per-`cs_id` top-mlog10p.
-  Don't reuse one notebook's heuristic in another without thinking.
-- **Phenotype codes are FinnGen-specific.** `I9_CHD`, `T2D`, `K11_CROHN` etc. come from FinnGen's endpoint definitions, not free text.
-  Hit `fetch_json("/trait_name_mapping")` once to get the full code -> name mapping, then pick the code you actually want before passing strings to phenotype-keyed paths.
-  UKBB-style trait codes (`30640` ApoB, `30780` LDL-C, `6177_1` cholesterol-lowering medication) come from genebass / Open Targets and have their own conventions; don't mix them with FinnGen codes in the same prompt.
-- **rsID -> variant resolution can return the wrong allele.** `/rsid/variants?rsid=...` returns chr:pos:ref:alt, but FinnGen's credible-set store may have indexed the variant under a different alt allele than the resolver returns. nb02 falls back across alt alleles to handle this; if you see 0 rows for a variant that should clearly have hits, try the other alt allele before giving up.
+- **Don't infer response semantics from path names.** Endpoint paths like `exome_results_by_gene` sound like they return gene-level burden statistics, but the actual response is per-variant single-variant association rows.
+  Read the actual response shape (hit the endpoint once, or check the OpenAPI spec) before writing code or narrative that assumes a particular granularity or aggregation level.
+  The same principle applies to column names: `mlog10p` can saturate at floating-point limits (`mlog10p == 324` with `se == 0`), `pip` can be null, `most_severe` is a VEP prediction not a clinical classification.
+  Frame your notebook's descriptions around what the data actually contains, not what you infer from the label.
+- **Heuristics from one notebook don't transfer automatically.** Each notebook picks a filtering and sorting strategy matched to its question — nb01 picks the highest-PIP missense for PCSK9, nb03 picks the highest-`mlog10p` per credible set for a phenotype-wide Manhattan.
+  When composing a new notebook, choose the heuristic that matches *this* question rather than copy-pasting from the nearest existing notebook.
+  "What's the canonical coding hit?" needs a different selection than "what's the lead variant in each independent locus?" which is different from "which loci show cross-trait sharing?"
+- **Identifiers are system-specific and may not resolve as you expect.** Phenotype codes (`I9_CHD`, `T2D`) are FinnGen endpoint definitions, not free text — use `fetch_json("/trait_name_mapping")` to look up the right code before passing strings to phenotype-keyed paths.
+  UKBB-style trait codes come from a different namespace; don't mix them with FinnGen codes.
+  rsIDs can resolve to the wrong alt allele: `/rsid/variants` returns chr:pos:ref:alt, but the credible-set store may have indexed a different alt allele.
+  The general principle: any time you bridge between identifier systems (rsID → variant, gene name → phenotype, trait code → human-readable label), verify the resolution matched before building downstream logic on it.
+  When a query returns 0 rows for an identifier you know should have hits, the identifier mapping — not the data — is usually the problem.
 
 ## When to revise this skill
 
