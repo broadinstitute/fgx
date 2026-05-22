@@ -26,9 +26,9 @@ with app.setup:
     import polars as pl
     from dotenv import load_dotenv
 
-    load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
     FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    BASE = "https://finngenie.broadinstitute.org/api/v1"
 
 
 @app.function

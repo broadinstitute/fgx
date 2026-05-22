@@ -31,6 +31,7 @@ Future explorations are nb05+ -- they import from this core and are not expected
 | `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the FinnGenie demo. |
 | `nb08_genetics_primer` | -- | Educational walkthrough: LDLR as a case study through GWAS, fine-mapping, colocalization, exome, eQTL/pQTL, and gene-disease curation. Imports `prepare_deleterious` from nb04. Teaches genetics concepts by showing what a clean signal looks like for a well-understood gene. |
 | `nb09_polygenic_heart_disease` | -- | Phenotype (CHD) -> `credible_sets_by_phenotype` -> Manhattan + effect-size histogram + cross-pathway colocalization + multi-gene exome forest plot. Builds the case that heart disease is polygenic from four layers of evidence: many independent loci, small individual effects, diverse colocalizing traits (with CHD self-coloc filtering), and rare coding variants in LDLR/PCSK9/APOB/LPA. Imports `pick_leads` and `annotate_with_nearest_gene` from nb03, `prepare_deleterious` from nb04. |
+| `nb10_diabetes_susceptibility` | -- | Phenotype (T2D) -> `credible_sets_by_phenotype` -> Manhattan + effect-size histogram + TCF7L2 colocalization deep dive + MODY gene-disease curation. Same polygenic shape as nb09 but with a distinct angle: the GWAS loci overlap heavily with monogenic MODY genes (HNF1A, HNF4A, GCK, KCNJ11, ABCC8, PPARG), showing that common variants whisper what rare mutations shout. Imports `pick_leads` from nb03. First notebook to use the `alt.Data(values=df.to_dicts())` pattern for altair chart data — see the polars/altair gotcha. |
 
 When the user's question matches a row's "demonstrates" column with only a parameter changed, see Path A below.
 When it matches the *shape* of a row but tells a different story, or when it doesn't match any row, compose -- see Path C.
@@ -248,10 +249,19 @@ The first one is the most important and applies to every notebook. The next five
 - **Each top-level variable name must be unique across all cells.** Marimo tracks every name assigned in a cell; if two cells both define `chart = alt.Chart(...)`, the second cell errors with `MultipleDefinitionError` even though neither cell exports `chart` via `return`. The fix: give each chart a descriptive name scoped to its section -- `trait_chart`, `coloc_chart`, `eqtl_chart`, `forest`. This applies to any commonly reused name: `df`, `top`, `summary`, `chart`, `table`. Underscore-prefixed names (`_chart`) are cell-local and don't collide, but can't be referenced from other cells.
 - **Validate via marimo-pair against a live kernel, never via a standalone `uv run python3` script.** A parallel script can't see `@app.function` mangling, can't catch auto-formatter rewrites, and gives you a false green that costs more than no signal.
   If `execute-code.sh` reports `No active sessions`, the fix is to ask the user to open the browser URL -- not to bypass.
-- **Polars-only; never call `.to_pandas()`.** Altair 6+ accepts polars DataFrames directly via narwhals (`alt.Chart(df_polars)` works -- no conversion).
-  The PEP 723 deps don't include `pandas` or `pyarrow`, and modern polars routes `.to_pandas()` through Arrow, so any `.to_pandas()` call raises `ModuleNotFoundError: pa.Table requires 'pyarrow' module`.
-  The fix is the cleaner one: pass polars DataFrames straight to Altair.
-  Don't add pandas / pyarrow to the deps to "fix" it -- the dependency is the bug, not the missing package.
+- **Polars DataFrames must be converted to dicts before passing to altair.** Although altair 6+ nominally accepts polars DataFrames via narwhals, the resulting vega-lite spec uses a named-dataset reference (`"data": {"name": "data-abc123"}`) instead of inlining the values.
+  The `mo.ui.altair_chart()` wrapper and marimo's static HTML export cannot resolve these named references — the chart renders axes and labels but **no marks** (no bars, no dots, no lines).
+  The standalone `chart.save("file.html")` works because it embeds the full vega-lite renderer with dataset resolution, but marimo's `marimo-vega` custom element does not.
+  The fix: always convert to dicts before passing to altair — `alt.Chart(alt.Data(values=df.select("col_a", "col_b").to_dicts()))`.
+  This forces inline `"data": {"values": [...]}` in the spec, which every renderer can handle.
+  The `.select()` projection before `.to_dicts()` is not optional — without it, vega-lite embeds the entire frame (all columns), which bloats the spec and can exceed molab's `output_max_bytes` limit.
+  Never add pandas / pyarrow to the deps — the PEP 723 header doesn't include them, and `.to_pandas()` will raise `ModuleNotFoundError`.
+- **`mo.ui.altair_chart()` can silently break bar charts with few data points.** When a chart has very few rows (e.g. 3-row bar chart from a `group_by().agg()`), wrapping in `mo.ui.altair_chart()` renders the chart frame (axes, title, labels) but no marks — the bars are invisible.
+  The same chart renders correctly as a bare expression (without the wrapper) or via `chart.save()`.
+  The fix: for charts with small datasets (under ~10 rows), output the bare chart object instead of wrapping in `mo.ui.altair_chart()`.
+  Reserve `mo.ui.altair_chart()` for charts with enough data points that the interactive selection adds value (Manhattan plots, PheWAS dots, histograms).
+  This trades molab static-preview rendering (which needs the wrapper) for actually showing data in the live editor (which is what the user sees).
+  If you need both, test the wrapped version visually before committing — don't assume it works because the data is in the spec.
 - **Marimo mangles any name starting with `_`.** Any name beginning with an underscore is treated as cell-local and rewritten at compile time to `_cell_<id>_<name>`, so it cannot be referenced from another cell -- including from `app.setup` to a regular cell.
   Two flavors hit fgx specifically: (1) an `@app.function` helper like `_client` called from another `@app.function` like `fetch_tsv` fails with `NameError: name '_cell_<id>_client' is not defined`; (2) a setup-block constant like `_DEFAULT_TOKEN` referenced from a cell's `mo.ui.text(value=_DEFAULT_TOKEN)` raises `NameError` and cascades into "ancestor raised an exception" failures down the cell graph.
   The fix is uniform: drop the leading underscore for anything visible across cells (`client`, `DEFAULT_TOKEN`).
@@ -277,6 +287,11 @@ The first one is the most important and applies to every notebook. The next five
 - **Heuristics from one notebook don't transfer automatically.** Each notebook picks a filtering and sorting strategy matched to its question — nb01 picks the highest-PIP missense for PCSK9, nb03 picks the highest-`mlog10p` per credible set for a phenotype-wide Manhattan.
   When composing a new notebook, choose the heuristic that matches *this* question rather than copy-pasting from the nearest existing notebook.
   "What's the canonical coding hit?" needs a different selection than "what's the lead variant in each independent locus?" which is different from "which loci show cross-trait sharing?"
+- **The `/search` endpoint uses `q`, not `query`.** The parameter name is `q` (required), with optional `types` (comma-separated: `phenotypes`, `genes`) and `limit`.
+  The response is JSON (not TSV) — don't use `fetch_tsv` or `fetch_json` (which injects `format=json` and can cause 422s); call `client().get(f"{BASE}/search", params={"q": term})` directly and parse `r.json()`.
+- **`/credible_sets_by_phenotype` requires `resource/phenotype` in the path.** The path is `/credible_sets_by_phenotype/{resource}/{phenotype_or_study}`, not `/credible_sets_by_phenotype/{phenotype}`.
+  Omitting the resource gives a 404.
+  Use the FinnGen resource name (`finngen`) for FinnGen phenotype codes (`T2D`, `I9_CHD`), or `open_targets` for GCST codes.
 - **Identifiers are system-specific and may not resolve as you expect.** Phenotype codes (`I9_CHD`, `T2D`) are FinnGen endpoint definitions, not free text — use `fetch_json("/trait_name_mapping")` to look up the right code before passing strings to phenotype-keyed paths.
   UKBB-style trait codes come from a different namespace; don't mix them with FinnGen codes.
   rsIDs can resolve to the wrong alt allele: `/rsid/variants` returns chr:pos:ref:alt, but the credible-set store may have indexed a different alt allele.
