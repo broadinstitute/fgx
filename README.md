@@ -1,7 +1,7 @@
 # fgx — FinnGen eXplore
 
 > [!NOTE]
-> Personal experiment — not an official FinnGen or FinnGenie project.
+> Part of the [jx](https://github.com/broadinstitute/jx) experiment — not an official FinnGen or FinnGenie project.
 
 An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API — FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
 
