@@ -26,8 +26,7 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.broadinstitute.org/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:

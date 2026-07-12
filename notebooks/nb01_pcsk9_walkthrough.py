@@ -27,21 +27,24 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=True)
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.broadinstitute.org/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
+    BASE = "https://genegenie.broadinstitute.org/api/v1"
 
 
 @app.function
 def client() -> httpx.Client:
     """Authenticated httpx client. Bearer token comes from .env at the repo root."""
-    if not FINNGENIE_TOKEN:
-        raise RuntimeError("FINNGENIE_TOKEN not set. Copy .env.example to .env and paste your key.")
-    return httpx.Client(headers={"Authorization": f"Bearer {FINNGENIE_TOKEN}"}, timeout=60)
+    if not GENEGENIE_TOKEN:
+        raise RuntimeError("GENEGENIE_TOKEN not set. Copy .env.example to .env and paste your key.")
+    # follow_redirects=True so a future host rename degrades to a warning, not a hard 3xx failure
+    return httpx.Client(
+        headers={"Authorization": f"Bearer {GENEGENIE_TOKEN}"}, timeout=60, follow_redirects=True
+    )
 
 
 @app.function
 def fetch_tsv(path: str, **params) -> pl.DataFrame:
-    """GET a FinnGenie endpoint as TSV and return a polars DataFrame."""
+    """GET a GeneGenie endpoint as TSV and return a polars DataFrame."""
     with client() as c:
         r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
@@ -50,7 +53,7 @@ def fetch_tsv(path: str, **params) -> pl.DataFrame:
 
 @app.function
 def fetch_json(path: str, **params) -> list[dict]:
-    """GET a FinnGenie endpoint as JSON. Most endpoints accept ?format=json."""
+    """GET a GeneGenie endpoint as JSON. Most endpoints accept ?format=json."""
     with client() as c:
         r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
         r.raise_for_status()
@@ -64,7 +67,7 @@ def _():
 
     Pick a gene, find its lead missense variant in fine-mapped GWAS, then ask which traits share
     its causal signal. Demonstrates the full pattern fgx is built on: an `httpx.get` against
-    `https://finngenie.fi/api/v1/*`, parse the response, plot.
+    `https://genegenie.broadinstitute.org/api/v1/*`, parse the response, plot.
     """)
     return
 
@@ -72,23 +75,23 @@ def _():
 @app.cell
 def _():
     mo.md(r"""
-    ## How fgx talks to FinnGenie
+    ## How fgx talks to GeneGenie
 
-    The whole "library" is `httpx.get` against `https://finngenie.fi/api/v1/*` with a bearer token.
+    The whole "library" is `httpx.get` against `https://genegenie.broadinstitute.org/api/v1/*` with a bearer token.
     Every Python call below is the equivalent of one of these shell one-liners; if you'd rather
     skip Python, the same data comes out either way:
 
     ```bash
     # list all 29 datasets
-    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" https://finngenie.fi/api/v1/datasets
+    curl -H "Authorization: Bearer $GENEGENIE_TOKEN" https://genegenie.broadinstitute.org/api/v1/datasets
 
     # credible sets near a gene (default Content-Type is text/tab-separated-values; pipe to duckdb)
-    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
-         "https://finngenie.fi/api/v1/credible_sets_by_gene/PCSK9"
+    curl -H "Authorization: Bearer $GENEGENIE_TOKEN" \
+         "https://genegenie.broadinstitute.org/api/v1/credible_sets_by_gene/PCSK9"
 
     # colocalization at a variant (JSON, opt-in via ?format=json)
-    curl -H "Authorization: Bearer $FINNGENIE_TOKEN" \
-         "https://finngenie.fi/api/v1/colocalization_by_variant/1:55039974:G:T?format=json"
+    curl -H "Authorization: Bearer $GENEGENIE_TOKEN" \
+         "https://genegenie.broadinstitute.org/api/v1/colocalization_by_variant/1:55039974:G:T?format=json"
     ```
 
     That's the entire data-access layer. The two helpers below (`fetch_tsv`, `fetch_json`) are
@@ -98,8 +101,8 @@ def _():
     For the **complete surface** -- 26 paths across 13 tags (credible sets, colocalization,
     exome, summary stats, search, rsid, etc.) -- the API ships its own OpenAPI 3.1 spec:
 
-    - <https://finngenie.fi/api/v1/openapi.json> (machine-readable, ~74 KB)
-    - <https://finngenie.fi/api/v1/docs> (Swagger UI -- browseable; live + version-correct)
+    - <https://genegenie.broadinstitute.org/api/v1/openapi.json> (machine-readable, ~74 KB)
+    - <https://genegenie.broadinstitute.org/api/v1/docs> (Swagger UI -- browseable; live + version-correct)
 
     When composing a new notebook against an endpoint nb01 doesn't already touch, read the
     spec rather than guessing the path; both links above are the source of truth.

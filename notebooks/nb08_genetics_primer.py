@@ -26,8 +26,7 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:
@@ -43,7 +42,7 @@ def _():
 
     This notebook walks through the core ideas behind modern human genetics using one gene
     as a running example. Every concept is grounded in real data from FinnGen and collaborating
-    biobanks, queried live through the FinnGenie API.
+    biobanks, queried live through the GeneGenie API.
 
     The approach is bottom-up: start with a gene, ask what the genome tells us about it, and
     build up the layers of evidence that connect a stretch of DNA to a disease and a drug.
@@ -150,7 +149,7 @@ def _(GENE):
     variants tested, only signals surviving a stringent threshold (p < 5e-8, or
     -log10(p) > 7.3) count as genome-wide significant.
 
-    FinnGenie stores the results of fine-mapped GWAS as **credible sets** - groups of
+    GeneGenie stores the results of fine-mapped GWAS as **credible sets** - groups of
     variants that, together, have high probability of containing the true causal variant.
     """),
             mo.md(f"### {len(cs):,} credible-set rows for **{GENE}** across all data types"),
@@ -593,7 +592,7 @@ def _():
       phenocode like `I9_CHD` (coronary heart disease) and pull all credible sets for that
       trait. You'll find LDLR alongside dozens of other loci - that's the genome-wide view
       this notebook deliberately avoided to keep the focus on one gene.
-    - **Explore the full FinnGenie catalog.** nb07 lists all 29 datasets the API exposes.
+    - **Explore the full GeneGenie catalog.** nb07 lists all 29 datasets the API exposes.
       This notebook touched GWAS, exome, colocalization, gene-disease, eQTL, and
       nearest-genes - there are more (summary stats, peak-to-genes, chromatin peaks).
     """)
