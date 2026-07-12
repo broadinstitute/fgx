@@ -47,7 +47,11 @@ def prepare_deleterious(exome: pl.DataFrame, ci_z: float = 1.96) -> pl.DataFrame
     Caller decides how to sort and how many rows to keep.
     """
     return (
-        exome.filter(pl.col("annotation").is_in(["pLoF", "missense"]))
+        # Pin numeric dtypes: the API serves TSV, and a gene whose column is all-NA (or has a
+        # stray non-numeric) infers as String, so mlog10p/beta/se dtype varies gene to gene.
+        # Left unpinned, concatenating per-gene frames (nb09) fails to vstack on the dtype clash.
+        exome.with_columns(pl.col("mlog10p", "beta", "se").cast(pl.Float64, strict=False))
+        .filter(pl.col("annotation").is_in(["pLoF", "missense"]))
         .filter(pl.col("se") > 0)
         .filter(pl.col("mlog10p").is_not_null())
         .with_columns(
