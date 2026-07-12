@@ -1,19 +1,19 @@
 ---
 name: compose-notebook
-description: Compose a new genetics analysis in the fgx repo by reusing the marimo notebook(s) under notebooks/ as the substrate, hitting FinnGenie's REST API directly via httpx.get. Trigger when the user asks for a notebook, analysis, figure, or vignette against human-genetics data exposed by FinnGenie -- "credible sets near gene X", "loci driving phenotype Y", "what colocalizes at variant Z", "pull the GWAS signal for...", "compare PIPs across resources", "PheWAS for rsid", "look up an rsID", "search for a phenotype", or any composition question against /api/v1/* -- credible_sets_by_{gene,phenotype,variant,qtl_gene,region,id} and credible_sets/{id}/stats; colocalization_by_{variant,credible_set_id}; exome_results_by_{gene,phenotype,region,variant}; summary_stats/{resource}/{data_type}; nearest_genes; peak_to_genes; gene_disease; rsid/variants; search; phenotype/{resource}/{phenocode}/markdown; resource_metadata; resources; datasets. Authoritative path list at /api/v1/openapi.json (browseable at /api/v1/docs); confirm against the spec rather than guessing if the user asks about an endpoint not listed here. Use this instead of writing standalone httpx code from scratch when the existing helpers already cover the call shape, and instead of asking the user to wire auth themselves.
+description: Compose a new genetics analysis in the fgx repo by reusing the marimo notebook(s) under notebooks/ as the substrate, hitting GeneGenie's REST API directly via httpx.get. Trigger when the user asks for a notebook, analysis, figure, or vignette against human-genetics data exposed by GeneGenie -- "credible sets near gene X", "loci driving phenotype Y", "what colocalizes at variant Z", "pull the GWAS signal for...", "compare PIPs across resources", "PheWAS for rsid", "look up an rsID", "search for a phenotype", or any composition question against /api/v1/* -- credible_sets_by_{gene,phenotype,variant,qtl_gene,region,id} and credible_sets/{id}/stats; colocalization_by_{variant,credible_set_id}; exome_results_by_{gene,phenotype,region,variant}; summary_stats/{resource}/{data_type}; nearest_genes; peak_to_genes; gene_disease; rsid/variants; search; phenotype/{resource}/{phenocode}/markdown; resource_metadata; resources; datasets. Authoritative path list at /api/v1/openapi.json (browseable at /api/v1/docs); confirm against the spec rather than guessing if the user asks about an endpoint not listed here. Use this instead of writing standalone httpx code from scratch when the existing helpers already cover the call shape, and instead of asking the user to wire auth themselves.
 ---
 
 # Compose a new marimo notebook in fgx
 
 ## What this skill is for
 
-fgx is a single-substrate repo: marimo notebooks against FinnGenie's REST API at `https://finngenie.fi/api/v1/*` via `httpx.get`, and nothing else.
+fgx is a single-substrate repo: marimo notebooks against GeneGenie's REST API at `https://genegenie.broadinstitute.org/api/v1/*` via `httpx.get`, and nothing else.
 There is no Python SDK, no MCP server, no schema cache, and no shared library file -- every helper lives in the notebook that introduced it, and other notebooks reach across via plain Python imports.
 The `nbNN_<topic>.py` filename convention exists *specifically* so a sibling notebook can do `sys.path.insert(0, "notebooks") + from nb01_pcsk9_walkthrough import fetch_tsv`.
 Python forbids module names starting with a digit; `nbNN_*` sidesteps that.
 This is the same layering the [jx repo](https://github.com/broadinstitute/jx) uses for JUMP Cell Painting.
 
-When the user asks a genetics question that the FinnGenie API can answer, your job is to (a) decide whether to edit a canonical notebook in place (parameter swap), or compose a fresh exploration notebook that imports from the canonical homes, and (b) reuse the existing helpers rather than re-implementing auth, TSV/JSON parsing, or any other plumbing.
+When the user asks a genetics question that the GeneGenie API can answer, your job is to (a) decide whether to edit a canonical notebook in place (parameter swap), or compose a fresh exploration notebook that imports from the canonical homes, and (b) reuse the existing helpers rather than re-implementing auth, TSV/JSON parsing, or any other plumbing.
 
 ## The catalog
 
@@ -27,8 +27,8 @@ Future explorations are nb05+ -- they import from this core and are not expected
 | `nb03_phenotype_locus_zoom` | `pick_leads(cs)`, `annotate_with_nearest_gene(variants)` | Phenocode + resource -> `credible_sets_by_phenotype` -> Manhattan with gene labels. `pick_leads` reduces a credible-set DataFrame to one lead row per `cs_id`; `annotate_with_nearest_gene` joins each variant with its nearest protein-coding gene. |
 | `nb04_gene_exome_burden` | `prepare_deleterious(exome, ci_z=1.96)` | Gene (rare-variant arm) -> `exome_results_by_gene` -> `gene_disease` -> forest plot of pLoF/missense betas with CIs. `prepare_deleterious` is the polars prep pipeline (filter to pLoF/missense, drop `mlog10p` underflow rows, attach CI bounds + `trait_variant` label). nb05 imports it to avoid duplicating the pipeline. |
 | `nb05_pign_cdg` | -- | Gene (rare-variant arm, recessive Mendelian) -> `exome_results_by_gene` -> `gene_disease` -> forest plot + curated cross-check. Same shape as nb04, different story: where PCSK9's two arms *converge* on lipids, PIGN's *diverge* -- gencc/monarch converge on MCAHS1 ("Definitive" by ClinGen and G2P, autosomal recessive) while genebass surfaces corneal biomechanics in adult heterozygotes. UKB doesn't enroll affected MCAHS1 probands, so the rare-variant arm shows what one PIGN dose perturbs in carriers, not the recessive disease itself. First concrete demo of the cross-notebook composition pattern -- imports `prepare_deleterious` from nb04 rather than duplicating the polars chain. |
-| `nb06_variant_pqtl_function` | `pqtl_credible_sets(variant)`, `direction_consensus(df, beta_col)` | Variant -> `credible_sets_by_variant` filtered to `data_type == "pQTL"` -> per-protein PIP/beta panel + direction-of-effect summary. Hero replay of the FinnGenie demo (Karjalainen, 2026-05-05): `chr2:9521321:A:G` in ADAM17 -> 4 plasma proteins all with negative beta -> consistent loss-of-sheddase mechanism. Distinct from nb01 (gene-first) and nb02 (full PheWAS) by being variant-first AND pQTL-only AND by surfacing sign-of-effect across the panel rather than top-mlog10p across all data types. |
-| `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the FinnGenie demo. |
+| `nb06_variant_pqtl_function` | `pqtl_credible_sets(variant)`, `direction_consensus(df, beta_col)` | Variant -> `credible_sets_by_variant` filtered to `data_type == "pQTL"` -> per-protein PIP/beta panel + direction-of-effect summary. Hero replay of the GeneGenie demo (Karjalainen, 2026-05-05): `chr2:9521321:A:G` in ADAM17 -> 4 plasma proteins all with negative beta -> consistent loss-of-sheddase mechanism. Distinct from nb01 (gene-first) and nb02 (full PheWAS) by being variant-first AND pQTL-only AND by surfacing sign-of-effect across the panel rather than top-mlog10p across all data types. |
+| `nb07_data_catalog` | `list_datasets()`, `list_resources()`, `resource_metadata(resource)` | `/datasets` + `/resources` + `/resource_metadata/{resource}` -> grouped catalog table with `mo.ui.table` selection driving a per-resource metadata drill-down. The "what's available?" introspection notebook -- read it first when a new question lands to confirm a dataset covers it. Replays the slide-05/06 catalog walk from the GeneGenie demo. |
 | `nb08_genetics_primer` | -- | Educational walkthrough: LDLR as a case study through GWAS, fine-mapping, colocalization, exome, eQTL/pQTL, and gene-disease curation. Imports `prepare_deleterious` from nb04. Teaches genetics concepts by showing what a clean signal looks like for a well-understood gene. |
 | `nb09_polygenic_heart_disease` | -- | Phenotype (CHD) -> `credible_sets_by_phenotype` -> Manhattan + effect-size histogram + cross-pathway colocalization + multi-gene exome forest plot. Builds the case that heart disease is polygenic from four layers of evidence: many independent loci, small individual effects, diverse colocalizing traits (with CHD self-coloc filtering), and rare coding variants in LDLR/PCSK9/APOB/LPA. Imports `pick_leads` and `annotate_with_nearest_gene` from nb03, `prepare_deleterious` from nb04. |
 | `nb10_diabetes_susceptibility` | -- | Phenotype (T2D) -> `credible_sets_by_phenotype` -> Manhattan + effect-size histogram + TCF7L2 colocalization deep dive + MODY gene-disease curation. Same polygenic shape as nb09 but with a distinct angle: the GWAS loci overlap heavily with monogenic MODY genes (HNF1A, HNF4A, GCK, KCNJ11, ABCC8, PPARG), showing that common variants whisper what rare mutations shout. Imports `pick_leads` from nb03. First notebook to use the `alt.Data(values=df.to_dicts())` pattern for altair chart data — see the polars/altair gotcha. |
@@ -54,7 +54,7 @@ Per-line comments are fragile -- a manual `ruff check --fix --unsafe-fixes` run,
 The pyproject-level rule survives both.
 
 Importing nb01 also runs nb01's own `with app.setup:` block (idempotent: same `load_dotenv`, same `import polars`); cell *bodies* don't execute on import because `if __name__ == "__main__": app.run()` guards the kernel start.
-Local `BASE` and `FINNGENIE_TOKEN` constants stay in each notebook's setup so .env diagnostics surface locally rather than chasing imports.
+Local `BASE` and `GENEGENIE_TOKEN` constants stay in each notebook's setup so .env diagnostics surface locally rather than chasing imports.
 
 ## Two paths: parameter swap vs compose
 
@@ -108,8 +108,8 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
+    BASE = "https://genegenie.broadinstitute.org/api/v1"
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:
@@ -164,9 +164,9 @@ It then becomes importable by future composers via the same `from nbNN_<topic> i
 1. **Read the closest existing notebook.** The first cell explains what it does; the helpers and import recipe sit at the top.
    Skim before composing.
 2. **Identify the endpoint.** Map the user's question to a `/api/v1/*` path.
-   The full surface is in the OpenAPI spec at <https://finngenie.fi/api/v1/openapi.json> (browseable Swagger at <https://finngenie.fi/api/v1/docs>) -- 28 operations across 13 tags.
+   The full surface is in the OpenAPI spec at <https://genegenie.broadinstitute.org/api/v1/openapi.json> (browseable Swagger at <https://genegenie.broadinstitute.org/api/v1/docs>) -- 28 operations across 13 tags.
    Read the spec before guessing; the description's path list is a reminder, not a contract.
-   If you're unsure of the response shape, run `curl -fsS -H "Authorization: Bearer $FINNGENIE_TOKEN" "https://finngenie.fi/api/v1/<path>?format=json"` once to confirm, then write the cell.
+   If you're unsure of the response shape, run `curl -fsS -H "Authorization: Bearer $GENEGENIE_TOKEN" "https://genegenie.broadinstitute.org/api/v1/<path>?format=json"` once to confirm, then write the cell.
 3. **Pick the path.** Parameter-swap on a canonical -> Path A. Anything else -> Path C.
 4. **See the data before writing the story.** Run the key API calls and inspect the actual values *before* drafting narrative cells.
    Characterize what the data contains: unique value counts, group-by distributions, range of the column you plan to sort or color by.

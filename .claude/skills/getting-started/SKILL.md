@@ -4,9 +4,9 @@ description: >-
   Walk a first-time fgx user from a fresh clone to a running marimo kernel
   with agent composition enabled. Trigger when the user says "help me get
   started", "onboard me", "set me up", "I'm new to fgx", "first time using
-  fgx", "what do I do next", or asks any FinnGenie / human-genetics
+  fgx", "what do I do next", or asks any GeneGenie / human-genetics
   composition question before a marimo kernel is running and marimo-pair
-  is connected. Verifies the FINNGENIE_TOKEN is set, sets up uv, prompts
+  is connected. Verifies the GENEGENIE_TOKEN is set, sets up uv, prompts
   the user to install the marimo-pair skill, launches the marimo server
   on nb01.
 ---
@@ -17,19 +17,19 @@ Your job: get this user from a cold clone to a live marimo kernel pointed at nb0
 
 ## Setup flow
 
-### 1. Verify FINNGENIE_TOKEN is set
+### 1. Verify GENEGENIE_TOKEN is set
 
-Check `.env` exists and contains a non-empty `FINNGENIE_TOKEN`:
+Check `.env` exists and contains a non-empty `GENEGENIE_TOKEN`:
 
-grep -q "^FINNGENIE_TOKEN=." .env 2>/dev/null && echo OK || echo MISSING
+grep -q "^GENEGENIE_TOKEN=." .env 2>/dev/null && echo OK || echo MISSING
 
 If `MISSING`, walk the user through:
 
-1. Open <https://finngenie.broadinstitute.org/> -> `MCP/API KEYS` -> `Create key`.
+1. Open <https://genegenie.broadinstitute.org/> -> `MCP/API KEYS` -> `Create key`.
 2. `cp .env.example .env`.
-3. Paste the key after `FINNGENIE_TOKEN=` in `.env`.
+3. Paste the key after `GENEGENIE_TOKEN=` in `.env`.
 
-Confirm the same token works for both the FinnGenie MCP and the REST API fgx uses; one key, both paths.
+Confirm the same token works for both the GeneGenie MCP and the REST API fgx uses; one key, both paths.
 
 ### 2. Verify uv is installed
 
@@ -81,7 +81,7 @@ Once the kernel is live and marimo-pair is connected, ask the user what genetics
 - **marimo[lsp] resolver conflict (`jedi==0.20.0`).** `uvx marimo edit --sandbox` resolves marimo with its `[lsp]` extras, which transitively pulls `python-lsp-server>=1.13.0` requiring `jedi<0.20.0`, while something in the resolution graph pins `jedi==0.20.0`. nb01's PEP 723 header carries an explicit `jedi<0.20.0` to break the tie -- if you copy-fork to nb02 and the launch fails with "you require jedi==0.20.0 and marimo[lsp] ...", the `jedi<0.20.0` line is missing from the new notebook's header.
   Don't drop it.
   Don't try to "fix" it by relaxing the `marimo<0.23.4` pin either; that pin avoids a separate 0.23.4 sandbox lockfile bug.
-- **Don't share the `FINNGENIE_TOKEN`.** It's personal and gates access to embargoed FinnGen data.
+- **Don't share the `GENEGENIE_TOKEN`.** It's personal and gates access to embargoed FinnGen data.
   Never commit `.env`; never paste the token into chat.
   The portal's "Created" timestamp lets the user audit which keys are active.
 - **No data caching.** Unlike jx, fgx hits the API live every cell.

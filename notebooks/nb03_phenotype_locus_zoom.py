@@ -27,8 +27,7 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:
@@ -91,7 +90,7 @@ def _():
     mo.md(r"""
     # nb03: phenotype-first locus discovery
 
-    Pick a phenotype, ask FinnGenie for every fine-mapped credible set genome-wide, then draw a
+    Pick a phenotype, ask GeneGenie for every fine-mapped credible set genome-wide, then draw a
     Manhattan from the lead variants and annotate the top loci with their nearest gene. The
     entry point flips relative to nb01: instead of "what does this gene do?", we're asking
     "where in the genome does this disease live?".

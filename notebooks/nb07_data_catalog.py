@@ -27,8 +27,7 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:
@@ -39,7 +38,7 @@ with app.setup:
 
 @app.function
 def list_datasets() -> pl.DataFrame:
-    """All datasets FinnGenie indexes, flattened to one row per dataset.
+    """All datasets GeneGenie indexes, flattened to one row per dataset.
 
     Hits `/datasets` and pulls the top-level fields out of the nested
     `products` (`credible_sets`, `summary_stats`, `colocalization.partners`)
@@ -154,13 +153,13 @@ def _():
     mo.md(r"""
     # nb07: What's in the catalog?
 
-    The FinnGenie demo (Karjalainen, VOA 2026-05-05) opened with a slide cataloguing all 29
+    The GeneGenie demo (Karjalainen, VOA 2026-05-05) opened with a slide cataloguing all 29
     datasets the API exposes -- GWAS, QTL families, exome / gene-based, expression, gene-disease,
     chromatin peaks, colocalization-only -- with phenotype counts and sample sizes. This notebook
     is the agentic equivalent: hit `/datasets` and `/resources`, group the response, and let an
     agent (or a human) introspect what's available before composing an analysis.
 
-    Use this as the **first** notebook to read when a new question lands. "Can FinnGenie answer
+    Use this as the **first** notebook to read when a new question lands. "Can GeneGenie answer
     X for trait Y?" reduces to "is there a dataset whose `resource`/`type` covers Y?" -- and the
     answer is one cell away. The dataset names you find here are the strings you pass to the
     `resource=` parameter on most other endpoints (nb01-nb04 helpers).
@@ -172,7 +171,7 @@ def _():
 def _():
     datasets = list_datasets()
     if datasets.is_empty():
-        header = mo.md("`/datasets` returned no rows -- check `FINNGENIE_TOKEN` and `BASE`.")
+        header = mo.md("`/datasets` returned no rows -- check `GENEGENIE_TOKEN` and `BASE`.")
     else:
         header = mo.md(f"### `/datasets` returned {len(datasets):,} rows with columns: `{', '.join(datasets.columns)}`")
     header
@@ -292,7 +291,7 @@ def _():
     mo.md(r"""
     ## Phenotype counts at a glance
 
-    The other introspection question the FinnGenie demo answered live was *"how many phenotypes
+    The other introspection question the GeneGenie demo answered live was *"how many phenotypes
     are in FinnGen R13?"* -- 2,754 core GWAS, 388 Kanta lab, 126 drug-purchase. That number lives
     inside `stats.n_phenotypes` on each `/datasets` row, which `list_datasets()` has already
     pulled out into the flat `n_phenotypes` column. The cell below filters to the FinnGen family;
@@ -332,7 +331,7 @@ def _():
       filter, and you've built a one-cell catalog browser an agent can drive in a single step.
     - Pull `/trait_name_mapping` once and join it to the metadata table so phenotype codes
       (`I9_CHD`, `T2D`, `K11_CROHN`, ...) resolve to human labels in place.
-    - Cache `/datasets` to a local parquet (it's small and changes only on FinnGenie releases).
+    - Cache `/datasets` to a local parquet (it's small and changes only on GeneGenie releases).
       An agent can then introspect the catalog without hitting the API on every cold start.
     - When the OpenAPI spec adds a new endpoint family, the surface this notebook surveys still
       stays one cell -- the spec at `/api/v1/openapi.json` is the source of truth, and adding a

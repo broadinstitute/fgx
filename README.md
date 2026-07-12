@@ -1,15 +1,15 @@
 # fgx — FinnGen eXplore
 
 > [!NOTE]
-> Part of the [jx](https://github.com/broadinstitute/jx) experiment — not an official FinnGen or FinnGenie project.
+> Part of the [jx](https://github.com/broadinstitute/jx) experiment — not an official FinnGen or GeneGenie project.
 
-An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [FinnGenie](https://finngenie.broadinstitute.org/) results API — FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
+An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [GeneGenie](https://genegenie.broadinstitute.org/) results API — FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
 
 fgx is a curated catalog of [marimo](https://marimo.io) notebooks for human-genetics analysis, plus a thin skill that lets an agent compose new analyses from them.
 Each notebook is both a runnable demonstration and a source of pure functions other notebooks can [import and reuse](https://docs.marimo.io/guides/reusing_functions/) directly.
 Given a new human-genetics question, the agent picks relevant notebooks, composes their functions into a new notebook, executes it in a live kernel, and hands back a self-contained, re-runnable result.
 
-FinnGenie ships [`https://finngenie.fi/api/v1/*`](https://finngenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
+GeneGenie ships [`https://genegenie.broadinstitute.org/api/v1/*`](https://genegenie.broadinstitute.org/) with bearer auth, predictable paths, and TSV by default — that collapses the data-access layer to `httpx.get`, so there is no Python SDK, no MCP server, no schema cache.
 
 ## The catalog
 
@@ -31,7 +31,7 @@ Related public catalogs of the same pattern: [jx](https://github.com/broadinstit
 
 ## Getting started
 
-Create an API key at [finngenie.broadinstitute.org](https://finngenie.broadinstitute.org/) (`MCP/API KEYS` -> `Create key`), then `cp .env.example .env` and paste your key in.
+Create an API key at [genegenie.broadinstitute.org](https://genegenie.broadinstitute.org/) (`MCP/API KEYS` -> `Create key`), then `cp .env.example .env` and paste your key in.
 
 Clone this repo, open Claude Code inside it, and ask: *help me get started*.
 The `getting-started` skill installs prereqs ([uv](https://docs.astral.sh/uv/) and the [marimo-pair](https://github.com/marimo-team/marimo-pair) skill), launches `nb01_pcsk9_walkthrough` in a live marimo kernel, and hands off to the `compose-notebook` skill for the actual analysis.

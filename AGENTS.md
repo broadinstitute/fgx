@@ -1,7 +1,7 @@
 # AGENTS.md - fgx
 
 Project-specific guidance for agents working in this repository.
-This is the public, runnable catalog of marimo notebooks for FinnGenie human-genetics analysis.
+This is the public, runnable catalog of marimo notebooks for GeneGenie human-genetics analysis.
 Planning and cross-instance coordination live in the primary [`jx`](https://github.com/broadinstitute/jx) repo.
 
 `README.md` is the human entry point.
@@ -54,8 +54,8 @@ Always regenerate snapshots **after** the final formatter / source edit, and com
 - Catalog over library.
   Helpers live as `@app.function` cells in numbered notebooks.
   Later notebooks import from earlier notebooks by adding `notebooks/` to `sys.path`.
-- FinnGenie access is direct REST via `httpx`; there is no SDK, no schema cache, and no MCP dependency in the notebook path.
-- `FINNGENIE_TOKEN` lives only in local `.env`.
+- GeneGenie access is direct REST via `httpx`; there is no SDK, no schema cache, and no MCP dependency in the notebook path.
+- `GENEGENIE_TOKEN` lives only in local `.env`.
   Never commit or paste it.
 - API reads are live by design; do not add a committed cache unless the data surface changes.
 - Do not add a Python package until repeated cross-notebook imports make the notebook-as-library pattern painful.
@@ -69,7 +69,7 @@ Always regenerate snapshots **after** the final formatter / source edit, and com
 
 ## When the Question Fits the Catalog
 
-Almost every FinnGenie question should compose existing helpers:
+Almost every GeneGenie question should compose existing helpers:
 
 - gene -> credible sets / colocalization -> `nb01_pcsk9_walkthrough`
 - variant / rsID PheWAS -> `nb02_variant_phewas`

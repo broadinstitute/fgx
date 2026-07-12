@@ -27,8 +27,7 @@ with app.setup:
     from dotenv import load_dotenv
 
     load_dotenv(Path(__file__).resolve().parent.parent / ".env")
-    FINNGENIE_TOKEN = os.environ.get("FINNGENIE_TOKEN")
-    BASE = "https://finngenie.fi/api/v1"
+    GENEGENIE_TOKEN = os.environ.get("GENEGENIE_TOKEN")
 
     NOTEBOOK_DIR = Path(__file__).resolve().parent
     if str(NOTEBOOK_DIR) not in sys.path:
@@ -93,7 +92,7 @@ def _():
     mo.md(r"""
     # nb06: Variant -> pQTL credible sets -> mechanism
 
-    The hero example from the FinnGenie demo (Karjalainen, VOA 2026-05-05): take a GWAS-significant
+    The hero example from the GeneGenie demo (Karjalainen, VOA 2026-05-05): take a GWAS-significant
     variant in a gene of interest, ask which **plasma proteins** have a credible set that includes
     this variant, then read the **direction of effect** across those proteins. When a variant sits
     in a sheddase or a regulator and pushes multiple downstream proteins in the same direction,
@@ -133,7 +132,7 @@ def _(VARIANT):
     if pqtl.is_empty():
         header = mo.md(
             f"No pQTL credible sets contain `{VARIANT}`. Either the variant doesn't index any "
-            "protein signal at the resources FinnGenie holds, or the allele encoding differs from "
+            "protein signal at the resources GeneGenie holds, or the allele encoding differs from "
             f"the credible-set store -- try `nb02.alt_alleles({VARIANT!r})` and re-run with each "
             "candidate."
         )
@@ -284,7 +283,7 @@ def _(GENE_CONTEXT):
 
     A variant in **{GENE_CONTEXT}** that pushes a set of plasma proteins in one shared
     direction is the signature of a single upstream mechanism. The interpretation step --
-    which the FinnGenie chatbot does via literature search -- is to ask whether the affected
+    which the GeneGenie chatbot does via literature search -- is to ask whether the affected
     proteins share a known relationship to {GENE_CONTEXT}'s function. For ADAM17 specifically,
     the demo's reading was: ERBB4 and TNFRSF1A are documented ADAM17 substrates whose
     ectodomains are cleaved off the cell surface; if the variant **reduces** ADAM17 sheddase
