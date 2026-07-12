@@ -13,3 +13,7 @@ __marimo__/
 !notebooks/__marimo__/
 !notebooks/__marimo__/session/
 !notebooks/__marimo__/session/*.json
+
+# Installed skills: recorded in the tracked skills-lock.json, NOT vendored.
+.agents/
+.claude/skills/*

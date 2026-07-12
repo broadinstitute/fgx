@@ -5,7 +5,8 @@ This is the public, runnable catalog of marimo notebooks for GeneGenie human-gen
 Planning and cross-instance coordination live in the primary [`jx`](https://github.com/broadinstitute/jx) repo.
 
 `README.md` is the human entry point.
-The skills under `.claude/skills/` are the operational entry points: `getting-started` for first-run setup and `compose-notebook` for adding or composing analyses.
+This catalog uses the shared [vignette-catalog-skills](https://github.com/carpenter-singh-lab/vignette-catalog-skills) (`vignette-catalog-setup` for first-run setup, `vignette-catalog-compose-notebook` for adding or composing analyses); its specifics live in `catalog.toml`.
+The skills are installed via `npx skills add carpenter-singh-lab/vignette-catalog-skills --agent claude-code -y`, recorded in the tracked `skills-lock.json`, but **not vendored** - `.claude/skills/*` is gitignored, so restore them on a fresh clone before use.
 
 ## Launching notebooks
 
@@ -79,4 +80,4 @@ Almost every GeneGenie question should compose existing helpers:
 - variant pQTL direction of effect -> `nb06_variant_pqtl_function`
 - available datasets/resources -> `nb07_data_catalog`
 
-Read `.claude/skills/compose-notebook/SKILL.md` before writing new analysis code.
+Read the installed `vignette-catalog-compose-notebook` skill (and `catalog.toml`'s `[[vignette]]` table) before writing new analysis code.
