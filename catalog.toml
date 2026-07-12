@@ -8,6 +8,7 @@ version = ""       # no single catalog-wide release: GeneGenie aggregates ~29 da
                    # of each dataset is carried in that dataset's own API responses; results are not
                    # reproducible across upstream re-releases of any constituent dataset.
 cache = ""         # public read-only reads, fetched fresh; no cache
+caveats = "AGENTS.md"   # fgx-specific GeneGenie API papercuts under "GeneGenie API gotchas"
 
 [auth]
 env_var = "GENEGENIE_TOKEN"   # personal API key for GeneGenie; embargoed FinnGen data, do not share

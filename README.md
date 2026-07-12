@@ -3,7 +3,7 @@
 > [!NOTE]
 > Part of the [jx](https://github.com/broadinstitute/jx) experiment — not an official FinnGen or GeneGenie project.
 
-An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [GeneGenie](https://genegenie.broadinstitute.org/) results API — FinnGen R13 + UK Biobank + MVP meta-analyses, eQTL Catalogue R7, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
+An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [GeneGenie](https://genegenie.broadinstitute.org/) results API — FinnGen R14 + UK Biobank + MVP meta-analyses, eQTL Catalogue R8, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
 
 fgx is a curated catalog of [marimo](https://marimo.io) notebooks for human-genetics analysis, plus a thin skill that lets an agent compose new analyses from them.
 Each notebook is both a runnable demonstration and a source of pure functions other notebooks can [import and reuse](https://docs.marimo.io/guides/reusing_functions/) directly.
