@@ -5,7 +5,8 @@ This is the public, runnable catalog of marimo notebooks for GeneGenie human-gen
 Planning and cross-instance coordination live in the primary [`jx`](https://github.com/broadinstitute/jx) repo.
 
 `README.md` is the human entry point.
-The skills under `.claude/skills/` are the operational entry points: `getting-started` for first-run setup and `compose-notebook` for adding or composing analyses.
+This catalog uses the shared [vignette-catalog-skills](https://github.com/carpenter-singh-lab/vignette-catalog-skills) (`vignette-catalog-setup` for first-run setup, `vignette-catalog-compose-notebook` for adding or composing analyses); its specifics live in `catalog.toml`.
+The skills are installed via `npx skills add carpenter-singh-lab/vignette-catalog-skills --agent claude-code -y`, recorded in the tracked `skills-lock.json`, but **not vendored** - `.claude/skills/*` is gitignored, so restore them on a fresh clone before use.
 
 ## Launching notebooks
 
@@ -79,4 +80,15 @@ Almost every GeneGenie question should compose existing helpers:
 - variant pQTL direction of effect -> `nb06_variant_pqtl_function`
 - available datasets/resources -> `nb07_data_catalog`
 
-Read `.claude/skills/compose-notebook/SKILL.md` before writing new analysis code.
+Read the installed `vignette-catalog-compose-notebook` skill (and `catalog.toml`'s `[[vignette]]` table) before writing new analysis code.
+
+## GeneGenie API gotchas
+
+These are fgx-specific endpoint-semantics papercuts (they do not live in the shared skill; the generic marimo/molab gotchas do).
+
+- **TSV is the API default** (`Content-Type: text/tab-separated-values`). `fetch_json` *unconditionally* injects `format=json`, so pick the helper by the response shape you want; you cannot flip format via a kwarg.
+- **Filter before printing.** `credible_sets_by_gene/PCSK9` is ~3,200 rows / ~1.3 MB and `resource_metadata/finngen` ~3,300 rows. Summarize in-cell (`.filter`, `.head(20)`, `group_by+agg`) and never let a raw full-size response land in the transcript.
+- **Do not infer semantics from a path name.** `exome_results_by_gene` returns per-variant single-variant rows, not gene-level burden. `mlog10p` saturates at floating-point limits (`mlog10p == 324` with `se == 0`), `pip` can be null, and `most_severe` is a VEP prediction, not a clinical classification. Read the actual response (or the OpenAPI spec) first.
+- **`/search` uses `q`, not `query`.** It returns JSON; call `client().get(f"{BASE}/search", params={"q": term})` directly and parse `r.json()` - `fetch_json` (which forces `format=json`) can 422 here.
+- **`/credible_sets_by_phenotype` needs `{resource}/{phenotype}`** in the path (e.g. `finngen/T2D`, `open_targets/GCST...`). Omitting the resource is a 404.
+- **Identifiers are system-specific.** Phenotype codes (`I9_CHD`, `T2D`) are FinnGen definitions - look them up via `fetch_json("/trait_name_mapping")`. An rsID can resolve to a different alt allele than the credible-set store indexed; when a known-good identifier returns 0 rows, suspect the mapping, not the data.

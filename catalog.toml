@@ -1,0 +1,67 @@
+name = "fgx"
+description = "FinnGen eXplore - agent-composable marimo notebooks over GeneGenie's REST API for human-genetics fine-mapping, colocalization, and exome analysis"
+
+[data]
+surface = "rest"   # rest | duckdb | pooch | files
+version = ""       # no single catalog-wide release: GeneGenie aggregates ~29 datasets, each versioned
+                   # independently (FinnGen R14, Open Targets 25.12, eQTL Catalogue R8, ...). The version
+                   # of each dataset is carried in that dataset's own API responses; results are not
+                   # reproducible across upstream re-releases of any constituent dataset.
+cache = ""         # public read-only reads, fetched fresh; no cache
+caveats = "AGENTS.md"   # fgx-specific GeneGenie API papercuts under "GeneGenie API gotchas"
+
+[auth]
+env_var = "GENEGENIE_TOKEN"   # personal API key for GeneGenie; embargoed FinnGen data, do not share
+
+[getting_started]
+first_notebook = "nb01_pcsk9_walkthrough.py"
+
+[[vignette]]
+notebook = "nb01_pcsk9_walkthrough.py"
+helpers  = ["client", "fetch_tsv", "fetch_json"]
+does     = "Gene -> credible_sets_by_gene -> colocalization_by_variant -> bar chart of top traits + colocalizing pairs. Every other notebook imports the three helpers from here"
+
+[[vignette]]
+notebook = "nb02_variant_phewas.py"
+helpers  = ["alt_alleles"]
+does     = "rsID / variant -> rsid/variants -> credible_sets_by_variant -> nearest_genes -> PheWAS dot plot; alt_alleles returns strand/allele-fallback candidates when an rsID resolution misses the index"
+
+[[vignette]]
+notebook = "nb03_phenotype_locus_zoom.py"
+helpers  = ["pick_leads", "annotate_with_nearest_gene"]
+does     = "Phenocode + resource -> credible_sets_by_phenotype -> Manhattan with gene labels; pick_leads reduces to one lead row per cs_id, annotate_with_nearest_gene joins nearest protein-coding gene"
+
+[[vignette]]
+notebook = "nb04_gene_exome_burden.py"
+helpers  = ["prepare_deleterious"]
+does     = "Gene (rare-variant arm) -> exome_results_by_gene -> gene_disease -> forest plot of pLoF/missense betas with CIs; prepare_deleterious is the polars prep pipeline reused by nb05/nb08"
+
+[[vignette]]
+notebook = "nb05_pign_cdg.py"
+helpers  = []
+does     = "Gene (recessive Mendelian) -> exome_results_by_gene -> gene_disease -> forest plot + curated cross-check; first demo of cross-notebook composition, imports prepare_deleterious from nb04"
+
+[[vignette]]
+notebook = "nb06_variant_pqtl_function.py"
+helpers  = ["pqtl_credible_sets", "direction_consensus"]
+does     = "Variant -> credible_sets_by_variant filtered to pQTL -> per-protein PIP/beta panel + direction-of-effect summary (variant-first, pQTL-only, sign-of-effect across the panel)"
+
+[[vignette]]
+notebook = "nb07_data_catalog.py"
+helpers  = ["list_datasets", "list_resources", "resource_metadata"]
+does     = "/datasets + /resources + /resource_metadata -> grouped catalog table with selection-driven per-resource drill-down; the 'what's available?' introspection notebook, read first when a new question lands"
+
+[[vignette]]
+notebook = "nb08_genetics_primer.py"
+helpers  = []
+does     = "Educational walkthrough: LDLR through GWAS, fine-mapping, colocalization, exome, eQTL/pQTL, and gene-disease curation; imports prepare_deleterious from nb04"
+
+[[vignette]]
+notebook = "nb09_polygenic_heart_disease.py"
+helpers  = []
+does     = "Phenotype (CHD) -> credible_sets_by_phenotype -> Manhattan + effect-size histogram + cross-pathway colocalization + multi-gene exome forest; imports pick_leads/annotate_with_nearest_gene from nb03, prepare_deleterious from nb04"
+
+[[vignette]]
+notebook = "nb10_diabetes_susceptibility.py"
+helpers  = []
+does     = "Phenotype (T2D) -> credible_sets_by_phenotype -> Manhattan + histogram + TCF7L2 colocalization + MODY gene-disease curation; imports pick_leads from nb03"

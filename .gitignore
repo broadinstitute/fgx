@@ -13,3 +13,10 @@ __marimo__/
 !notebooks/__marimo__/
 !notebooks/__marimo__/session/
 !notebooks/__marimo__/session/*.json
+
+# Installed skills: recorded in the tracked skills-lock.json, NOT vendored.
+.agents/
+.claude/skills/*
+
+# Local red-team review cache written by the Stop hook; never commit.
+.claude/.red-team-cache/
