@@ -384,7 +384,7 @@ def _():
 @app.cell
 def _(raw_leads):
     direction_probe = (
-        raw_leads.filter(pl.col("mlog10p") >= GW_MLOG10P)
+        raw_leads.filter((pl.col("mlog10p") >= GW_MLOG10P) & pl.col("aaf").is_not_null())
         .with_columns(
             pl.when(pl.col("aaf") < 0.01)
             .then(pl.lit("<1%"))
@@ -396,7 +396,10 @@ def _(raw_leads):
             .alias("alt_allele_freq")
         )
         .group_by("alt_allele_freq")
-        .agg(pl.len().alias("n_leads"), pl.col("beta").lt(0).mean().alias("frac_protective"))
+        .agg(
+            pl.len().alias("n_leads"),
+            pl.col("beta").lt(0).mean().alias("frac_protective"),
+        )
         .sort("alt_allele_freq")
     )
     direction_chart = (
@@ -404,19 +407,39 @@ def _(raw_leads):
         .mark_bar(size=42, color="#2b83ba")
         .encode(
             x=alt.X(
-                "alt_allele_freq:N", sort=["<1%", "1-5%", "5-50%", ">50% (alt is major)"], title="alt allele frequency"
+                "alt_allele_freq:N",
+                sort=["<1%", "1-5%", "5-50%", ">50% (alt is major)"],
+                title="alt allele frequency",
             ),
-            y=alt.Y("frac_protective:Q", title="fraction of leads with beta < 0", scale=alt.Scale(domain=[0, 0.6])),
-            tooltip=["alt_allele_freq", "n_leads", alt.Tooltip("frac_protective:Q", format=".3f")],
+            y=alt.Y(
+                "frac_protective:Q",
+                title="fraction of leads with beta < 0",
+                scale=alt.Scale(domain=[0, 0.6]),
+            ),
+            tooltip=[
+                "alt_allele_freq",
+                "n_leads",
+                alt.Tooltip("frac_protective:Q", format=".3f"),
+            ],
         )
-        .properties(height=260, title="Protective fraction rises with allele frequency -- ascertainment, not biology")
+        .properties(
+            height=260,
+            title="Protective fraction rises with allele frequency -- ascertainment, not biology",
+        )
     )
     rule = alt.Chart(pl.DataFrame({"y": [0.5]})).mark_rule(strokeDash=[6, 4], color="#d7191c").encode(y="y:Q")
+    _n_significant = raw_leads.filter(pl.col("mlog10p") >= GW_MLOG10P).height
+    _n_null_aaf = raw_leads.filter((pl.col("mlog10p") >= GW_MLOG10P) & pl.col("aaf").is_null()).height
+    _n_below_gw = len(raw_leads) - _n_significant
     mo.vstack(
         [
             mo.ui.altair_chart(direction_chart + rule),
             direction_probe,
             mo.md(
+                f"The chart includes {_n_significant - _n_null_aaf:,} genome-wide significant leads "
+                f"with reported allele frequency. The {_n_below_gw:,} retrieved leads not shown are "
+                f"below the p <= 5e-8 threshold; {_n_null_aaf:,} significant leads are excluded for "
+                "missing allele frequency.\n\n"
                 "At **alt-allele frequency above 50%** the split is ~52/48 -- a coin flip, exactly what "
                 "arbitrary allele labelling predicts. It falls to **~14% at frequencies under 1%**.\n\n"
                 "That gradient is a detection asymmetry, not a biological one. To reach genome-wide "
@@ -504,6 +527,14 @@ def _():
 
 @app.cell
 def _(protective):
+    _mapping_checks = {
+        "Malignant neoplasm of breast": "Breast",
+        "Malignant neoplasm of bronchus and lung": "Lung",
+        "Malignant neoplasm": "All cancer (umbrella)",
+        "Basal cell carcinoma of skin": "Skin (non-melanoma)",
+    }
+    assert all(cancer_site(_label) == _site for _label, _site in _mapping_checks.items())
+
     by_site = (
         protective.group_by("site")
         .agg(
@@ -512,22 +543,50 @@ def _(protective):
             pl.col("locus").n_unique().alias("independent_loci"),
             pl.col("phenotype_code").n_unique().alias("finngen_codes"),
         )
+        .with_columns((pl.col("distinct_variants") / pl.col("independent_loci")).round(2).alias("variants_per_locus"))
         .sort("associations", descending=True)
     )
     skin_row = by_site.filter(pl.col("site") == "Skin (non-melanoma)")
+    _prostate_row = by_site.filter(pl.col("site") == "Prostate")
+    _unmapped_row = by_site.filter(pl.col("site") == "Other/unmapped")
+    _all_loci = protective["locus"].n_unique()
+    _skin_loci = int(skin_row["independent_loci"][0])
+    _loci_without_skin = _all_loci - _skin_loci
+    _multi_site_loci = (
+        protective.group_by("locus")
+        .agg(pl.col("site").n_unique().alias("n_sites"))
+        .filter(pl.col("n_sites") > 1)
+        .height
+    )
+    _unmapped_associations = int(_unmapped_row["associations"][0]) if _unmapped_row.height else 0
+    _unmapped_loci = int(_unmapped_row["independent_loci"][0]) if _unmapped_row.height else 0
+    _skin_queries_per_locus = float(skin_row["variants_per_locus"][0])
+    _prostate_queries_per_locus = float(_prostate_row["variants_per_locus"][0])
     mo.vstack(
         [
             by_site,
             mo.md(
                 "**Non-melanoma skin cancer alone accounts for "
                 f"{int(skin_row['associations'][0]):,} of {len(protective):,} protective associations "
-                f"({int(skin_row['associations'][0]) / len(protective):.0%})** -- but only "
-                f"{int(skin_row['independent_loci'][0]):,} independent loci.\n\n"
-                "That is not skin cancer being unusually genetic. It is FinnGen defining it "
-                f"{int(skin_row['finngen_codes'][0])} different ways (`C3_SKIN`, `C3_OTHER_SKIN_WIDE`, "
-                "`C3_BASAL_CELL_CARCINOMA_WIDE`, `C3_SQUAMOUS_CELL_CARCINOMA_SKIN_WIDE`, each with "
-                "`_WIDE`/`_EXALLC` control variants) and three overlapping resources each reporting "
-                "it. **This is the garbage-with-the-signal problem in one number.**"
+                f"({int(skin_row['associations'][0]) / len(protective):.0%}) and {_skin_loci:,} of "
+                f"{_all_loci:,} protective loci ({_skin_loci / _all_loci:.0%}). Only "
+                f"{_loci_without_skin:,} loci have no non-melanoma skin association.** Dermatologic "
+                "ascertainment may contribute to that dominance, so the skin-excluded count is an important "
+                "sensitivity result rather than a second estimate of the same population quantity.\n\n"
+                "FinnGen represents non-melanoma skin cancer with four codes: `C3_SKIN`, "
+                "`C3_OTHER_SKIN_WIDE`, `C3_BASAL_CELL_CARCINOMA_WIDE`, and "
+                "`C3_SQUAMOUS_CELL_CARCINOMA_SKIN_WIDE`. Those four already include the broad and "
+                "histology-specific definitions; three overlapping resources repeat them.\n\n"
+                f"**Rows are not additive.** {_multi_site_loci:,} loci are protective for more than one "
+                f"site, so summing `independent_loci` gives {int(by_site['independent_loci'].sum()):,} "
+                f"locus-site signals, not {_all_loci:,} loci. The mapping leaves {_unmapped_associations:,} "
+                f"associations across {_unmapped_loci:,} loci as `Other/unmapped`.\n\n"
+                "**Query effort is also uneven.** The PheWAS below sends every distinct protective variant: "
+                f"{_skin_queries_per_locus:.2f} variants per non-melanoma skin locus versus "
+                f"{_prostate_queries_per_locus:.2f} per prostate locus. That gives skin loci "
+                f"{_skin_queries_per_locus / _prostate_queries_per_locus:.1f}x as many chances per locus "
+                "to acquire a trade-off label. Cross-site trade-off rates therefore require matching or "
+                "adjustment for variants queried per locus; this notebook reports no unadjusted site ranking."
             ),
         ]
     )
@@ -536,6 +595,12 @@ def _(protective):
 
 @app.cell
 def _(protective, qc):
+    _all_protective_loci = protective["locus"].n_unique()
+    _skin_loci = protective.filter(pl.col("site") == "Skin (non-melanoma)")["locus"].n_unique()
+    _loci_without_skin = _all_protective_loci - _skin_loci
+    _fully_protective_loci = (
+        qc.group_by("locus").agg(pl.col("alt_protective").mean().alias("f")).filter(pl.col("f") == 1.0).height
+    )
     counts = pl.DataFrame(
         {
             "unit": [
@@ -543,18 +608,20 @@ def _(protective, qc):
                 "distinct protective variants",
                 "distinct (locus x cancer site) signals",
                 "independent protective loci",
+                "loci with no non-melanoma skin association",
                 "loci protective for every cancer they hit",
             ],
             "n": [
                 len(protective),
                 protective["variant"].n_unique(),
                 protective.select(["locus", "site"]).unique().height,
-                protective["locus"].n_unique(),
-                qc.group_by("locus").agg(pl.col("alt_protective").mean().alias("f")).filter(pl.col("f") == 1.0).height,
+                _all_protective_loci,
+                _loci_without_skin,
+                _fully_protective_loci,
             ],
         }
     )
-    mixed = (
+    _mixed = (
         qc.group_by("locus")
         .agg(pl.col("alt_protective").mean().alias("f"))
         .filter((pl.col("f") > 0) & (pl.col("f") < 1))
@@ -565,9 +632,11 @@ def _(protective, qc):
             mo.md("## Answer to Q1\n\nThe count spans an order of magnitude depending on the unit:"),
             counts,
             mo.md(
-                f"**The defensible headline is ~{protective['locus'].n_unique():,} independent protective loci**, "
-                f"of which {counts['n'][4]:,} point protective at every cancer they reach. The other "
-                f"{mixed:,} loci lower risk for one cancer while raising it for another -- so even "
+                f"**The defensible all-cancer headline is ~{_all_protective_loci:,} independent protective loci, "
+                f"but {_skin_loci:,} ({_skin_loci / _all_protective_loci:.0%}) have a non-melanoma skin "
+                f"association and only {_loci_without_skin:,} do not.** Of the full set, "
+                f"{_fully_protective_loci:,} point protective at every cancer they reach. The other "
+                f"{_mixed:,} loci lower risk for one cancer while raising it for another -- so even "
                 "'protective' is site-specific, not a property of the variant."
             ),
         ]
@@ -622,7 +691,7 @@ def _(protective):
     # reverse is not.
     probes = (
         protective.sort("mlog10p", descending=True)
-        .unique(subset=["variant"], keep="first")
+        .unique(subset=["variant"], keep="first", maintain_order=True)
         .select(
             "variant",
             "locus",
@@ -638,7 +707,7 @@ def _(protective):
     # display and grouping only; the PheWAS itself never collapses to these.
     loci = (
         protective.sort("mlog10p", descending=True)
-        .unique(subset=["locus"], keep="first")
+        .unique(subset=["locus"], keep="first", maintain_order=True)
         .select(
             "locus",
             pl.col("gene_most_severe").alias("locus_gene"),
@@ -725,11 +794,12 @@ def _(phewas):
             ),
             naive_split,
             mo.md(
-                "**A near-perfect 50/50 -- which should be a red flag, not a finding.** Most of these "
+                "**The near-50/50 split is descriptive, not a statistical finding.** Most of these "
                 "'traits' are not diseases. They are Kanta lab measurements with numeric codes "
                 "(`3026361`), ATC drug-purchase endpoints (`ATC_H03AA_IRN`), and Open Targets studies "
                 "(`GCST...`) that are largely quantitative. For a lab value, 'higher' has no intrinsic "
-                "direction of harm, so counting sign flips over them measures nothing.\n\n"
+                "direction of harm, so counting sign flips over them measures nothing. A binomial test "
+                "against 50% would only attach confidence to the wrong estimand.\n\n"
                 "To ask the question honestly we have to restrict to **binary disease endpoints**, "
                 "where raising the trait unambiguously means more disease."
             ),
@@ -740,15 +810,17 @@ def _(phewas):
 
 @app.cell
 def _(RESOURCES, non_cancer_all):
-    binary_codes = (
-        pl.concat(
-            [resource_metadata(r).select("phenotype_code", "trait_type") for r in RESOURCES],
-            how="vertical_relaxed",
-        )
-        .filter(pl.col("trait_type") == "binary")["phenotype_code"]
-        .unique()
-        .to_list()
+    _binary_endpoint_catalog = pl.concat(
+        [
+            resource_metadata(r)
+            .filter(pl.col("trait_type") == "binary")
+            .select(pl.lit(r).alias("resource"), "phenotype_code")
+            for r in RESOURCES
+        ],
+        how="vertical_relaxed",
     )
+    binary_codes = _binary_endpoint_catalog["phenotype_code"].unique().to_list()
+    n_binary_endpoint_instances = _binary_endpoint_catalog.select("resource", "phenotype_code").unique().height
     disease = non_cancer_all.filter(
         (~pl.col("trait_original").str.starts_with("GCST"))
         & (~pl.col("trait_original").str.starts_with("ATC_"))
@@ -759,25 +831,30 @@ def _(RESOURCES, non_cancer_all):
         pl.when(pl.col("beta") < 0).then(pl.lit("also lower")).otherwise(pl.lit("higher")).alias("direction"),
         pl.col("trait").str.replace_all("_", " ").alias("other_disease"),
     )
-    disease_split = disease.group_by("direction").agg(pl.len().alias("n"))
+    disease_split = disease.group_by("direction").agg(pl.len().alias("n")).sort("direction")
+    _n_higher = int(disease_split.filter(pl.col("direction") == "higher")["n"][0])
+    _n_lower = int(disease_split.filter(pl.col("direction") == "also lower")["n"][0])
     mo.vstack(
         [
             mo.md(
                 f"### Restricted to binary disease endpoints: {len(disease):,} associations "
-                f"across {disease['trait_original'].n_unique():,} distinct diseases"
+                f"across {disease['trait_original'].n_unique():,} distinct disease codes"
             ),
             disease_split,
             mo.md(
-                "Now the split is real and it leans the wrong way: cancer-protective alleles raise "
-                "another disease more often than they lower one."
+                f"At the association-row level, {_n_higher:,} rows raise another disease and "
+                f"{_n_lower:,} lower one. **This is descriptive only.** Rows recur across overlapping "
+                "resources, correlated disease definitions, and multiple variants at the same locus, "
+                "so they are not independent replicates and do not support a row-level binomial p-value "
+                "or confidence interval. The locus-level verdict below is the analysis unit."
             ),
         ]
     )
-    return (disease,)
+    return disease, n_binary_endpoint_instances
 
 
 @app.cell
-def _(disease, loci, n_loci, probes):
+def _(disease, loci, n_binary_endpoint_instances, n_loci, probes):
     # Counts are of distinct diseases, not association rows: the same phenotype recurs across
     # resources and across the several variants now probed at each locus, and summing rows
     # would let one disease counted three times look like three trade-offs.
@@ -803,7 +880,9 @@ def _(disease, loci, n_loci, probes):
     # `.implode()` because `is_in` against a bare Series of the same dtype is deprecated in
     # polars (pola-rs/polars#22149) -- element-wise vs collection membership is ambiguous
     # there. Imploding to a single list cell says "membership in this collection" explicitly.
-    rep_variants = probes.sort("cancer_mlog10p", descending=True).unique(subset=["locus"], keep="first")["variant"]
+    rep_variants = probes.sort("cancer_mlog10p", descending=True).unique(
+        subset=["locus"], keep="first", maintain_order=True
+    )["variant"]
     rep_per_locus = verdicts(disease.filter(pl.col("variant").is_in(rep_variants.implode())))
     rep_tradeoff = rep_per_locus.filter(pl.col("n_worse") > 0).height
     rep_silent = n_loci - rep_per_locus.height
@@ -817,27 +896,39 @@ def _(disease, loci, n_loci, probes):
             "loci": [silent, len(clean_loci), len(tradeoff_loci)],
         }
     )
+    _expected_null_hits = probes.height * n_binary_endpoint_instances * 5e-8
+    _tradeoff_denominator = len(clean_loci) + len(tradeoff_loci)
     mo.vstack(
         [
             mo.md(f"## Answer to Q2\n\nOf the {n_loci:,} protective cancer loci:"),
             verdict,
             mo.md(
-                f"**{len(tradeoff_loci) / (len(clean_loci) + len(tradeoff_loci)):.0%} of the loci that "
-                "have any other-disease signal at all are trade-offs.** A locus is classified from the "
+                f"**Among loci with any significant other-disease signal, trade-offs outnumber clean "
+                f"protection {len(tradeoff_loci):,} to {len(clean_loci):,} "
+                f"({len(tradeoff_loci) / _tradeoff_denominator:.0%}).** A locus is classified from the "
                 "union over every protective variant it contains, so 'trade-off' is easy to reach and "
-                "'cleanly protective' is the strictly harder claim -- which is the right way round for "
-                "an error to fall. It is still the weaker of the two: absence of a significant "
-                "association is mostly absence of power, not evidence of no effect."
+                "'cleanly protective' is the strictly harder claim -- the conservative direction for a "
+                "safety screen.\n\n"
+                "**The percentage is not a stable biological rate.** It depends on how many variants were "
+                "queried per locus, how many diseases had powered GWAS, and which correlated endpoints and "
+                "resources were available. Absence of a significant association is therefore weaker than "
+                "presence, and sites with denser protective leads receive more chances to be labelled a "
+                "trade-off.\n\n"
+                f"**Nominal false positives are too rare to explain the count.** As a scale check, "
+                f"{probes.height:,} queried variants x {n_binary_endpoint_instances:,} available binary "
+                f"resource-endpoints x 5e-8 gives {_expected_null_hits:.2f} expected threshold crossings under a "
+                "complete null. This does not remove phenotype dependence, selection, winner's curse, or "
+                "the query-effort bias above."
             ),
             mo.md(
                 "**What the shortcut would have cost.** Re-scoring the same PheWAS rows using only each "
-                f"locus's strongest protective lead -- the representative-variant design -- gives "
-                f"{rep_tradeoff:,} trade-off loci instead of {len(tradeoff_loci):,}, and {rep_silent:,} "
-                f"apparently silent loci instead of {silent:,}. The single worst case is the *APOE* "
-                "region: its strongest protective lead (19:44913484, liver cancer) raises three "
-                "diseases, while the neighbouring protective lead 5 kb away sits on *APOE* itself and "
-                "raises 46, including the entire dementia family at `mlog10p` ~1,600. Query one and "
-                "call the locus described and you miss the largest trade-off in the dataset."
+                f"locus's strongest protective lead -- {n_loci:,} queries instead of {probes.height:,} -- "
+                f"gives {rep_tradeoff:,} trade-off loci instead of {len(tradeoff_loci):,}, and "
+                f"{rep_silent:,} apparently silent loci instead of {silent:,}. More queries are still "
+                "finding more trade-offs, so discovery is not saturated. The largest change is the "
+                "*APOE* region: its representative lead raises three diseases, while a neighbouring "
+                "protective lead raises 46. Section 5 treats that liver-cancer association as a "
+                "competing-risk warning, not biological validation."
             ),
         ]
     )
@@ -848,11 +939,15 @@ def _(disease, loci, n_loci, probes):
 def _(disease, tradeoff_loci):
     worse = (
         disease.filter(pl.col("direction") == "higher")
-        .join(tradeoff_loci.select("locus", "locus_gene", "locus_site"), on="locus", how="inner")
+        .join(
+            tradeoff_loci.select("locus", "locus_gene", "locus_site"),
+            on="locus",
+            how="inner",
+        )
         .sort("mlog10p", descending=True)
         # One row per (locus, disease), keeping the strongest. Deduping on gene instead would
         # merge two genuinely distinct loci that share a nearest-gene annotation.
-        .unique(subset=["locus", "trait_original"], keep="first")
+        .unique(subset=["locus", "trait_original"], keep="first", maintain_order=True)
         .sort("mlog10p", descending=True)
     )
     mo.vstack(
@@ -926,17 +1021,13 @@ def _():
     mo.md(r"""
     ### What the top trade-offs actually are
 
-    These are not statistical curiosities -- they are known immunology and known pleiotropy,
-    which is the best available check that the pipeline is doing something real:
+    Several entries line up with prior biology. That is a useful plausibility check, but it does
+    not establish that the cancer and other-disease associations share one causal variant:
 
     - **`PHTF1` (1p13.2)** is the *PTPN22* region, and the widest-reaching trade-off here.
       The allele that lowers skin-cancer risk raises autoimmune hypothyroidism, rheumatoid
       arthritis, type 1 diabetes, and Crohn's. Sharper immune surveillance, more
       autoimmunity -- the classic immune set-point trade.
-    - **`AC011481.3` / *APOE* (19q13)** is the strongest single row in the notebook. A lead
-      protective for liver cancer raises dementia and Alzheimer's at `mlog10p` ~1,600.
-      The gene label is the annotation caveat in miniature: the locus is *APOE*, and the
-      lead carrying the dementia signal is annotated to a neighbouring lncRNA.
     - **`CDKN2B-AS1` (9p21)** carries eight distinct protective leads spanning *CDKN2A* and
       *CDKN2B-AS1* across four cancer sites (non-melanoma skin, melanoma, brain/CNS,
       colorectal), and raises coronary atherosclerosis, ischaemic heart disease and primary
@@ -948,47 +1039,98 @@ def _():
       immune-regulation loci, all the same shape: less cancer at the site they hit, more
       autoimmune thyroid disease, type 1 diabetes, rheumatoid arthritis, Crohn's.
     - Outside the immune block: **`SPDL1`** lowers cancer overall and raises **idiopathic
-      pulmonary fibrosis**, one of the cleanest known cancer/fibrosis antagonisms;
-      **`VAMP8`** lowers prostate cancer and raises coronary heart disease; **`FTO`** lowers
-      recorded breast-cancer risk and raises type 2 diabetes, hypertension and arthrosis,
-      which is the adiposity axis rather than an immune one.
+      pulmonary fibrosis**; **`VAMP8`** lowers prostate cancer and raises coronary heart
+      disease; **`FTO`** lowers recorded breast-cancer risk and raises type 2 diabetes,
+      hypertension and arthrosis, which is the adiposity axis rather than an immune one.
 
-    **The recurring theme is immune tone.** A large share of what looks like "protection from
-    cancer" in this data is a dial on immune activity, and turning it up costs autoimmunity.
-    That is a coherent biological story, and it is the kind of answer the question was
-    actually reaching for.
+    **The recurring pattern is immune tone.** Many loci point toward less recorded cancer and
+    more autoimmune disease. That coherence raises plausibility, but the distance-defined loci,
+    correlated endpoints, and ascertainment limits mean it remains a hypothesis for colocalization
+    and mechanism work, not a validated causal story.
 
-    **Some entries point the other way and should be treated as open questions.** *ABO* here
-    is protective for pancreatic cancer while raising pulmonary embolism, and *CHEK2* is
-    protective for lung cancer while raising myeloproliferative disease -- both loci are
-    genuinely pleiotropic, but neither direction is the textbook one, and co-location in a
-    500kb window is not colocalization. These are exactly the rows to send through
-    `colocalization_by_variant` before believing them.
+    **The *CHEK2* cancer direction has independent support.** A Polish case-control study
+    genotyped 895 lung-cancer cases and 6,391 controls for four founder alleles and reported lower
+    lung-cancer odds among carriers (OR 0.3, 95% CI 0.2-0.5, p = 3e-8;
+    [PMID 18281249](https://pubmed.ncbi.nlm.nih.gov/18281249/)). That makes the protective
+    lung-cancer direction less surprising than this notebook originally implied. It does not by
+    itself show that the myeloproliferative association is the same causal signal; that cross-disease
+    trade-off still needs colocalization. *ABO* protective for pancreatic cancer while raising
+    pulmonary embolism remains an open question for the same reason.
     """)
     return
 
 
 @app.cell
-def _(disease, n_loci):
-    ascertainment = disease.filter(
-        pl.col("gene").is_in(["KLK3", "MSMB"]) | pl.col("other_disease").str.to_lowercase().str.contains("actinic")
+def _(disease, n_loci, protective):
+    psa_signals = (
+        protective.filter(pl.col("gene_most_severe").is_in(["KLK3", "MSMB"]))
+        .sort("mlog10p", descending=True)
+        .unique(
+            subset=["gene_most_severe", "variant"],
+            keep="first",
+            maintain_order=True,
+        )
+    )
+    actinic_signals = (
+        disease.filter(pl.col("other_disease").str.to_lowercase().str.contains("actinic"))
+        .sort("mlog10p", descending=True)
+        .unique(subset=["variant", "trait_original"], keep="first", maintain_order=True)
+    )
+    apoe_cancer_signals = (
+        protective.filter(pl.col("gene_most_severe").is_in(["APOE", "AC011481.3"]))
+        .sort("mlog10p", descending=True)
+        .unique(
+            subset=["gene_most_severe", "variant"],
+            keep="first",
+            maintain_order=True,
+        )
     )
     mo.vstack(
         [
             mo.md(
                 "## 5. What these data cannot support\n\n"
-                "### a. Some 'protection' is detection, not biology\n\n"
-                "The strongest prostate signals sit at **`KLK3`** -- the gene encoding **PSA**. "
-                "Prostate cancer in a biobank is largely ascertained *by PSA screening*. An allele "
-                "that lowers PSA lowers the chance of being biopsied and therefore of being "
-                "diagnosed. It may or may not lower the chance of having the disease. This data "
-                "cannot distinguish those, and nothing in the API flags it."
+                "### a. Some 'protection' is detection or selection, not necessarily biology\n\n"
+                "The strongest prostate signals include **`KLK3`** -- the gene encoding **PSA** -- and "
+                "**`MSMB`**. Prostate cancer in a biobank is substantially ascertained through PSA "
+                "screening. An allele that lowers PSA can lower the chance of biopsy and diagnosis "
+                "without lowering the chance of having disease. This dataset cannot distinguish those "
+                "paths, and the API does not flag them."
             ),
-            ascertainment.select("gene", "site", "other_disease", "beta", "mlog10p").head(8),
+            mo.md("**Cancer associations at the PSA-related loci:**"),
+            psa_signals.select(
+                pl.col("gene_most_severe").alias("gene"),
+                "site",
+                pl.col("trait_label").alias("cancer_trait"),
+                "variant",
+                pl.col("beta").alias("cancer_beta"),
+                pl.col("mlog10p").alias("cancer_mlog10p"),
+            ),
             mo.md(
-                f"Similarly, {n_loci:,} loci were carried forward by significance alone; where a "
-                "'second disease' is a precursor of the first (an allele lowering both skin cancer "
-                "and **actinic keratosis**), that is one biology counted twice, not independent benefit."
+                f"A separate precursor problem appears among the {n_loci:,} loci carried forward by "
+                "significance: when the same allele lowers skin cancer and **actinic keratosis**, one "
+                "biological pathway appears twice rather than demonstrating an independent benefit."
+            ),
+            actinic_signals.select("gene", "site", "other_disease", "variant", "beta", "mlog10p").head(8),
+            mo.md(
+                "**The *APOE* liver-cancer signal is a competing-risk warning, not validation.** A "
+                "case-only GWAS of ischemic-stroke age at onset used simulations to show that the observed "
+                "*APOE* signal could arise from general survival bias rather than stroke biology "
+                "([PMID 39286457](https://pubmed.ncbi.nlm.nih.gov/39286457/)). That is indirect evidence "
+                "for this liver-cancer result, not proof about it. A 38-study cancer meta-analysis likewise "
+                "concluded that common *APOE* genotype is not a major overall cancer-risk factor, while "
+                "allowing small site-specific effects "
+                "([PMID 41197273](https://pubmed.ncbi.nlm.nih.gov/41197273/)). Because liver cancer is "
+                "late-onset, earlier competing mortality could make an allele look protective among those "
+                "who survive to diagnosis. This notebook has no survival model and cannot distinguish that "
+                "selection mechanism from hepatic biology."
+            ),
+            apoe_cancer_signals.select(
+                pl.col("gene_most_severe").alias("gene"),
+                "site",
+                pl.col("trait_label").alias("cancer_trait"),
+                "variant",
+                pl.col("beta").alias("cancer_beta"),
+                pl.col("mlog10p").alias("cancer_mlog10p"),
             ),
         ]
     )
@@ -1023,8 +1165,15 @@ def _():
     skipped (`nb01`, `nb06`).
 
     **Absence of a trade-off is not evidence of safety.** The "cleanly protective" loci are
-    clean partly because FinnGen has fewer cases for the diseases they would affect.
-    The trade-off count is a floor.
+    clean partly because FinnGen has fewer cases for the diseases they would affect and partly
+    because the query has finite effort. The representative-lead sensitivity analysis found
+    76 trade-off loci; querying all protective leads found 111, so discovery was still rising
+    with the number of variants queried. The pooled 59% is a floor conditioned on lead density,
+    endpoint coverage, and power -- not an intrinsic property of protective cancer loci.
+
+    **Chromosome labels follow the API convention.** `chr == 23` means chromosome X here. No
+    cross-source chromosome join is performed in this notebook; any extension that joins a
+    source labelled `X` must normalize that field first.
 
     **Effect sizes are tiny.** Most protective loci here have `abs(beta)` under 0.15, an odds
     ratio around 0.87. These are population-genetic signals, not personal risk factors.
