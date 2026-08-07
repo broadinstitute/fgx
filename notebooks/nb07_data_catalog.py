@@ -3,10 +3,10 @@
 # dependencies = [
 #     "marimo<0.23.4",
 #     "jedi<0.20.0",
-#     "polars",
-#     "httpx",
-#     "altair",
-#     "python-dotenv",
+#     "polars<2",
+#     "httpx<0.29",
+#     "altair<7",
+#     "python-dotenv<2",
 # ]
 # ///
 
@@ -33,7 +33,7 @@ with app.setup:
     if str(NOTEBOOK_DIR) not in sys.path:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
-    from nb01_pcsk9_walkthrough import BASE, client, fetch_json, fetch_tsv
+    from nb01_pcsk9_walkthrough import BASE, client, fetch_json, fetch_json_raw, fetch_tsv
 
 
 @app.function
@@ -44,22 +44,18 @@ def list_datasets() -> pl.DataFrame:
     `products` (`credible_sets`, `summary_stats`, `colocalization.partners`)
     and `stats` (`n_phenotypes`, `n_samples_median`) substructures into flat
     columns suitable for sorting, filtering, and grouping. Unknown extras
-    are dropped on purpose -- print `client().get(f"{BASE}/datasets").json()`
-    if you need them.
+    are dropped on purpose -- print `fetch_json_raw("/datasets")` if you need them.
 
-    Gotcha: `/datasets` is the one endpoint that *rejects* `format`, so `fetch_json`
-    (which always injects `format=json`) 422s here. It answers JSON anyway, so
-    `fetch_tsv` cannot parse it either. Hence the raw GET below.
+    Gotcha: `/datasets` rejects `format`, so `fetch_json` (which always injects
+    `format=json`) 422s here, and the response is JSON so `fetch_tsv` cannot parse it
+    either. `fetch_json_raw` is the helper for that class of endpoint.
 
     Returned columns: `dataset_id`, `resource`, `version`, `data_type`,
     `trait_type`, `n_phenotypes`, `n_samples`, `has_credible_sets`,
     `has_summary_stats`, `n_coloc_partners`, `description`, `author`,
     `publication_date`.
     """
-    with client() as c:
-        r = c.get(f"{BASE}/datasets")
-        r.raise_for_status()
-    rows = r.json()
+    rows = fetch_json_raw("/datasets")
     if not rows:
         return pl.DataFrame()
 
@@ -100,7 +96,7 @@ def list_resources() -> pl.DataFrame:
     (family, resource entry) with `family`, `id`, `resource`,
     `gencode_version`, `version_label`, `author`, `publication_date`.
     """
-    payload = fetch_json("/resources")
+    payload = fetch_json_raw("/resources")  # /resources rejects `format`, like /datasets
     if not payload:
         return pl.DataFrame()
     if isinstance(payload, list):

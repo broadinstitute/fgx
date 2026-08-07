@@ -3,10 +3,10 @@
 # dependencies = [
 #     "marimo<0.23.4",
 #     "jedi<0.20.0",
-#     "polars",
-#     "httpx",
-#     "altair",
-#     "python-dotenv",
+#     "polars<2",
+#     "httpx<0.29",
+#     "altair<7",
+#     "python-dotenv<2",
 # ]
 # ///
 

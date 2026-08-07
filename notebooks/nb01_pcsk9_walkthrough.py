@@ -3,10 +3,10 @@
 # dependencies = [
 #     "marimo<0.23.4",
 #     "jedi<0.20.0",
-#     "polars",
-#     "httpx",
-#     "altair",
-#     "python-dotenv",
+#     "polars<2",
+#     "httpx<0.29",
+#     "altair<7",
+#     "python-dotenv<2",
 # ]
 # ///
 
@@ -37,9 +37,7 @@ def client() -> httpx.Client:
     if not GENEGENIE_TOKEN:
         raise RuntimeError("GENEGENIE_TOKEN not set. Copy .env.example to .env and paste your key.")
     # follow_redirects=True so a future host rename degrades to a warning, not a hard 3xx failure
-    return httpx.Client(
-        headers={"Authorization": f"Bearer {GENEGENIE_TOKEN}"}, timeout=60, follow_redirects=True
-    )
+    return httpx.Client(headers={"Authorization": f"Bearer {GENEGENIE_TOKEN}"}, timeout=60, follow_redirects=True)
 
 
 @app.function
@@ -56,6 +54,24 @@ def fetch_json(path: str, **params) -> list[dict]:
     """GET a GeneGenie endpoint as JSON. Most endpoints accept ?format=json."""
     with client() as c:
         r = c.get(f"{BASE}{path}", params={**params, "format": "json"})
+        r.raise_for_status()
+    return r.json()
+
+
+@app.function
+def fetch_json_raw(path: str, **params):
+    """GET a JSON endpoint that rejects the `format` parameter.
+
+    Eleven paths in the OpenAPI spec take no `format` parameter -- `/datasets`,
+    `/resources`, `/rsid/variants`, `/trait_name_mapping` and `/dataset_display_names`
+    are the ones this catalog touches. They 422 with "Unknown query parameter(s):
+    format" yet answer JSON regardless, so `fetch_json` cannot reach them (it injects
+    `format=json` unconditionally) and `fetch_tsv` cannot parse what comes back. Use
+    this instead; strict about status so a rejected parameter surfaces as an error
+    rather than an empty result.
+    """
+    with client() as c:
+        r = c.get(f"{BASE}{path}", params=params)
         r.raise_for_status()
     return r.json()
 
