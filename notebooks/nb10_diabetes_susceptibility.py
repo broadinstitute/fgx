@@ -3,10 +3,10 @@
 # dependencies = [
 #     "marimo<0.23.4",
 #     "jedi<0.20.0",
-#     "polars",
-#     "httpx",
-#     "altair",
-#     "python-dotenv",
+#     "polars<2",
+#     "httpx<0.29",
+#     "altair<7",
+#     "python-dotenv<2",
 # ]
 # ///
 
@@ -328,11 +328,7 @@ def _(tcf7l2_diverse, tcf7l2_variant):
     )
 
     tcf7l2_type_chart = (
-        alt.Chart(
-            alt.Data(
-                values=tcf7l2_by_type.select("data_type2", "n_traits").to_dicts()
-            )
-        )
+        alt.Chart(alt.Data(values=tcf7l2_by_type.select("data_type2", "n_traits").to_dicts()))
         .mark_bar(cornerRadiusTopLeft=3, cornerRadiusTopRight=3)
         .encode(
             x=alt.X("data_type2:N", title="Data type", sort="-y"),

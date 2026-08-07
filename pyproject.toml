@@ -1,6 +1,22 @@
 [tool.ruff]
 line-length = 120
 
+[tool.ruff.lint]
+# Select explicitly. Ruff's *implicit* default rule set has widened across
+# releases - under 0.16 an unconfigured run enables ~400 rules and reports 107
+# findings here (mostly PLR1711 on the `return` marimo requires at the end of
+# every cell). That made `uvx ruff check notebooks/` in AGENTS.md fail on an
+# untouched checkout, purely because the pinned-nowhere tool moved underneath
+# us. Naming the rules keeps the answer the same whatever ruff is installed.
+select = [
+    "E4", # pycodestyle: imports
+    "E7", # pycodestyle: statements
+    "E9", # pycodestyle: runtime errors
+    "F",  # pyflakes
+    "B",  # bugbear
+    "I",  # isort
+]
+
 [tool.ruff.lint.per-file-ignores]
 # Marimo notebooks intentionally use bare expressions for rendering, imports
 # from setup/cross-notebook helpers that ruff cannot always see statically, and

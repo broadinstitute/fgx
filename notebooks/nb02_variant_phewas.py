@@ -3,10 +3,10 @@
 # dependencies = [
 #     "marimo<0.23.4",
 #     "jedi<0.20.0",
-#     "polars",
-#     "httpx",
-#     "altair",
-#     "python-dotenv",
+#     "polars<2",
+#     "httpx<0.29",
+#     "altair<7",
+#     "python-dotenv<2",
 # ]
 # ///
 
@@ -33,7 +33,7 @@ with app.setup:
     if str(NOTEBOOK_DIR) not in sys.path:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
-    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv
+    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_json_raw, fetch_tsv
 
 
 @app.function
@@ -86,8 +86,9 @@ def _():
 @app.cell
 def _(RSID):
     # Step 1: rsID -> variant. The endpoint returns a list of variants per rsID
-    # (multi-allelic sites can map to several).
-    resolved = fetch_json("/rsid/variants", rsids=RSID)
+    # (multi-allelic sites can map to several). `fetch_json_raw` because this endpoint
+    # rejects `format` with a 422 while answering JSON anyway.
+    resolved = fetch_json_raw("/rsid/variants", rsids=RSID)
     candidate_variants = resolved[0]["variants"] if resolved else []
 
     # Step 2: not every variant string the resolver returns has credible-set data
