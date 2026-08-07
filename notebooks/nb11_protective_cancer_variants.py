@@ -800,8 +800,11 @@ def _(disease, loci, n_loci, probes):
     # What the representative-variant shortcut would have concluded, from the same PheWAS rows
     # and no extra API calls: keep only each locus's strongest protective lead. This is the
     # cost of the shortcut measured rather than argued.
+    # `.implode()` because `is_in` against a bare Series of the same dtype is deprecated in
+    # polars (pola-rs/polars#22149) -- element-wise vs collection membership is ambiguous
+    # there. Imploding to a single list cell says "membership in this collection" explicitly.
     rep_variants = probes.sort("cancer_mlog10p", descending=True).unique(subset=["locus"], keep="first")["variant"]
-    rep_per_locus = verdicts(disease.filter(pl.col("variant").is_in(rep_variants)))
+    rep_per_locus = verdicts(disease.filter(pl.col("variant").is_in(rep_variants.implode())))
     rep_tradeoff = rep_per_locus.filter(pl.col("n_worse") > 0).height
     rep_silent = n_loci - rep_per_locus.height
     verdict = pl.DataFrame(
