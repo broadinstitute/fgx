@@ -65,3 +65,8 @@ does     = "Phenotype (CHD) -> credible_sets_by_phenotype -> Manhattan + effect-
 notebook = "nb10_diabetes_susceptibility.py"
 helpers  = []
 does     = "Phenotype (T2D) -> credible_sets_by_phenotype -> Manhattan + histogram + TCF7L2 colocalization + MODY gene-disease curation; imports pick_leads from nb03"
+
+[[vignette]]
+notebook = "nb11_protective_cancer_variants.py"
+helpers  = ["cancer_phenotype_codes", "harvest_leads", "cluster_loci", "batch_credible_sets_by_variant", "cancer_site"]
+does     = "Disease-class sweep: every cancer endpoint across three resources -> credible_sets_by_phenotype_leads -> QC + locus clustering -> count protective signals, then PheWAS every protective lead to split clean protection from disease trade-offs. Use harvest_leads for any many-phenotype sweep, cluster_loci to collapse a signal recurring across endpoints, batch_credible_sets_by_variant for many-variant PheWAS (body separator is a NEWLINE), cancer_site to collapse FinnGen's redundant _WIDE/_EXALLC definitions"
