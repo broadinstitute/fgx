@@ -19,9 +19,11 @@ with app.setup:
     import concurrent.futures as cf
     import os
     import sys
+    import time
     from pathlib import Path
 
     import altair as alt
+    import httpx
     import marimo as mo
     import polars as pl
     from dotenv import load_dotenv
@@ -43,6 +45,9 @@ with app.setup:
     MAX_SE = 0.5
     MIN_AAF = 0.001
     LOCUS_KB = 500
+
+    # Statuses worth a retry; anything else is a bug in the request, not a blip.
+    RETRY_STATUS = {429, 500, 502, 503, 504}
 
 
 @app.function
@@ -118,24 +123,83 @@ def cluster_loci(df: pl.DataFrame, kb: int = 500) -> pl.DataFrame:
 
 
 @app.function
-def batch_credible_sets_by_variant(variants: list[str], chunk: int = 40) -> pl.DataFrame:
+def qc_leads(malignant: pl.DataFrame, gw: float = GW_MLOG10P, kb: int = LOCUS_KB) -> pl.DataFrame:
+    """Apply the stated QC filters, dedupe, and attach `locus` labels. One code path.
+
+    The clustering population is *all* QC-passing leads, risk and protective alike; the
+    `beta < 0` filter belongs after the locus labels exist. Order matters: cluster the
+    protective rows on their own and a risk lead that had been bridging two protective
+    leads is gone, so the same window silently yields more loci. The headline count and
+    the sensitivity grid both call this, so they cannot drift apart.
+    """
+    return cluster_loci(
+        malignant.filter(
+            (pl.col("mlog10p") >= gw)
+            & (pl.col("beta").abs() <= MAX_ABS_BETA)
+            & (pl.col("se") <= MAX_SE)
+            & (pl.col("aaf") >= MIN_AAF)
+        ).unique(subset=["chr", "pos", "ref", "alt", "phenotype_code", "beta", "se", "mlog10p"], keep="first"),
+        kb,
+    )
+
+
+@app.function
+def protective_loci_at(malignant: pl.DataFrame, gw: float, kb: int) -> int:
+    """Independent protective loci at significance `gw` and clustering window `kb`."""
+    return qc_leads(malignant, gw, kb).filter(pl.col("beta") < 0)["locus"].n_unique()
+
+
+@app.function
+def batch_credible_sets_by_variant(
+    variants: list[str], chunk: int = 40, max_workers: int = 6, attempts: int = 4
+) -> tuple[pl.DataFrame, pl.DataFrame]:
     """POST /credible_sets_by_variant for many variants; the PheWAS arm of this notebook.
+
+    **Fails closed.** A chunk that never answers 200 raises rather than returning `[]`.
+    This matters more here than anywhere else in the catalog: downstream, a variant with no
+    returned rows is read as "no other-disease association", so one silently dropped chunk
+    would relabel up to `chunk` variants as clean. Transient statuses (429, 5xx) and
+    transport errors are retried with exponential backoff first.
+
+    Returns `(rows, coverage)`; `coverage` is one row per chunk so the caller can assert
+    full coverage before computing any verdict.
 
     Gotcha: the `variants` body field is a single string whose separator is a NEWLINE.
     Commas, spaces and semicolons all 422 with "variant needs to contain four fields".
     """
 
-    def one(vs):
-        with client() as c:
-            r = c.post(f"{BASE}/credible_sets_by_variant", json={"variants": "\n".join(vs)}, params={"format": "json"})
-        return r.json() if r.status_code == 200 else []
+    def one(item):
+        idx, vs = item
+        why = "no attempt made"
+        for attempt in range(1, attempts + 1):
+            try:
+                with client() as c:
+                    r = c.post(
+                        f"{BASE}/credible_sets_by_variant",
+                        json={"variants": "\n".join(vs)},
+                        params={"format": "json"},
+                    )
+                if r.status_code == 200:
+                    return {"chunk": idx, "n_variants": len(vs), "attempts": attempt}, r.json()
+                why = f"HTTP {r.status_code}: {r.text[:160]}"
+                if r.status_code not in RETRY_STATUS:
+                    break
+            except httpx.HTTPError as exc:  # timeouts, connection resets
+                why = repr(exc)
+            if attempt < attempts:
+                time.sleep(2 ** (attempt - 1))
+        raise RuntimeError(f"/credible_sets_by_variant chunk {idx} ({len(vs)} variants) failed -- {why}")
 
-    chunks = [variants[i : i + chunk] for i in range(0, len(variants), chunk)]
-    rows = []
-    with cf.ThreadPoolExecutor(max_workers=6) as ex:
-        for payload in ex.map(one, chunks):
+    chunks = list(enumerate([variants[i : i + chunk] for i in range(0, len(variants), chunk)]))
+    rows, cov = [], []
+    with cf.ThreadPoolExecutor(max_workers=max_workers) as ex:
+        for meta, payload in ex.map(one, chunks):  # ex.map re-raises here, so a dead chunk stops the notebook
+            cov.append({**meta, "n_rows": len(payload)})
             rows.extend(payload)
-    return pl.DataFrame(rows, infer_schema_length=None) if rows else pl.DataFrame()
+    return (
+        pl.DataFrame(rows, infer_schema_length=None) if rows else pl.DataFrame(),
+        pl.DataFrame(cov).sort("chunk"),
+    )
 
 
 @app.function
@@ -412,23 +476,12 @@ def _(raw_leads):
 
 @app.cell
 def _(malignant):
-    qc = (
-        malignant.filter(
-            (pl.col("mlog10p") >= GW_MLOG10P)
-            & (pl.col("beta").abs() <= MAX_ABS_BETA)
-            & (pl.col("se") <= MAX_SE)
-            & (pl.col("aaf") >= MIN_AAF)
-        )
-        .unique(subset=["chr", "pos", "ref", "alt", "phenotype_code", "beta", "se", "mlog10p"], keep="first")
-        .with_columns(
-            pl.concat_str(["chr", "pos", "ref", "alt"], separator=":").alias("variant"),
-            (pl.col("beta") < 0).alias("alt_protective"),
-            pl.col("trait").str.replace_all("_", " ").alias("trait_label"),
-        )
+    qc = qc_leads(malignant).with_columns(
+        pl.concat_str(["chr", "pos", "ref", "alt"], separator=":").alias("variant"),
+        (pl.col("beta") < 0).alias("alt_protective"),
+        pl.col("trait").str.replace_all("_", " ").alias("trait_label"),
     )
-    qc = cluster_loci(qc, LOCUS_KB).with_columns(
-        pl.col("trait_label").map_elements(cancer_site, return_dtype=pl.String).alias("site")
-    )
+    qc = qc.with_columns(pl.col("trait_label").map_elements(cancer_site, return_dtype=pl.String).alias("site"))
     protective = qc.filter(pl.col("alt_protective"))
     mo.md(
         f"**After QC: {len(qc):,} cancer associations**, of which **{len(protective):,} are protective** "
@@ -524,35 +577,34 @@ def _(protective, qc):
 
 @app.cell
 def _(malignant):
-    grid = []
-    for gw in (GW_MLOG10P, 8.0, 9.0, 12.0):
-        for kb in (100, 500, 1000):
-            f = malignant.filter(
-                (pl.col("mlog10p") >= gw)
-                & (pl.col("beta").abs() <= MAX_ABS_BETA)
-                & (pl.col("se") <= MAX_SE)
-                & (pl.col("aaf") >= MIN_AAF)
-                & (pl.col("beta") < 0)
-            ).unique(subset=["chr", "pos", "ref", "alt", "phenotype_code"], keep="first")
-            grid.append(
-                {
-                    "p threshold": f"p<=1e-{gw:.0f}" if gw > 7.4 else "p<=5e-8",
-                    "locus window (kb)": kb,
-                    "protective loci": cluster_loci(f, kb)["locus"].n_unique(),
-                }
-            )
+    grid = [
+        {
+            "p threshold": f"p<=1e-{gw:.0f}" if gw > 7.4 else "p<=5e-8",
+            "locus window (kb)": kb,
+            "protective loci": protective_loci_at(malignant, gw, kb),
+        }
+        for gw in (GW_MLOG10P, 8.0, 9.0, 12.0)
+        for kb in (100, 500, 1000)
+    ]
     sens = pl.DataFrame(grid).pivot(on="locus window (kb)", index="p threshold", values="protective loci")
+    grid_counts = [g["protective loci"] for g in grid]
+    grid_same_kb = [g["protective loci"] for g in grid if g["locus window (kb)"] == LOCUS_KB]
     mo.vstack(
         [
             mo.md(
                 "### How fragile is that number?\n\n"
                 "Protective loci as a function of the two choices that actually move it -- significance "
-                "threshold and locus window. Columns are the clustering window in kb."
+                "threshold and locus window. Columns are the clustering window in kb. The grid runs the "
+                f"same `protective_loci_at` code path as the headline, so the p<=5e-8 / {LOCUS_KB}kb cell "
+                "reproduces the headline exactly rather than approximating it."
             ),
             sens,
             mo.md(
-                "**Roughly a two-fold range across defensible settings.** The number is threshold-dependent "
-                "in the way every GWAS count is; it is not knife-edge. The plausibility filters "
+                f"**A {max(grid_counts) / min(grid_counts):.1f}-fold range across the whole grid** "
+                f"({max(grid_counts):,} at the loosest corner, {min(grid_counts):,} at the tightest), and "
+                f"{max(grid_same_kb) / min(grid_same_kb):.1f}-fold if you hold the {LOCUS_KB}kb window and "
+                "vary only the threshold. The number is threshold-dependent in the way every GWAS count "
+                "is; it is not knife-edge. The plausibility filters "
                 "(`beta`, `se`, `aaf`) barely move it at all -- they remove ~12% of associations but "
                 "under 1% of loci, because the implausible rows pile onto loci that are already counted."
             ),
@@ -563,12 +615,17 @@ def _(malignant):
 
 @app.cell
 def _(protective):
-    reps = (
+    # Every distinct protective variant is queried, not one representative per locus.
+    # Distance clustering says two leads are near each other; it does not say they tag the
+    # same causal signal, so one lead's PheWAS is not a valid proxy for the other's. Query
+    # all of them and aggregate to the locus afterwards -- that direction is safe, the
+    # reverse is not.
+    probes = (
         protective.sort("mlog10p", descending=True)
-        .unique(subset=["locus"], keep="first")
+        .unique(subset=["variant"], keep="first")
         .select(
-            "locus",
             "variant",
+            "locus",
             "chr",
             "pos",
             "site",
@@ -577,12 +634,29 @@ def _(protective):
             pl.col("gene_most_severe").alias("gene"),
         )
     )
-    mo.md(
-        f"### Q2 input: {len(reps):,} representative variants\n\n"
-        "One variant per protective locus -- the most significant protective lead there. "
-        "These go into the PheWAS."
+    # Locus-level labels, taken from the strongest protective lead at the locus. Used for
+    # display and grouping only; the PheWAS itself never collapses to these.
+    loci = (
+        protective.sort("mlog10p", descending=True)
+        .unique(subset=["locus"], keep="first")
+        .select(
+            "locus",
+            pl.col("gene_most_severe").alias("locus_gene"),
+            pl.col("site").alias("locus_site"),
+        )
     )
-    return (reps,)
+    n_loci = loci.height
+    mo.md(
+        f"### Q2 input: {len(probes):,} distinct protective variants across {n_loci:,} loci\n\n"
+        f"An earlier draft sent one representative variant per locus ({n_loci:,} queries instead of "
+        f"{len(probes):,}) and then labelled the whole locus from that one PheWAS. That is only valid if "
+        "co-located leads are in tight LD, which 500kb distance clustering does not establish -- two "
+        "independent signals 300kb apart can have entirely different pleiotropy. So every protective "
+        "variant is queried and the union is taken per locus. Doing it the other way understates "
+        "trade-offs, because a trade-off found at any lead in the locus is missed unless that lead "
+        "happened to be the representative."
+    )
+    return loci, n_loci, probes
 
 
 @app.cell
@@ -599,11 +673,16 @@ def _():
 
 
 @app.cell
-def _(reps):
-    phewas_raw = batch_credible_sets_by_variant(reps["variant"].to_list())
+def _(probes):
+    phewas_raw, phewas_cov = batch_credible_sets_by_variant(probes["variant"].to_list())
+    # Fail closed a second time, at the analysis boundary: no verdict is computed unless the
+    # chunks together account for every variant we asked about. A missing chunk would read as
+    # "these variants have no other-disease association", which is the one error that silently
+    # inflates the reassuring answer.
+    assert phewas_cov["n_variants"].sum() == probes.height, "PheWAS coverage is incomplete"
     phewas = (
         phewas_raw.with_columns(pl.concat_str(["chr", "pos", "ref", "alt"], separator=":").alias("variant"))
-        .join(reps.drop("chr", "pos"), on="variant", how="inner")
+        .join(probes.drop("chr", "pos"), on="variant", how="inner")
         .filter((pl.col("data_type") == "GWAS") & (pl.col("mlog10p") >= GW_MLOG10P))
         .with_columns(
             pl.any_horizontal([pl.col("trait_original").str.starts_with(p) for p in ("C3_", "CD2_")]).alias(
@@ -615,10 +694,12 @@ def _(reps):
     mo.vstack(
         [
             mo.md(
-                f"**{len(phewas_raw):,} credible-set rows returned** for {reps['variant'].n_unique():,} "
-                "variants, across GWAS and the molecular QTL layers. We keep only genome-wide "
-                "significant GWAS rows for the disease question; the QTL rows are the mechanism "
-                "layer and are left for a follow-on notebook."
+                f"**{len(phewas_raw):,} credible-set rows returned** for all {probes.height:,} "
+                f"protective variants, sent as {phewas_cov.height} chunks with every chunk confirmed 200 "
+                "(`batch_credible_sets_by_variant` raises rather than returning an empty payload, so a "
+                "throttled or expired request cannot masquerade as 'no association'). Rows span GWAS and "
+                "the molecular QTL layers; we keep only genome-wide significant GWAS rows for the disease "
+                "question, and leave the QTL mechanism layer to a follow-on notebook."
             ),
             layer_mix,
         ]
@@ -696,17 +777,33 @@ def _(RESOURCES, non_cancer_all):
 
 
 @app.cell
-def _(disease, reps):
-    per_locus = disease.group_by("locus").agg(
-        pl.col("gene").first(),
-        pl.col("site").first().alias("cancer_site"),
-        pl.col("cancer_mlog10p").first(),
-        (pl.col("direction") == "higher").sum().alias("n_worse"),
-        (pl.col("direction") == "also lower").sum().alias("n_better"),
-    )
+def _(disease, loci, n_loci, probes):
+    # Counts are of distinct diseases, not association rows: the same phenotype recurs across
+    # resources and across the several variants now probed at each locus, and summing rows
+    # would let one disease counted three times look like three trade-offs.
+    def verdicts(rows: pl.DataFrame) -> pl.DataFrame:
+        return (
+            rows.group_by("locus")
+            .agg(
+                pl.col("variant").n_unique().alias("n_variants_with_signal"),
+                pl.col("trait_original").filter(pl.col("direction") == "higher").n_unique().alias("n_worse"),
+                pl.col("trait_original").filter(pl.col("direction") == "also lower").n_unique().alias("n_better"),
+            )
+            .join(loci, on="locus", how="left")
+        )
+
+    per_locus = verdicts(disease)
     clean_loci = per_locus.filter(pl.col("n_worse") == 0)
     tradeoff_loci = per_locus.filter(pl.col("n_worse") > 0)
-    silent = len(reps) - per_locus.height
+    silent = n_loci - per_locus.height
+
+    # What the representative-variant shortcut would have concluded, from the same PheWAS rows
+    # and no extra API calls: keep only each locus's strongest protective lead. This is the
+    # cost of the shortcut measured rather than argued.
+    rep_variants = probes.sort("cancer_mlog10p", descending=True).unique(subset=["locus"], keep="first")["variant"]
+    rep_per_locus = verdicts(disease.filter(pl.col("variant").is_in(rep_variants)))
+    rep_tradeoff = rep_per_locus.filter(pl.col("n_worse") > 0).height
+    rep_silent = n_loci - rep_per_locus.height
     verdict = pl.DataFrame(
         {
             "verdict": [
@@ -719,13 +816,25 @@ def _(disease, reps):
     )
     mo.vstack(
         [
-            mo.md(f"## Answer to Q2\n\nOf the {len(reps):,} protective cancer loci:"),
+            mo.md(f"## Answer to Q2\n\nOf the {n_loci:,} protective cancer loci:"),
             verdict,
             mo.md(
                 f"**{len(tradeoff_loci) / (len(clean_loci) + len(tradeoff_loci)):.0%} of the loci that "
-                "have any other-disease signal at all are trade-offs.** The 'cleanly protective' column "
-                "is the weaker claim of the two: absence of a significant association is mostly absence "
-                "of power, not evidence of no effect."
+                "have any other-disease signal at all are trade-offs.** A locus is classified from the "
+                "union over every protective variant it contains, so 'trade-off' is easy to reach and "
+                "'cleanly protective' is the strictly harder claim -- which is the right way round for "
+                "an error to fall. It is still the weaker of the two: absence of a significant "
+                "association is mostly absence of power, not evidence of no effect."
+            ),
+            mo.md(
+                "**What the shortcut would have cost.** Re-scoring the same PheWAS rows using only each "
+                f"locus's strongest protective lead -- the representative-variant design -- gives "
+                f"{rep_tradeoff:,} trade-off loci instead of {len(tradeoff_loci):,}, and {rep_silent:,} "
+                f"apparently silent loci instead of {silent:,}. The single worst case is the *APOE* "
+                "region: its strongest protective lead (19:44913484, liver cancer) raises three "
+                "diseases, while the neighbouring protective lead 5 kb away sits on *APOE* itself and "
+                "raises 46, including the entire dementia family at `mlog10p` ~1,600. Query one and "
+                "call the locus described and you miss the largest trade-off in the dataset."
             ),
         ]
     )
@@ -736,19 +845,27 @@ def _(disease, reps):
 def _(disease, tradeoff_loci):
     worse = (
         disease.filter(pl.col("direction") == "higher")
-        .join(tradeoff_loci.select("locus"), on="locus", how="inner")
+        .join(tradeoff_loci.select("locus", "locus_gene", "locus_site"), on="locus", how="inner")
         .sort("mlog10p", descending=True)
-        .unique(subset=["gene", "trait_original"], keep="first")
+        # One row per (locus, disease), keeping the strongest. Deduping on gene instead would
+        # merge two genuinely distinct loci that share a nearest-gene annotation.
+        .unique(subset=["locus", "trait_original"], keep="first")
         .sort("mlog10p", descending=True)
     )
     mo.vstack(
         [
             mo.md(
                 "### The trade-offs, strongest first\n\n"
-                "`gene` is the nearest/most-severe gene at the cancer locus; `other_disease` is what "
-                "the same allele raises."
+                "One row per (locus, disease) pair. `gene` is the nearest/most-severe gene at the "
+                "cancer locus; `other_disease` is what the same allele raises."
             ),
-            worse.select("gene", "site", "other_disease", "beta", "mlog10p").head(30),
+            worse.select(
+                pl.col("locus_gene").alias("gene"),
+                pl.col("locus_site").alias("site"),
+                "other_disease",
+                "beta",
+                "mlog10p",
+            ).head(30),
         ]
     )
     return
@@ -756,12 +873,20 @@ def _(disease, tradeoff_loci):
 
 @app.cell
 def _(disease, tradeoff_loci):
+    # The axis says "distinct diseases", so count distinct diseases. `pl.len()` here would count
+    # association rows, and the same phenotype recurs across finngen / finngen_ukbb /
+    # finngen_mvp_ukbb and across the several protective variants at a locus -- enough to
+    # reorder the bars, not just inflate them. `association_rows` is kept in the tooltip so the
+    # gap between the two is visible rather than hidden.
     top_genes = (
-        disease.join(tradeoff_loci.select("locus"), on="locus", how="inner")
-        .filter(pl.col("direction") == "higher")
-        .group_by("gene")
-        .agg(pl.len().alias("n"), pl.col("mlog10p").max().alias("max_mlog10p"))
-        .filter(pl.col("gene").is_not_null())
+        disease.join(tradeoff_loci.select("locus", "locus_gene"), on="locus", how="inner")
+        .filter((pl.col("direction") == "higher") & pl.col("locus_gene").is_not_null())
+        .group_by(pl.col("locus_gene").alias("gene"))
+        .agg(
+            pl.col("trait_original").n_unique().alias("n"),
+            pl.len().alias("association_rows"),
+            pl.col("mlog10p").max().alias("max_mlog10p"),
+        )
         .sort("n", descending=True)
         .head(15)
     )
@@ -771,11 +896,25 @@ def _(disease, tradeoff_loci):
         .encode(
             x=alt.X("n:Q", title="distinct diseases raised by the cancer-protective allele"),
             y=alt.Y("gene:N", sort="-x", title=None),
-            tooltip=["gene", "n", alt.Tooltip("max_mlog10p:Q", format=".1f")],
+            tooltip=["gene", "n", "association_rows", alt.Tooltip("max_mlog10p:Q", format=".1f")],
         )
         .properties(height=380, title="Loci that buy cancer protection at a cost")
     )
-    mo.ui.altair_chart(tradeoff_chart)
+    mo.vstack(
+        [
+            mo.ui.altair_chart(tradeoff_chart),
+            mo.md(
+                "**Read `n` as an upper bound.** Section 3 showed FinnGen defining one cancer several "
+                "ways; it does the same on the other-disease side. *PHTF1*'s 64 'distinct diseases' "
+                "include `Hypothyroidism, strict autoimmune`, `Hypothyroidism, drug reimbursement` and "
+                "`Disorders of the thyroid gland` as three. Counting association rows instead would be "
+                "worse still -- it also multiplies by resource, which is why *CDKN2B-AS1* outranks "
+                "*PHTF1* on rows (99 vs 98) and loses on diseases (47 vs 64). Collapsing the "
+                "non-cancer endpoints into disease families, the way `cancer_site` does for cancers, "
+                "is the missing piece; it needs a mapping this notebook does not build."
+            ),
+        ]
+    )
     return
 
 
@@ -787,29 +926,47 @@ def _():
     These are not statistical curiosities -- they are known immunology and known pleiotropy,
     which is the best available check that the pipeline is doing something real:
 
-    - **`PHTF1` (1p13.2)** is the *PTPN22* region. The allele that lowers skin-cancer risk
-      raises autoimmune hypothyroidism, rheumatoid arthritis, type 1 diabetes, and Crohn's.
-      Sharper immune surveillance, more autoimmunity -- the classic immune set-point trade.
-    - **`PTCSC2` (14q13, near *FOXE1*)** lowers thyroid cancer and raises hypothyroidism and
+    - **`PHTF1` (1p13.2)** is the *PTPN22* region, and the widest-reaching trade-off here.
+      The allele that lowers skin-cancer risk raises autoimmune hypothyroidism, rheumatoid
+      arthritis, type 1 diabetes, and Crohn's. Sharper immune surveillance, more
+      autoimmunity -- the classic immune set-point trade.
+    - **`AC011481.3` / *APOE* (19q13)** is the strongest single row in the notebook. A lead
+      protective for liver cancer raises dementia and Alzheimer's at `mlog10p` ~1,600.
+      The gene label is the annotation caveat in miniature: the locus is *APOE*, and the
+      lead carrying the dementia signal is annotated to a neighbouring lncRNA.
+    - **`CDKN2B-AS1` (9p21)** carries eight distinct protective leads spanning *CDKN2A* and
+      *CDKN2B-AS1* across four cancer sites (non-melanoma skin, melanoma, brain/CNS,
+      colorectal), and raises coronary atherosclerosis, ischaemic heart disease and primary
+      open-angle glaucoma. The best argument in the notebook for querying every lead rather
+      than one per locus.
+    - **`PTCSC2` (9q22, near *FOXE1*)** lowers thyroid cancer and raises hypothyroidism and
       goitre. Same tissue, opposite ends of thyroid function.
-    - **`SPDL1`** lowers cancer overall and raises **idiopathic pulmonary fibrosis** and
-      interstitial lung disease. A Finnish-enriched variant and one of the cleanest known
-      cancer/fibrosis antagonisms.
-    - **`CDKN2B-AS1` (9p21)** lowers skin cancer and raises primary open-angle glaucoma.
-    - **`VAMP8`** lowers prostate cancer and raises coronary atherosclerosis.
-    - **`IL2RA`, `BACH2`, `SHARPIN`, `UBE2L3`, `IRF5`** -- all core immune-regulation genes,
-      all showing the same shape.
+    - **`IL2RA`, `BACH2`, `CDKAL1`, `RAB5B`, `UBE2L3`** (skin) and **`IRF5`** (kidney) --
+      immune-regulation loci, all the same shape: less cancer at the site they hit, more
+      autoimmune thyroid disease, type 1 diabetes, rheumatoid arthritis, Crohn's.
+    - Outside the immune block: **`SPDL1`** lowers cancer overall and raises **idiopathic
+      pulmonary fibrosis**, one of the cleanest known cancer/fibrosis antagonisms;
+      **`VAMP8`** lowers prostate cancer and raises coronary heart disease; **`FTO`** lowers
+      recorded breast-cancer risk and raises type 2 diabetes, hypertension and arthrosis,
+      which is the adiposity axis rather than an immune one.
 
     **The recurring theme is immune tone.** A large share of what looks like "protection from
     cancer" in this data is a dial on immune activity, and turning it up costs autoimmunity.
     That is a coherent biological story, and it is the kind of answer the question was
     actually reaching for.
+
+    **Some entries point the other way and should be treated as open questions.** *ABO* here
+    is protective for pancreatic cancer while raising pulmonary embolism, and *CHEK2* is
+    protective for lung cancer while raising myeloproliferative disease -- both loci are
+    genuinely pleiotropic, but neither direction is the textbook one, and co-location in a
+    500kb window is not colocalization. These are exactly the rows to send through
+    `colocalization_by_variant` before believing them.
     """)
     return
 
 
 @app.cell
-def _(disease, reps):
+def _(disease, n_loci):
     ascertainment = disease.filter(
         pl.col("gene").is_in(["KLK3", "MSMB"]) | pl.col("other_disease").str.to_lowercase().str.contains("actinic")
     )
@@ -826,7 +983,7 @@ def _(disease, reps):
             ),
             ascertainment.select("gene", "site", "other_disease", "beta", "mlog10p").head(8),
             mo.md(
-                f"Similarly, {len(reps):,} loci were carried forward by significance alone; where a "
+                f"Similarly, {n_loci:,} loci were carried forward by significance alone; where a "
                 "'second disease' is a precursor of the first (an allele lowering both skin cancer "
                 "and **actinic keratosis**), that is one biology counted twice, not independent benefit."
             ),
@@ -837,7 +994,7 @@ def _(disease, reps):
 
 @app.cell
 def _():
-    mo.md(r"""
+    mo.md(rf"""
     ### b. The rest of the ledger
 
     **Ancestry.** Every resource here is European-ancestry (Finnish, UK Biobank, MVP).
@@ -849,6 +1006,13 @@ def _():
     section 1 is a power artefact. A rare allele that halves cancer risk is far harder to
     detect than one that doubles it. The true rare-protective count is larger than anything
     here, and this data cannot bound it.
+
+    **Loci are distance-defined, not LD-defined.** {LOCUS_KB}kb clustering groups leads that sit
+    near each other; it does not establish that they tag one causal signal. That is why the
+    PheWAS queries every protective variant and aggregates to the locus afterwards, rather than
+    treating one lead as a proxy for its neighbours. The locus *count* still inherits the
+    assumption, which is what the sensitivity grid is there to expose. Proper LD or
+    colocalization between co-located leads would replace the assumption with a measurement.
 
     **Nearest gene is not causal gene.** `gene_most_severe` is a VEP annotation of the lead
     variant. *PHTF1* is a label for the *PTPN22* region, not a claim about *PHTF1*. Turning

@@ -33,7 +33,7 @@ with app.setup:
     if str(NOTEBOOK_DIR) not in sys.path:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
-    from nb01_pcsk9_walkthrough import client, fetch_json, fetch_tsv
+    from nb01_pcsk9_walkthrough import BASE, client, fetch_json, fetch_tsv
 
 
 @app.function
@@ -44,15 +44,22 @@ def list_datasets() -> pl.DataFrame:
     `products` (`credible_sets`, `summary_stats`, `colocalization.partners`)
     and `stats` (`n_phenotypes`, `n_samples_median`) substructures into flat
     columns suitable for sorting, filtering, and grouping. Unknown extras
-    are dropped on purpose -- print the raw response with
-    `fetch_json("/datasets")` if you need them.
+    are dropped on purpose -- print `client().get(f"{BASE}/datasets").json()`
+    if you need them.
+
+    Gotcha: `/datasets` is the one endpoint that *rejects* `format`, so `fetch_json`
+    (which always injects `format=json`) 422s here. It answers JSON anyway, so
+    `fetch_tsv` cannot parse it either. Hence the raw GET below.
 
     Returned columns: `dataset_id`, `resource`, `version`, `data_type`,
     `trait_type`, `n_phenotypes`, `n_samples`, `has_credible_sets`,
     `has_summary_stats`, `n_coloc_partners`, `description`, `author`,
     `publication_date`.
     """
-    rows = fetch_json("/datasets")
+    with client() as c:
+        r = c.get(f"{BASE}/datasets")
+        r.raise_for_status()
+    rows = r.json()
     if not rows:
         return pl.DataFrame()
 
