@@ -1,0 +1,59 @@
+name: Sync notebooks to MarimoHub
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Archive repository
+        run: git archive --format=tar.gz -o "$RUNNER_TEMP/fgx-sync.tgz" HEAD
+
+      - name: Push every notebook mirror
+        env:
+          MARIMOHUB_SYNC_TARGETS: ${{ secrets.MARIMOHUB_SYNC_TARGETS }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${MARIMOHUB_SYNC_TARGETS:-}" ]; then
+            echo "MARIMOHUB_SYNC_TARGETS is not configured" >&2
+            exit 1
+          fi
+
+          jq -e '
+            .repo == "broadinstitute/fgx" and
+            .branch == "main" and
+            .root_path == "" and
+            (.targets | length > 0) and
+            all(.targets[];
+              (.entry_notebook | startswith("notebooks/")) and
+              (.sync_url | startswith("https://")) and
+              (.sync_token | startswith("mhsync_")))
+          ' <<<"$MARIMOHUB_SYNC_TARGETS" >/dev/null
+
+          jq -c '.targets[]' <<<"$MARIMOHUB_SYNC_TARGETS" |
+            while IFS= read -r target; do
+              entry=$(jq -r '.entry_notebook' <<<"$target")
+              sync_url=$(jq -r '.sync_url' <<<"$target")
+              sync_token=$(jq -r '.sync_token' <<<"$target")
+
+              echo "Syncing $entry"
+              curl --fail-with-body --silent --show-error \
+                --request POST "$sync_url" \
+                --header "Authorization: Bearer $sync_token" \
+                --header "Content-Type: application/gzip" \
+                --header "X-Marimohub-Archive-Format: tar.gz" \
+                --header "X-Marimohub-Repo: $GITHUB_REPOSITORY" \
+                --header "X-Marimohub-Branch: $GITHUB_REF_NAME" \
+                --header "X-Marimohub-Commit: $GITHUB_SHA" \
+                --data-binary "@$RUNNER_TEMP/fgx-sync.tgz" \
+                --output "$RUNNER_TEMP/marimohub-sync-response.json"
+            done
