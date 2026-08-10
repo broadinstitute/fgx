@@ -36,17 +36,17 @@ with app.setup:
         sys.path.insert(0, str(NOTEBOOK_DIR))
 
     from nb01_pcsk9_walkthrough import BASE, client, fetch_tsv
-    from nb02_variant_phewas import alt_alleles  # noqa: F401  (allele-fallback, see "To extend")
+    from nb02_variant_phewas import alt_alleles  # noqa: F401
     from nb07_data_catalog import resource_metadata
 
-    # Analysis constants, stated once so every count below is traceable to them.
+    # Analysis constants used for all reported counts.
     GW_MLOG10P = 7.30103  # p <= 5e-8, the conventional genome-wide threshold
     MAX_ABS_BETA = 1.0  # |log OR| <= 1, i.e. OR in [0.37, 2.72]
     MAX_SE = 0.5
     MIN_AAF = 0.001
     LOCUS_KB = 500
 
-    # Statuses worth a retry; anything else is a bug in the request, not a blip.
+    # Retry transient HTTP failures.
     RETRY_STATUS = {429, 500, 502, 503, 504}
 
 
@@ -75,9 +75,9 @@ def cancer_phenotype_codes(resource: str, prefixes=("C3_", "CD2_")) -> pl.DataFr
 def harvest_leads(targets: list[tuple[str, str]], max_workers: int = 12) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Fetch `credible_sets_by_phenotype_leads` for many (resource, phenotype) pairs.
 
-    One row per credible set: the lead is the highest-PIP variant in that 95% set, so
-    LD within a signal is already collapsed by fine-mapping. Returns (leads, coverage);
-    coverage records the HTTP status per target so 404s are visible rather than silent.
+    The endpoint represents each credible set by its highest-PIP variant in the 95% set.
+    This is a lead representation, not LD pruning; leads from separate sets can remain
+    correlated. Returns (leads, coverage); coverage records the HTTP status per target.
 
     Gotcha: this endpoint answers JSON by default, not the API-wide TSV.
     """
@@ -101,11 +101,10 @@ def harvest_leads(targets: list[tuple[str, str]], max_workers: int = 12) -> tupl
 
 @app.function
 def cluster_loci(df: pl.DataFrame, kb: int = 500) -> pl.DataFrame:
-    """Label each row with a `locus` id, merging leads within `kb` on a chromosome.
+    """Label each row with a single-linkage distance cluster on its chromosome.
 
-    Fine-mapping removes LD *within* a credible set, but the same signal reappears as a
-    separate credible set in every phenotype definition and every resource that carries it.
-    Distance clustering is the crude second pass that turns those back into one locus.
+    Adjacent lead positions within `kb` are grouped across phenotype definitions and
+    resources. Neither the credible-set leads nor these clusters are LD-defined groups.
     """
     return (
         df.sort(["chr", "pos"])
@@ -124,13 +123,11 @@ def cluster_loci(df: pl.DataFrame, kb: int = 500) -> pl.DataFrame:
 
 @app.function
 def qc_leads(malignant: pl.DataFrame, gw: float = GW_MLOG10P, kb: int = LOCUS_KB) -> pl.DataFrame:
-    """Apply the stated QC filters, dedupe, and attach `locus` labels. One code path.
+    """Apply QC filters, deduplicate rows, and attach distance-based locus labels.
 
-    The clustering population is *all* QC-passing leads, risk and protective alike; the
-    `beta < 0` filter belongs after the locus labels exist. Order matters: cluster the
-    protective rows on their own and a risk lead that had been bridging two protective
-    leads is gone, so the same window silently yields more loci. The headline count and
-    the sensitivity grid both call this, so they cannot drift apart.
+    Clustering uses all QC-passing leads before filtering on effect direction. Filtering
+    first could remove a lead between two protective leads and change the distance clusters.
+    The primary estimate and sensitivity analysis both use this function.
     """
     return cluster_loci(
         malignant.filter(
@@ -145,7 +142,7 @@ def qc_leads(malignant: pl.DataFrame, gw: float = GW_MLOG10P, kb: int = LOCUS_KB
 
 @app.function
 def protective_loci_at(malignant: pl.DataFrame, gw: float, kb: int) -> int:
-    """Independent protective loci at significance `gw` and clustering window `kb`."""
+    """Count distance-clustered protective loci at threshold `gw` and window `kb`."""
     return qc_leads(malignant, gw, kb).filter(pl.col("beta") < 0)["locus"].n_unique()
 
 
@@ -153,18 +150,16 @@ def protective_loci_at(malignant: pl.DataFrame, gw: float, kb: int) -> int:
 def batch_credible_sets_by_variant(
     variants: list[str], chunk: int = 40, max_workers: int = 6, attempts: int = 4
 ) -> tuple[pl.DataFrame, pl.DataFrame]:
-    """POST /credible_sets_by_variant for many variants; the PheWAS arm of this notebook.
+    """POST `/credible_sets_by_variant` for multiple variants.
 
-    **Fails closed.** A chunk that never answers 200 raises rather than returning `[]`.
-    This matters more here than anywhere else in the catalog: downstream, a variant with no
-    returned rows is read as "no other-disease association", so one silently dropped chunk
-    would relabel up to `chunk` variants as clean. Transient statuses (429, 5xx) and
-    transport errors are retried with exponential backoff first.
+    A chunk that does not return HTTP 200 raises rather than returning an empty result.
+    Otherwise a missing chunk could be interpreted as no other-disease association.
+    Transient HTTP and transport errors are retried with exponential backoff.
 
     Returns `(rows, coverage)`; `coverage` is one row per chunk so the caller can assert
     full coverage before computing any verdict.
 
-    Gotcha: the `variants` body field is a single string whose separator is a NEWLINE.
+    The `variants` body field is a single string whose separator is a NEWLINE.
     Commas, spaces and semicolons all 422 with "variant needs to contain four fields".
     """
 
@@ -206,10 +201,9 @@ def batch_credible_sets_by_variant(
 def cancer_site(label: str) -> str:
     """Collapse a FinnGen phenotype label to a canonical cancer site.
 
-    FinnGen ships the same cancer under many case/control definitions (`_WIDE` adds Hilmo
+    FinnGen includes the same cancer under several case/control definitions (`_WIDE` adds Hilmo
     hospital records, `_EXALLC` excludes other cancers from controls, `_INCLAVO` adds
-    primary-care records) plus histological subtypes. Counting those as distinct diseases
-    is the single largest source of inflation in this analysis. First match wins.
+    primary-care records) and histological subtypes. The first matching rule is used.
     """
     rules = [
         ("basal cell", "Skin (non-melanoma)"),
@@ -273,20 +267,16 @@ def cancer_site(label: str) -> str:
 @app.cell
 def _():
     mo.md(r"""
-    # nb11: How many protective variants are there for cancer?
+    # nb11: Protective cancer variants
 
-    A deceptively simple two-part question, and a good stress test of the API:
+    This notebook estimates two quantities from fine-mapped cancer GWAS in GeneGenie:
 
-    1. **How many protective variants are there for any cancer?**
-    2. **Of those, which are associated with other diseases?**
+    1. the number of alternate alleles associated with lower risk of at least one cancer;
+    2. the number of their loci with an association to increased risk of another disease.
 
-    Both are answerable from the fine-mapped GWAS already in the API. The interesting part
-    is not the number -- it is that the number is only meaningful once you say what a
-    "variant" is, what "protective" means when allele labels are arbitrary, and which of
-    FinnGen's several-hundred cancer endpoints are actually different diseases.
-
-    This notebook answers both, states every threshold, and ends with the part that matters
-    most: what these data **cannot** tell you.
+    Counts are reported at the association, variant, locus-site, and locus levels. Their
+    interpretation depends on effect-allele coding, phenotype definitions, GWAS power, and
+    the distance-based locus definition used here.
     """)
     return
 
@@ -294,11 +284,11 @@ def _():
 @app.cell
 def _():
     mo.md(r"""
-    ## 0. What cancer data is actually here?
+    ## 1. Data coverage
 
-    Before counting anything: which resources carry fine-mapped cancer GWAS, and how many
-    cancer endpoints does each define? (`nb07` is the general introspection notebook; we
-    reuse its `resource_metadata` helper.)
+    The analysis queries every `C3_` or `CD2_` cancer endpoint in three resources, then
+    restricts the primary estimates to malignant (`C3_`) endpoints. The endpoint metadata
+    are retrieved with `resource_metadata` from `nb07`.
     """)
     return
 
@@ -321,10 +311,9 @@ def _():
     mo.vstack(
         [
             mo.md(
-                "**Cancer endpoints defined per resource.** `finngen` is R14 (Finland only, "
-                "deepest phenotyping); `finngen_ukbb` and `finngen_mvp_ukbb` are the R13 "
-                "meta-analyses that add UK Biobank and the Million Veteran Program -- far fewer "
-                "endpoints, far larger samples."
+                "**Cancer endpoints defined per resource.** `finngen` is R14; `finngen_ukbb` "
+                "and `finngen_mvp_ukbb` are R13 meta-analyses that include UK Biobank and the "
+                "Million Veteran Program."
             ),
             catalog_summary,
         ]
@@ -333,7 +322,7 @@ def _():
 
 
 @app.cell
-def _(RESOURCES, catalog):
+def _(catalog):
     targets = [(r["resource"], r["phenotype_code"]) for r in catalog.iter_rows(named=True)]
     raw_leads, coverage = harvest_leads(targets)
     cov_summary = (
@@ -348,12 +337,11 @@ def _(RESOURCES, catalog):
     mo.vstack(
         [
             mo.md(
-                f"### Probed all {len(targets):,} cancer endpoints across {len(RESOURCES)} resources\n\n"
-                "**First real finding, and it is a data-availability one.** The phenotype list and "
-                "the fine-mapping store are not the same thing: most FinnGen R14 cancer endpoints "
-                "return `404` from `credible_sets_by_phenotype_leads` because they were never "
-                "fine-mapped (too few cases). Any tool that answers this question off the phenotype "
-                "list alone will overstate its coverage."
+                f"### Fine-mapping coverage for {len(targets):,} cancer endpoints\n\n"
+                "The phenotype metadata contain more endpoints than the fine-mapping store. In "
+                "particular, many FinnGen R14 endpoints return `404` from "
+                "`credible_sets_by_phenotype_leads`. All estimates below use only endpoints for "
+                "which the API returned credible sets."
             ),
             cov_summary,
             mo.md(f"**Total credible-set leads retrieved: {len(raw_leads):,}**"),
@@ -365,18 +353,15 @@ def _(RESOURCES, catalog):
 @app.cell
 def _():
     mo.md(r"""
-    ## 1. The direction-of-effect problem
+    ## 2. Effect direction and allele frequency
 
-    Before any count, the question hides a trap.
+    GWAS effect sizes are reported per alternate allele. Here, `beta < 0` means that the
+    alternate allele is associated with lower cancer risk. Reversing the effect allele
+    reverses the sign, so "protective" is an allele-coded association rather than an
+    intrinsic property of a locus.
 
-    GWAS effect sizes are reported **per alternate allele**. "Protective" therefore means
-    `beta < 0`: carrying the alt allele lowers risk. But which allele is called *alt* is a
-    reference-genome convention, not biology. Every risk locus is also a protective locus
-    read from the other allele. So for common variants, "how many protective variants" is
-    close to a restatement of "how many cancer loci", divided by two.
-
-    The exception is informative. Plot the fraction of significant leads with `beta < 0`
-    against alt-allele frequency:
+    The plot shows the fraction of genome-wide significant leads with `beta < 0` by
+    alternate-allele frequency.
     """)
     return
 
@@ -424,7 +409,7 @@ def _(raw_leads):
         )
         .properties(
             height=260,
-            title="Protective fraction rises with allele frequency -- ascertainment, not biology",
+            title="Fraction of cancer leads with beta < 0 by alternate-allele frequency",
         )
     )
     rule = alt.Chart(pl.DataFrame({"y": [0.5]})).mark_rule(strokeDash=[6, 4], color="#d7191c").encode(y="y:Q")
@@ -440,13 +425,10 @@ def _(raw_leads):
                 f"with reported allele frequency. The {_n_below_gw:,} retrieved leads not shown are "
                 f"below the p <= 5e-8 threshold; {_n_null_aaf:,} significant leads are excluded for "
                 "missing allele frequency.\n\n"
-                "At **alt-allele frequency above 50%** the split is ~52/48 -- a coin flip, exactly what "
-                "arbitrary allele labelling predicts. It falls to **~14% at frequencies under 1%**.\n\n"
-                "That gradient is a detection asymmetry, not a biological one. To reach genome-wide "
-                "significance a rare allele must be *enriched* in cases; a rare allele *depleted* in "
-                "cases has almost no power at the same frequency. **Rare protective variants are "
-                "systematically under-ascertained in this data**, so any count below is a floor for "
-                "common variants and badly incomplete for rare ones."
+                "The fraction with `beta < 0` is about 52% when the alternate allele frequency is "
+                "above 50% and 14% below 1%. The discovered lead set is therefore depleted for rare "
+                "alternate alleles with negative effects. These data do not estimate the number of "
+                "rare protective variants that were not detected."
             ),
         ]
     )
@@ -456,19 +438,19 @@ def _(raw_leads):
 @app.cell
 def _():
     mo.md(rf"""
-    ## 2. Filters, stated up front
+    ## 3. Analysis definition
 
-    | filter | value | why |
+    | criterion | definition | purpose |
     |---|---|---|
-    | malignant only | `C3_` prefix | `CD2_` is in-situ/benign (uterine leiomyoma, colon polyps). Not cancer. |
-    | significance | `mlog10p >= {GW_MLOG10P}` (p <= 5e-8) | the leads endpoint returns credible sets regardless of significance -- the raw minimum here is p ~ 0.98 |
-    | effect plausibility | `abs(beta) <= {MAX_ABS_BETA}` | log-odds beyond +/-1 at these frequencies is model separation, not biology |
-    | standard error | `se <= {MAX_SE}` | same |
-    | allele frequency | `aaf >= {MIN_AAF}` | below 0.1% the effect estimate is not identifiable in these sample sizes |
+    | malignant only | `C3_` prefix | exclude `CD2_` in-situ, benign, and uncertain-behavior endpoints |
+    | significance | `mlog10p >= {GW_MLOG10P}` (p <= 5e-8) | the leads endpoint also returns sub-threshold credible sets |
+    | effect estimate | `abs(beta) <= {MAX_ABS_BETA}` | exclude extreme estimates likely to be unstable |
+    | standard error | `se <= {MAX_SE}` | exclude imprecise estimates |
+    | allele frequency | `aaf >= {MIN_AAF}` | limit sparse estimates at very low frequency |
     | direction | `beta < 0` | alt allele lowers risk |
-    | LD | credible-set leads, then {LOCUS_KB}kb clustering | fine-mapping handles LD within a signal; clustering handles the same signal recurring across endpoints |
+    | locus definition | credible-set leads, then {LOCUS_KB}kb clustering | collapse nearby leads recurring across endpoints; this does not establish LD |
 
-    The plausibility filters are not cosmetic. Watch what they remove:
+    The excluded significant leads are shown below.
     """)
     return
 
@@ -483,11 +465,11 @@ def _(raw_leads):
     mo.vstack(
         [
             mo.md(
-                f"### {len(implausible):,} significant leads fail the plausibility filters\n\n"
-                "Sorted by effect size, they are almost all the same thing: near-monomorphic alleles "
-                "at 16q24.3 (the *MC1R* pigmentation region) in skin-cancer endpoints, where the "
-                "logistic model is separating rather than estimating. A beta of -30 is an odds ratio "
-                "of 1e-13. The locus is real biology; these particular estimates are not usable numbers."
+                f"### {len(implausible):,} significant leads excluded by effect-estimate filters\n\n"
+                "The largest estimates occur at 16q24.3 near *MC1R* in skin-cancer endpoints. "
+                "They combine very low allele frequency with extreme effect estimates or large "
+                "standard errors, consistent with sparse-data separation. The associations may be "
+                "real, but these estimates are not used for counting."
             ),
             implausible.sort("beta")
             .select("phenotype_code", "resource", "chr", "pos", "beta", "se", "aaf", "mlog10p", "gene_most_severe")
@@ -507,8 +489,9 @@ def _(malignant):
     qc = qc.with_columns(pl.col("trait_label").map_elements(cancer_site, return_dtype=pl.String).alias("site"))
     protective = qc.filter(pl.col("alt_protective"))
     mo.md(
-        f"**After QC: {len(qc):,} cancer associations**, of which **{len(protective):,} are protective** "
-        f"({len(protective) / len(qc):.1%}) and {len(qc) - len(protective):,} are risk-increasing."
+        f"After filtering, {len(qc):,} cancer associations remain: {len(protective):,} "
+        f"({len(protective) / len(qc):.1%}) have `beta < 0` and "
+        f"{len(qc) - len(protective):,} have `beta > 0`."
     )
     return protective, qc
 
@@ -516,11 +499,10 @@ def _(malignant):
 @app.cell
 def _():
     mo.md(r"""
-    ## 3. The phenotype-redundancy problem
+    ## 4. Count by cancer site
 
-    Now the second trap, and the one that would most distort a naive answer.
-
-    Group the protective associations by cancer *site* rather than by phenotype code:
+    FinnGen includes overlapping phenotype definitions for the same cancer. Protective
+    associations are therefore grouped by cancer site before loci are counted.
     """)
     return
 
@@ -540,17 +522,19 @@ def _(protective):
         .agg(
             pl.len().alias("associations"),
             pl.col("variant").n_unique().alias("distinct_variants"),
-            pl.col("locus").n_unique().alias("independent_loci"),
+            pl.col("locus").n_unique().alias("distance_clustered_loci"),
             pl.col("phenotype_code").n_unique().alias("finngen_codes"),
         )
-        .with_columns((pl.col("distinct_variants") / pl.col("independent_loci")).round(2).alias("variants_per_locus"))
+        .with_columns(
+            (pl.col("distinct_variants") / pl.col("distance_clustered_loci")).round(2).alias("variants_per_locus")
+        )
         .sort("associations", descending=True)
     )
     skin_row = by_site.filter(pl.col("site") == "Skin (non-melanoma)")
     _prostate_row = by_site.filter(pl.col("site") == "Prostate")
     _unmapped_row = by_site.filter(pl.col("site") == "Other/unmapped")
     _all_loci = protective["locus"].n_unique()
-    _skin_loci = int(skin_row["independent_loci"][0])
+    _skin_loci = int(skin_row["distance_clustered_loci"][0])
     _loci_without_skin = _all_loci - _skin_loci
     _multi_site_loci = (
         protective.group_by("locus")
@@ -559,34 +543,32 @@ def _(protective):
         .height
     )
     _unmapped_associations = int(_unmapped_row["associations"][0]) if _unmapped_row.height else 0
-    _unmapped_loci = int(_unmapped_row["independent_loci"][0]) if _unmapped_row.height else 0
+    _unmapped_loci = int(_unmapped_row["distance_clustered_loci"][0]) if _unmapped_row.height else 0
     _skin_queries_per_locus = float(skin_row["variants_per_locus"][0])
     _prostate_queries_per_locus = float(_prostate_row["variants_per_locus"][0])
     mo.vstack(
         [
             by_site,
             mo.md(
-                "**Non-melanoma skin cancer alone accounts for "
+                "Non-melanoma skin cancer accounts for "
                 f"{int(skin_row['associations'][0]):,} of {len(protective):,} protective associations "
                 f"({int(skin_row['associations'][0]) / len(protective):.0%}) and {_skin_loci:,} of "
-                f"{_all_loci:,} protective loci ({_skin_loci / _all_loci:.0%}). Only "
-                f"{_loci_without_skin:,} loci have no non-melanoma skin association.** Dermatologic "
-                "ascertainment may contribute to that dominance, so the skin-excluded count is an important "
-                "sensitivity result rather than a second estimate of the same population quantity.\n\n"
+                f"{_all_loci:,} distance-clustered loci ({_skin_loci / _all_loci:.0%}). "
+                f"The remaining {_loci_without_skin:,} loci have no non-melanoma skin association. "
+                "Dermatologic ascertainment and overlapping phenotype definitions may contribute to "
+                "this concentration, so the skin-excluded count is reported separately.\n\n"
                 "FinnGen represents non-melanoma skin cancer with four codes: `C3_SKIN`, "
                 "`C3_OTHER_SKIN_WIDE`, `C3_BASAL_CELL_CARCINOMA_WIDE`, and "
-                "`C3_SQUAMOUS_CELL_CARCINOMA_SKIN_WIDE`. Those four already include the broad and "
-                "histology-specific definitions; three overlapping resources repeat them.\n\n"
-                f"**Rows are not additive.** {_multi_site_loci:,} loci are protective for more than one "
-                f"site, so summing `independent_loci` gives {int(by_site['independent_loci'].sum()):,} "
-                f"locus-site signals, not {_all_loci:,} loci. The mapping leaves {_unmapped_associations:,} "
+                "`C3_SQUAMOUS_CELL_CARCINOMA_SKIN_WIDE`; the three resources repeat several of these "
+                "definitions.\n\n"
+                f"Because {_multi_site_loci:,} loci are associated with more than one cancer site, "
+                f"the site-specific counts sum to {int(by_site['distance_clustered_loci'].sum()):,} locus-site "
+                f"signals rather than {_all_loci:,} loci. The mapping leaves {_unmapped_associations:,} "
                 f"associations across {_unmapped_loci:,} loci as `Other/unmapped`.\n\n"
-                "**Query effort is also uneven.** The PheWAS below sends every distinct protective variant: "
-                f"{_skin_queries_per_locus:.2f} variants per non-melanoma skin locus versus "
-                f"{_prostate_queries_per_locus:.2f} per prostate locus. That gives skin loci "
-                f"{_skin_queries_per_locus / _prostate_queries_per_locus:.1f}x as many chances per locus "
-                "to acquire a trade-off label. Cross-site trade-off rates therefore require matching or "
-                "adjustment for variants queried per locus; this notebook reports no unadjusted site ranking."
+                "The number of variants queried per locus also differs by site: "
+                f"{_skin_queries_per_locus:.2f} for non-melanoma skin cancer and "
+                f"{_prostate_queries_per_locus:.2f} for prostate cancer. Site-specific rates of "
+                "other-disease associations are therefore not compared."
             ),
         ]
     )
@@ -607,7 +589,7 @@ def _(protective, qc):
                 "variant x cancer-endpoint associations",
                 "distinct protective variants",
                 "distinct (locus x cancer site) signals",
-                "independent protective loci",
+                f"{LOCUS_KB} kb distance-clustered loci",
                 "loci with no non-melanoma skin association",
                 "loci protective for every cancer they hit",
             ],
@@ -629,15 +611,15 @@ def _(protective, qc):
     )
     mo.vstack(
         [
-            mo.md("## Answer to Q1\n\nThe count spans an order of magnitude depending on the unit:"),
+            mo.md("## 5. Number of protective cancer variants and loci\n\nCounts depend on the analysis unit:"),
             counts,
             mo.md(
-                f"**The defensible all-cancer headline is ~{_all_protective_loci:,} independent protective loci, "
-                f"but {_skin_loci:,} ({_skin_loci / _all_protective_loci:.0%}) have a non-melanoma skin "
-                f"association and only {_loci_without_skin:,} do not.** Of the full set, "
-                f"{_fully_protective_loci:,} point protective at every cancer they reach. The other "
-                f"{_mixed:,} loci lower risk for one cancer while raising it for another -- so even "
-                "'protective' is site-specific, not a property of the variant."
+                f"At the primary thresholds, the protective associations include "
+                f"{_all_protective_loci:,} distance-clustered loci. {_skin_loci:,} "
+                f"({_skin_loci / _all_protective_loci:.0%}) have a non-melanoma skin association; "
+                f"{_loci_without_skin:,} do not. The alternate allele has `beta < 0` for every cancer "
+                f"association at {_fully_protective_loci:,} loci. The remaining {_mixed:,} loci have "
+                "opposite directions across cancer sites."
             ),
         ]
     )
@@ -650,32 +632,28 @@ def _(malignant):
         {
             "p threshold": f"p<=1e-{gw:.0f}" if gw > 7.4 else "p<=5e-8",
             "locus window (kb)": kb,
-            "protective loci": protective_loci_at(malignant, gw, kb),
+            "distance-clustered loci": protective_loci_at(malignant, gw, kb),
         }
         for gw in (GW_MLOG10P, 8.0, 9.0, 12.0)
         for kb in (100, 500, 1000)
     ]
-    sens = pl.DataFrame(grid).pivot(on="locus window (kb)", index="p threshold", values="protective loci")
-    grid_counts = [g["protective loci"] for g in grid]
-    grid_same_kb = [g["protective loci"] for g in grid if g["locus window (kb)"] == LOCUS_KB]
+    sens = pl.DataFrame(grid).pivot(on="locus window (kb)", index="p threshold", values="distance-clustered loci")
+    grid_counts = [g["distance-clustered loci"] for g in grid]
+    grid_same_kb = [g["distance-clustered loci"] for g in grid if g["locus window (kb)"] == LOCUS_KB]
     mo.vstack(
         [
             mo.md(
-                "### How fragile is that number?\n\n"
-                "Protective loci as a function of the two choices that actually move it -- significance "
-                "threshold and locus window. Columns are the clustering window in kb. The grid runs the "
-                f"same `protective_loci_at` code path as the headline, so the p<=5e-8 / {LOCUS_KB}kb cell "
-                "reproduces the headline exactly rather than approximating it."
+                "### Sensitivity to significance threshold and distance window\n\n"
+                "Columns give the clustering window in kb. The p <= 5e-8, "
+                f"{LOCUS_KB} kb cell is the primary estimate."
             ),
             sens,
             mo.md(
-                f"**A {max(grid_counts) / min(grid_counts):.1f}-fold range across the whole grid** "
+                f"Counts vary {max(grid_counts) / min(grid_counts):.1f}-fold across the full grid "
                 f"({max(grid_counts):,} at the loosest corner, {min(grid_counts):,} at the tightest), and "
                 f"{max(grid_same_kb) / min(grid_same_kb):.1f}-fold if you hold the {LOCUS_KB}kb window and "
-                "vary only the threshold. The number is threshold-dependent in the way every GWAS count "
-                "is; it is not knife-edge. The plausibility filters "
-                "(`beta`, `se`, `aaf`) barely move it at all -- they remove ~12% of associations but "
-                "under 1% of loci, because the implausible rows pile onto loci that are already counted."
+                "vary only the threshold. The effect-estimate filters remove about 11% of associations "
+                "but fewer than 1% of loci because most excluded rows occur at loci that remain counted."
             ),
         ]
     )
@@ -684,11 +662,8 @@ def _(malignant):
 
 @app.cell
 def _(protective):
-    # Every distinct protective variant is queried, not one representative per locus.
-    # Distance clustering says two leads are near each other; it does not say they tag the
-    # same causal signal, so one lead's PheWAS is not a valid proxy for the other's. Query
-    # all of them and aggregate to the locus afterwards -- that direction is safe, the
-    # reverse is not.
+    # Query every distinct protective variant because distance clustering does not establish
+    # that one lead is a proxy for another. Aggregate PheWAS results by locus afterwards.
     probes = (
         protective.sort("mlog10p", descending=True)
         .unique(subset=["variant"], keep="first", maintain_order=True)
@@ -716,14 +691,10 @@ def _(protective):
     )
     n_loci = loci.height
     mo.md(
-        f"### Q2 input: {len(probes):,} distinct protective variants across {n_loci:,} loci\n\n"
-        f"An earlier draft sent one representative variant per locus ({n_loci:,} queries instead of "
-        f"{len(probes):,}) and then labelled the whole locus from that one PheWAS. That is only valid if "
-        "co-located leads are in tight LD, which 500kb distance clustering does not establish -- two "
-        "independent signals 300kb apart can have entirely different pleiotropy. So every protective "
-        "variant is queried and the union is taken per locus. Doing it the other way understates "
-        "trade-offs, because a trade-off found at any lead in the locus is missed unless that lead "
-        "happened to be the representative."
+        f"### Variants tested for other-disease associations\n\n"
+        f"The analysis queries all {len(probes):,} distinct protective variants across {n_loci:,} "
+        "distance-clustered loci. A 500 kb window does not establish LD, so one lead cannot be used "
+        "as a proxy for another. Associations are aggregated by locus only after the variant-level query."
     )
     return loci, n_loci, probes
 
@@ -731,12 +702,12 @@ def _(protective):
 @app.cell
 def _():
     mo.md(r"""
-    ## 4. Q2: what else do these alleles do?
+    ## 6. Other-disease associations
 
-    For each protective lead we ask `credible_sets_by_variant`: which other traits have a
-    credible set containing this variant? Because effect sizes are reported per alt allele
-    throughout, the comparison is direct -- the same allele that gave `beta < 0` for cancer
-    either lowers (`beta < 0`) or raises (`beta > 0`) the other trait.
+    For each protective variant, `credible_sets_by_variant` returns other traits whose credible
+    sets contain that variant. Effect sizes use the same alternate allele throughout. Their sign
+    indicates a lower or higher coded trait value; it is interpreted as disease risk only after
+    restriction to binary disease endpoints.
     """)
     return
 
@@ -744,10 +715,8 @@ def _():
 @app.cell
 def _(probes):
     phewas_raw, phewas_cov = batch_credible_sets_by_variant(probes["variant"].to_list())
-    # Fail closed a second time, at the analysis boundary: no verdict is computed unless the
-    # chunks together account for every variant we asked about. A missing chunk would read as
-    # "these variants have no other-disease association", which is the one error that silently
-    # inflates the reassuring answer.
+    # Require complete batch coverage before classifying loci. A missing response cannot be
+    # interpreted as absence of an other-disease association.
     assert phewas_cov["n_variants"].sum() == probes.height, "PheWAS coverage is incomplete"
     phewas = (
         phewas_raw.with_columns(pl.concat_str(["chr", "pos", "ref", "alt"], separator=":").alias("variant"))
@@ -763,12 +732,10 @@ def _(probes):
     mo.vstack(
         [
             mo.md(
-                f"**{len(phewas_raw):,} credible-set rows returned** for all {probes.height:,} "
-                f"protective variants, sent as {phewas_cov.height} chunks with every chunk confirmed 200 "
-                "(`batch_credible_sets_by_variant` raises rather than returning an empty payload, so a "
-                "throttled or expired request cannot masquerade as 'no association'). Rows span GWAS and "
-                "the molecular QTL layers; we keep only genome-wide significant GWAS rows for the disease "
-                "question, and leave the QTL mechanism layer to a follow-on notebook."
+                f"The API returned {len(phewas_raw):,} credible-set rows for {probes.height:,} variants "
+                f"in {phewas_cov.height} successful chunks. Incomplete requests raise an error rather "
+                "than being treated as null results. The analysis retains genome-wide significant GWAS "
+                "rows; molecular QTL rows are not used here."
             ),
             layer_mix,
         ]
@@ -785,23 +752,19 @@ def _(phewas):
         )
         .group_by("direction")
         .agg(pl.len().alias("n"))
+        .sort("direction")
     )
     mo.vstack(
         [
             mo.md(
-                f"### The naive answer, and why it is wrong\n\n"
-                f"{len(non_cancer_all):,} non-cancer associations. Split by direction:"
+                "### Restriction to disease endpoints\n\n"
+                f"All {len(non_cancer_all):,} non-cancer associations, grouped by effect direction:"
             ),
             naive_split,
             mo.md(
-                "**The near-50/50 split is descriptive, not a statistical finding.** Most of these "
-                "'traits' are not diseases. They are Kanta lab measurements with numeric codes "
-                "(`3026361`), ATC drug-purchase endpoints (`ATC_H03AA_IRN`), and Open Targets studies "
-                "(`GCST...`) that are largely quantitative. For a lab value, 'higher' has no intrinsic "
-                "direction of harm, so counting sign flips over them measures nothing. A binomial test "
-                "against 50% would only attach confidence to the wrong estimand.\n\n"
-                "To ask the question honestly we have to restrict to **binary disease endpoints**, "
-                "where raising the trait unambiguously means more disease."
+                "These rows include laboratory measurements, drug-purchase endpoints, and quantitative "
+                "Open Targets studies. For those traits, `beta > 0` does not consistently mean harm. "
+                "The locus classification therefore uses only binary disease endpoints."
             ),
         ]
     )
@@ -837,16 +800,15 @@ def _(RESOURCES, non_cancer_all):
     mo.vstack(
         [
             mo.md(
-                f"### Restricted to binary disease endpoints: {len(disease):,} associations "
+                f"### Binary disease endpoints: {len(disease):,} associations "
                 f"across {disease['trait_original'].n_unique():,} distinct disease codes"
             ),
             disease_split,
             mo.md(
-                f"At the association-row level, {_n_higher:,} rows raise another disease and "
-                f"{_n_lower:,} lower one. **This is descriptive only.** Rows recur across overlapping "
-                "resources, correlated disease definitions, and multiple variants at the same locus, "
-                "so they are not independent replicates and do not support a row-level binomial p-value "
-                "or confidence interval. The locus-level verdict below is the analysis unit."
+                f"At the association-row level, {_n_higher:,} rows have `beta > 0` and {_n_lower:,} "
+                "have `beta < 0`. Rows recur across overlapping resources, correlated disease "
+                "definitions, and variants at the same locus, so they are not independent observations. "
+                "The analysis unit below is the locus."
             ),
         ]
     )
@@ -855,9 +817,7 @@ def _(RESOURCES, non_cancer_all):
 
 @app.cell
 def _(disease, loci, n_binary_endpoint_instances, n_loci, probes):
-    # Counts are of distinct diseases, not association rows: the same phenotype recurs across
-    # resources and across the several variants now probed at each locus, and summing rows
-    # would let one disease counted three times look like three trade-offs.
+    # Count distinct disease codes because rows recur across resources and variants.
     def verdicts(rows: pl.DataFrame) -> pl.DataFrame:
         return (
             rows.group_by("locus")
@@ -874,9 +834,7 @@ def _(disease, loci, n_binary_endpoint_instances, n_loci, probes):
     tradeoff_loci = per_locus.filter(pl.col("n_worse") > 0)
     silent = n_loci - per_locus.height
 
-    # What the representative-variant shortcut would have concluded, from the same PheWAS rows
-    # and no extra API calls: keep only each locus's strongest protective lead. This is the
-    # cost of the shortcut measured rather than argued.
+    # Recompute classifications using only the strongest protective lead at each locus.
     # `.implode()` because `is_in` against a bare Series of the same dtype is deprecated in
     # polars (pola-rs/polars#22149) -- element-wise vs collection membership is ambiguous
     # there. Imploding to a single list cell says "membership in this collection" explicitly.
@@ -890,8 +848,8 @@ def _(disease, loci, n_binary_endpoint_instances, n_loci, probes):
         {
             "verdict": [
                 "no significant other-disease association",
-                "cleanly protective (lowers cancer, raises no disease)",
-                "trade-off (lowers cancer, raises another disease)",
+                "disease associations detected, none with beta > 0",
+                "at least one disease association with beta > 0",
             ],
             "loci": [silent, len(clean_loci), len(tradeoff_loci)],
         }
@@ -900,35 +858,28 @@ def _(disease, loci, n_binary_endpoint_instances, n_loci, probes):
     _tradeoff_denominator = len(clean_loci) + len(tradeoff_loci)
     mo.vstack(
         [
-            mo.md(f"## Answer to Q2\n\nOf the {n_loci:,} protective cancer loci:"),
+            mo.md(f"## 7. Locus-level other-disease results\n\nOf the {n_loci:,} protective cancer loci:"),
             verdict,
             mo.md(
-                f"**Among loci with any significant other-disease signal, trade-offs outnumber clean "
-                f"protection {len(tradeoff_loci):,} to {len(clean_loci):,} "
-                f"({len(tradeoff_loci) / _tradeoff_denominator:.0%}).** A locus is classified from the "
-                "union over every protective variant it contains, so 'trade-off' is easy to reach and "
-                "'cleanly protective' is the strictly harder claim -- the conservative direction for a "
-                "safety screen.\n\n"
-                "**The percentage is not a stable biological rate.** It depends on how many variants were "
-                "queried per locus, how many diseases had powered GWAS, and which correlated endpoints and "
-                "resources were available. Absence of a significant association is therefore weaker than "
-                "presence, and sites with denser protective leads receive more chances to be labelled a "
-                "trade-off.\n\n"
-                f"**Nominal false positives are too rare to explain the count.** As a scale check, "
-                f"{probes.height:,} queried variants x {n_binary_endpoint_instances:,} available binary "
-                f"resource-endpoints x 5e-8 gives {_expected_null_hits:.2f} expected threshold crossings under a "
-                "complete null. This does not remove phenotype dependence, selection, winner's curse, or "
-                "the query-effort bias above."
+                f"Among loci with a significant other-disease association, {len(tradeoff_loci):,} "
+                f"have at least one association with `beta > 0` and {len(clean_loci):,} have only "
+                f"associations with `beta < 0` ({len(tradeoff_loci) / _tradeoff_denominator:.0%} with "
+                "`beta > 0`). Each locus is classified from the union of results for all protective "
+                "variants in that locus.\n\n"
+                "This percentage is conditional on the variants queried, available disease GWAS, and "
+                "endpoint power. Loci with more queried variants have more opportunities to acquire a "
+                "`beta > 0` association, and a null result is weaker evidence than a detected association.\n\n"
+                f"A conservative scale calculation treats all {probes.height:,} variants x "
+                f"{n_binary_endpoint_instances:,} binary resource-endpoints as tests. At 5e-8 this gives "
+                f"{_expected_null_hits:.2f} expected threshold crossings. This calculation does not "
+                "address phenotype dependence, selection, winner's curse, or unequal query density."
             ),
             mo.md(
-                "**What the shortcut would have cost.** Re-scoring the same PheWAS rows using only each "
-                f"locus's strongest protective lead -- {n_loci:,} queries instead of {probes.height:,} -- "
-                f"gives {rep_tradeoff:,} trade-off loci instead of {len(tradeoff_loci):,}, and "
-                f"{rep_silent:,} apparently silent loci instead of {silent:,}. More queries are still "
-                "finding more trade-offs, so discovery is not saturated. The largest change is the "
-                "*APOE* region: its representative lead raises three diseases, while a neighbouring "
-                "protective lead raises 46. Section 5 treats that liver-cancer association as a "
-                "competing-risk warning, not biological validation."
+                f"Using only the strongest cancer lead at each locus gives {rep_tradeoff:,} loci with "
+                f"a `beta > 0` disease association, compared with {len(tradeoff_loci):,} when all "
+                f"{probes.height:,} protective variants are queried. The corresponding number with no "
+                f"other-disease association is {rep_silent:,} rather than {silent:,}. A representative "
+                "variant therefore misses associations carried by other leads in the same distance cluster."
             ),
         ]
     )
@@ -953,9 +904,9 @@ def _(disease, tradeoff_loci):
     mo.vstack(
         [
             mo.md(
-                "### The trade-offs, strongest first\n\n"
-                "One row per (locus, disease) pair. `gene` is the nearest/most-severe gene at the "
-                "cancer locus; `other_disease` is what the same allele raises."
+                "### Disease-increasing associations by locus\n\n"
+                "The table contains one row per locus and disease code, retaining the strongest "
+                "association. `gene` is the VEP nearest/most-severe annotation, not an assigned causal gene."
             ),
             worse.select(
                 pl.col("locus_gene").alias("gene"),
@@ -985,31 +936,27 @@ def _(disease, tradeoff_loci):
             pl.len().alias("association_rows"),
             pl.col("mlog10p").max().alias("max_mlog10p"),
         )
-        .sort("n", descending=True)
+        .sort(["n", "gene"], descending=[True, False])
         .head(15)
     )
     tradeoff_chart = (
         alt.Chart(top_genes)
         .mark_bar(color="#d7191c", opacity=0.85)
         .encode(
-            x=alt.X("n:Q", title="distinct diseases raised by the cancer-protective allele"),
+            x=alt.X("n:Q", title="disease codes with beta > 0"),
             y=alt.Y("gene:N", sort="-x", title=None),
             tooltip=["gene", "n", "association_rows", alt.Tooltip("max_mlog10p:Q", format=".1f")],
         )
-        .properties(height=380, title="Loci that buy cancer protection at a cost")
+        .properties(height=380, title="Cancer-protective loci with disease associations at beta > 0")
     )
     mo.vstack(
         [
             mo.ui.altair_chart(tradeoff_chart),
             mo.md(
-                "**Read `n` as an upper bound.** Section 3 showed FinnGen defining one cancer several "
-                "ways; it does the same on the other-disease side. *PHTF1*'s 64 'distinct diseases' "
-                "include `Hypothyroidism, strict autoimmune`, `Hypothyroidism, drug reimbursement` and "
-                "`Disorders of the thyroid gland` as three. Counting association rows instead would be "
-                "worse still -- it also multiplies by resource, which is why *CDKN2B-AS1* outranks "
-                "*PHTF1* on rows (99 vs 98) and loses on diseases (47 vs 64). Collapsing the "
-                "non-cancer endpoints into disease families, the way `cancer_site` does for cancers, "
-                "is the missing piece; it needs a mapping this notebook does not build."
+                "`n` is an upper bound because related disease codes are counted separately. For "
+                "example, the *PHTF1*-labelled locus includes strict autoimmune hypothyroidism, "
+                "hypothyroidism with drug reimbursement, and disorders of the thyroid gland as three "
+                "codes. No disease-family mapping is applied to the non-cancer endpoints."
             ),
         ]
     )
@@ -1019,43 +966,29 @@ def _(disease, tradeoff_loci):
 @app.cell
 def _():
     mo.md(r"""
-    ### What the top trade-offs actually are
+    ### Selected loci
 
-    Several entries line up with prior biology. That is a useful plausibility check, but it does
-    not establish that the cancer and other-disease associations share one causal variant:
+    Several high-count loci have associations consistent with established biology. Positional
+    overlap within a 500 kb cluster does not show that the cancer and other-disease associations
+    share a causal variant.
 
-    - **`PHTF1` (1p13.2)** is the *PTPN22* region, and the widest-reaching trade-off here.
-      The allele that lowers skin-cancer risk raises autoimmune hypothyroidism, rheumatoid
-      arthritis, type 1 diabetes, and Crohn's. Sharper immune surveillance, more
-      autoimmunity -- the classic immune set-point trade.
-    - **`CDKN2B-AS1` (9p21)** carries eight distinct protective leads spanning *CDKN2A* and
-      *CDKN2B-AS1* across four cancer sites (non-melanoma skin, melanoma, brain/CNS,
-      colorectal), and raises coronary atherosclerosis, ischaemic heart disease and primary
-      open-angle glaucoma. The best argument in the notebook for querying every lead rather
-      than one per locus.
-    - **`PTCSC2` (9q22, near *FOXE1*)** lowers thyroid cancer and raises hypothyroidism and
-      goitre. Same tissue, opposite ends of thyroid function.
-    - **`IL2RA`, `BACH2`, `CDKAL1`, `RAB5B`, `UBE2L3`** (skin) and **`IRF5`** (kidney) --
-      immune-regulation loci, all the same shape: less cancer at the site they hit, more
-      autoimmune thyroid disease, type 1 diabetes, rheumatoid arthritis, Crohn's.
-    - Outside the immune block: **`SPDL1`** lowers cancer overall and raises **idiopathic
-      pulmonary fibrosis**; **`VAMP8`** lowers prostate cancer and raises coronary heart
-      disease; **`FTO`** lowers recorded breast-cancer risk and raises type 2 diabetes,
-      hypertension and arthrosis, which is the adiposity axis rather than an immune one.
+    - The *PTPN22* region, labelled `PHTF1` by VEP, includes lower skin-cancer risk and higher
+      risk of autoimmune hypothyroidism, rheumatoid arthritis, type 1 diabetes, and Crohn's disease.
+    - The 9p21 `CDKN2B-AS1` cluster includes protective associations across several cancer sites
+      and associations with coronary atherosclerosis, ischaemic heart disease, and glaucoma.
+    - The `PTCSC2` region near *FOXE1* includes lower thyroid-cancer risk and higher risk of
+      hypothyroidism and goitre.
+    - `IL2RA`, `BACH2`, `CDKAL1`, `RAB5B`, `UBE2L3`, and `IRF5` also pair lower cancer risk with
+      higher risk of one or more autoimmune diseases.
 
-    **The recurring pattern is immune tone.** Many loci point toward less recorded cancer and
-    more autoimmune disease. That coherence raises plausibility, but the distance-defined loci,
-    correlated endpoints, and ascertainment limits mean it remains a hypothesis for colocalization
-    and mechanism work, not a validated causal story.
+    Several of the highest-count loci are annotated near immune-regulation genes. The correlated
+    endpoints and distance-defined loci do not establish a shared mechanism.
 
-    **The *CHEK2* cancer direction has independent support.** A Polish case-control study
-    genotyped 895 lung-cancer cases and 6,391 controls for four founder alleles and reported lower
-    lung-cancer odds among carriers (OR 0.3, 95% CI 0.2-0.5, p = 3e-8;
-    [PMID 18281249](https://pubmed.ncbi.nlm.nih.gov/18281249/)). That makes the protective
-    lung-cancer direction less surprising than this notebook originally implied. It does not by
-    itself show that the myeloproliferative association is the same causal signal; that cross-disease
-    trade-off still needs colocalization. *ABO* protective for pancreatic cancer while raising
-    pulmonary embolism remains an open question for the same reason.
+    A Polish case-control study of four *CHEK2* founder alleles reported lower lung-cancer odds
+    among carriers (895 cases, 6,391 controls; OR 0.3, 95% CI 0.2-0.5, p = 3e-8;
+    [PMID 18281249](https://pubmed.ncbi.nlm.nih.gov/18281249/)). This supports the cancer-effect
+    direction but does not show that the cancer and myeloproliferative associations share a
+    causal signal.
     """)
     return
 
@@ -1088,15 +1021,13 @@ def _(disease, n_loci, protective):
     mo.vstack(
         [
             mo.md(
-                "## 5. What these data cannot support\n\n"
-                "### a. Some 'protection' is detection or selection, not necessarily biology\n\n"
-                "The strongest prostate signals include **`KLK3`** -- the gene encoding **PSA** -- and "
-                "**`MSMB`**. Prostate cancer in a biobank is substantially ascertained through PSA "
-                "screening. An allele that lowers PSA can lower the chance of biopsy and diagnosis "
-                "without lowering the chance of having disease. This dataset cannot distinguish those "
-                "paths, and the API does not flag them."
+                "## 8. Interpretation limits\n\n"
+                "### Ascertainment and selection\n\n"
+                "The strongest prostate signals include `KLK3`, which encodes PSA, and `MSMB`. "
+                "An allele that lowers PSA can reduce biopsy and diagnosis without reducing disease "
+                "incidence. These data do not distinguish those pathways."
             ),
-            mo.md("**Cancer associations at the PSA-related loci:**"),
+            mo.md("Cancer associations at the PSA-related loci:"),
             psa_signals.select(
                 pl.col("gene_most_severe").alias("gene"),
                 "site",
@@ -1106,23 +1037,19 @@ def _(disease, n_loci, protective):
                 pl.col("mlog10p").alias("cancer_mlog10p"),
             ),
             mo.md(
-                f"A separate precursor problem appears among the {n_loci:,} loci carried forward by "
-                "significance: when the same allele lowers skin cancer and **actinic keratosis**, one "
-                "biological pathway appears twice rather than demonstrating an independent benefit."
+                f"Among the {n_loci:,} loci, several alleles are associated with lower risk of both "
+                "skin cancer and actinic keratosis. These correlated endpoints do not represent "
+                "independent protective effects."
             ),
             actinic_signals.select("gene", "site", "other_disease", "variant", "beta", "mlog10p").head(8),
             mo.md(
-                "**The *APOE* liver-cancer signal is a competing-risk warning, not validation.** A "
-                "case-only GWAS of ischemic-stroke age at onset used simulations to show that the observed "
-                "*APOE* signal could arise from general survival bias rather than stroke biology "
-                "([PMID 39286457](https://pubmed.ncbi.nlm.nih.gov/39286457/)). That is indirect evidence "
-                "for this liver-cancer result, not proof about it. A 38-study cancer meta-analysis likewise "
-                "concluded that common *APOE* genotype is not a major overall cancer-risk factor, while "
+                "The *APOE* liver-cancer association may also reflect selection. Simulations in a "
+                "case-only stroke GWAS showed that an *APOE* age-at-onset signal could arise from survival "
+                "bias ([PMID 39286457](https://pubmed.ncbi.nlm.nih.gov/39286457/)). A 38-study meta-analysis "
+                "found no major overall association between common *APOE* genotype and cancer, while "
                 "allowing small site-specific effects "
-                "([PMID 41197273](https://pubmed.ncbi.nlm.nih.gov/41197273/)). Because liver cancer is "
-                "late-onset, earlier competing mortality could make an allele look protective among those "
-                "who survive to diagnosis. This notebook has no survival model and cannot distinguish that "
-                "selection mechanism from hepatic biology."
+                "([PMID 41197273](https://pubmed.ncbi.nlm.nih.gov/41197273/)). This notebook has no "
+                "survival model and cannot distinguish competing mortality from a hepatic effect."
             ),
             apoe_cancer_signals.select(
                 pl.col("gene_most_severe").alias("gene"),
@@ -1140,48 +1067,35 @@ def _(disease, n_loci, protective):
 @app.cell
 def _():
     mo.md(rf"""
-    ### b. The rest of the ledger
+    ### Generalizability and interpretation
 
-    **Ancestry.** Every resource here is European-ancestry (Finnish, UK Biobank, MVP).
-    Finland is a bottlenecked population: some variants are enriched tenfold relative to
-    elsewhere, which is why FinnGen finds them and also why the count does not transfer.
-    This is a count of protective variants **discoverable in Europeans**, not in humans.
+    **Population.** FinnGen is a Finnish founder-population resource, and the combined resources
+    do not provide a balanced multi-ancestry estimate. The result is not a human-wide count.
 
-    **Rare protective variants are missing, and we showed why.** The frequency gradient in
-    section 1 is a power artefact. A rare allele that halves cancer risk is far harder to
-    detect than one that doubles it. The true rare-protective count is larger than anything
-    here, and this data cannot bound it.
+    **Rare variants.** Only 14% of significant leads below 1% alternate-allele frequency have
+    `beta < 0`. The analysis does not bound the number of rare protective variants that were
+    not detected.
 
-    **Loci are distance-defined, not LD-defined.** {LOCUS_KB}kb clustering groups leads that sit
-    near each other; it does not establish that they tag one causal signal. That is why the
-    PheWAS queries every protective variant and aggregates to the locus afterwards, rather than
-    treating one lead as a proxy for its neighbours. The locus *count* still inherits the
-    assumption, which is what the sensitivity grid is there to expose. Proper LD or
-    colocalization between co-located leads would replace the assumption with a measurement.
+    **Locus definition.** The {LOCUS_KB} kb clusters are based on physical distance, not LD.
+    The sensitivity analysis varies this window, but LD-aware grouping or colocalization is
+    required to establish whether nearby leads represent the same signal.
 
-    **Nearest gene is not causal gene.** `gene_most_severe` is a VEP annotation of the lead
-    variant. *PHTF1* is a label for the *PTPN22* region, not a claim about *PHTF1*. Turning
-    any of these loci into a target requires the colocalization and QTL work this notebook
-    skipped (`nb01`, `nb06`).
+    **Gene labels.** `gene_most_severe` is a VEP annotation of the lead variant, not a causal-gene
+    assignment. For example, `PHTF1` labels the *PTPN22* region.
 
-    **Absence of a trade-off is not evidence of safety.** The "cleanly protective" loci are
-    clean partly because FinnGen has fewer cases for the diseases they would affect and partly
-    because the query has finite effort. The representative-lead sensitivity analysis found
-    76 trade-off loci; querying all protective leads found 111, so discovery was still rising
-    with the number of variants queried. The pooled 59% is a floor conditioned on lead density,
-    endpoint coverage, and power -- not an intrinsic property of protective cancer loci.
+    **Null results.** No detected disease-increasing association does not imply safety. Querying
+    one representative variant per locus identifies 76 loci with such an association; querying
+    all protective variants identifies 111. Detection depends on query density, endpoint coverage,
+    and power.
 
-    **Chromosome labels follow the API convention.** `chr == 23` means chromosome X here. No
-    cross-source chromosome join is performed in this notebook; any extension that joins a
-    source labelled `X` must normalize that field first.
+    **Chromosome labels.** The API uses `chr == 23` for chromosome X. Any extension that joins a
+    source labelled `X` must normalize this field.
 
-    **Effect sizes are tiny.** Most protective loci here have `abs(beta)` under 0.15, an odds
-    ratio around 0.87. These are population-genetic signals, not personal risk factors.
+    **Effect size.** About 80% of protective association rows have `abs(beta) < 0.15`, corresponding
+    to an odds ratio near 0.87. These are association estimates, not individual risk predictions.
 
-    **What would actually answer the question better.** Multi-ancestry meta-analysis for the
-    frequency floor; a case-control design not conditioned on screening for prostate and
-    skin; and colocalization with pQTL/eQTL to move from locus to mechanism. In every case
-    the limit is the dataset, not the query.
+    Multi-ancestry analysis, designs less sensitive to screening-related ascertainment, and
+    colocalization with eQTL or pQTL data would address these limitations.
     """)
     return
 
@@ -1191,15 +1105,10 @@ def _():
     mo.md(r"""
     ## To extend
 
-    - Swap `C3_` for a single site (`cancer_site() == "Colorectal"`) and re-run; the
-      redundancy collapse matters less and the loci become individually interpretable.
-    - Feed the trade-off loci into `colocalization_by_variant` to test whether the cancer
-      signal and the autoimmune signal are the *same* causal variant or two in LD. That is
-      the difference between a real trade-off and a coincidence of position.
-    - Keep the pQTL rows dropped in section 4 and ask which proteins the immune-tone loci
-      move -- `nb06`'s `direction_consensus` is built for exactly that.
-    - Use `alt_alleles` from `nb02` if you enter from an rsID rather than a phenotype; the
-      credible-set index and dbSNP do not always agree on the alt allele.
+    - Repeat the analysis within one cancer site to reduce phenotype overlap.
+    - Test whether cancer and other-disease associations colocalize rather than relying on
+      physical proximity.
+    - Use the excluded pQTL rows with `nb06` to examine protein-level direction of effect.
     """)
     return
 
