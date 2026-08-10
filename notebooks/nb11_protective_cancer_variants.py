@@ -75,9 +75,9 @@ def cancer_phenotype_codes(resource: str, prefixes=("C3_", "CD2_")) -> pl.DataFr
 def harvest_leads(targets: list[tuple[str, str]], max_workers: int = 12) -> tuple[pl.DataFrame, pl.DataFrame]:
     """Fetch `credible_sets_by_phenotype_leads` for many (resource, phenotype) pairs.
 
-    One row per credible set: the lead is the highest-PIP variant in that 95% set, so
-    LD within a signal is already collapsed by fine-mapping. Returns (leads, coverage);
-    coverage records the HTTP status per target so 404s are visible rather than silent.
+    The endpoint represents each credible set by its highest-PIP variant in the 95% set.
+    This is a lead representation, not LD pruning; leads from separate sets can remain
+    correlated. Returns (leads, coverage); coverage records the HTTP status per target.
 
     Gotcha: this endpoint answers JSON by default, not the API-wide TSV.
     """
@@ -101,11 +101,10 @@ def harvest_leads(targets: list[tuple[str, str]], max_workers: int = 12) -> tupl
 
 @app.function
 def cluster_loci(df: pl.DataFrame, kb: int = 500) -> pl.DataFrame:
-    """Label each row with a `locus` id, merging leads within `kb` on a chromosome.
+    """Label each row with a single-linkage distance cluster on its chromosome.
 
-    Fine-mapping removes LD *within* a credible set, but the same signal reappears as a
-    separate credible set in every phenotype definition and every resource that carries it.
-    Distance clustering is the crude second pass that turns those back into one locus.
+    Adjacent lead positions within `kb` are grouped across phenotype definitions and
+    resources. Neither the credible-set leads nor these clusters are LD-defined groups.
     """
     return (
         df.sort(["chr", "pos"])
@@ -544,7 +543,7 @@ def _(protective):
         .height
     )
     _unmapped_associations = int(_unmapped_row["associations"][0]) if _unmapped_row.height else 0
-    _unmapped_loci = int(_unmapped_row["independent_loci"][0]) if _unmapped_row.height else 0
+    _unmapped_loci = int(_unmapped_row["distance_clustered_loci"][0]) if _unmapped_row.height else 0
     _skin_queries_per_locus = float(skin_row["variants_per_locus"][0])
     _prostate_queries_per_locus = float(_prostate_row["variants_per_locus"][0])
     mo.vstack(
