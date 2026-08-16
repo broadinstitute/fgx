@@ -1,7 +1,7 @@
 # fgx — FinnGen eXplore
 
 > [!NOTE]
-> Part of the [jx](https://github.com/broadinstitute/jx) experiment — not an official FinnGen or GeneGenie project.
+> Part of the [jx](https://github.com/broadinstitute/jx) experiment - not an official FinnGen or GeneGenie project.
 
 An experiment in agent-driven scientific data exploration, built around [FinnGen](https://www.finngen.fi/) and partner human-genetics datasets exposed through the [GeneGenie](https://genegenie.broadinstitute.org/) results API — FinnGen R14 + UK Biobank + MVP meta-analyses, eQTL Catalogue R8, Open Targets 25.12, GTEx, Genebass, GenCC, Monarch (29 datasets at last count).
 
@@ -42,11 +42,12 @@ The skill stores are gitignored, so a fresh clone has only `skills-lock.json`; r
 
 ```bash
 uv --version  # or: curl -LsSf https://astral.sh/uv/install.sh | sh
-npx skills add carpenter-singh-lab/vignette-catalog-skills --agent claude-code -y
-npx skills add marimo-team/marimo-pair --agent claude-code -y
+npx skills@1.5.20 add carpenter-singh-lab/vignette-catalog-skills -s vignette-catalog-compose-notebook -s vignette-catalog-scaffold -a claude-code -a codex -y
+npx skills@1.5.20 add marimo-team/marimo-pair -s marimo-pair -a claude-code -a codex -y
 ```
 
-Then open Claude Code in this repo and ask to *get started* - the `vignette-catalog-setup` skill installs prereqs ([uv](https://docs.astral.sh/uv/) and the [marimo-pair](https://github.com/marimo-team/marimo-pair) skill), launches `nb01_pcsk9_walkthrough` in a live marimo kernel, and hands off to `vignette-catalog-compose-notebook` for the actual analysis.
+Then open Claude Code or Codex in this repo and ask to *get started*.
+The `vignette-catalog-compose-notebook` skill launches `nb01_pcsk9_walkthrough` in a live marimo kernel and handles later analysis in the same workflow.
 
 ## License
 

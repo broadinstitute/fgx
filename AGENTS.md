@@ -5,8 +5,8 @@ This is the public, runnable catalog of marimo notebooks for GeneGenie human-gen
 Planning and cross-instance coordination live in the primary [`jx`](https://github.com/broadinstitute/jx) repo.
 
 `README.md` is the human entry point.
-This catalog uses the shared [vignette-catalog-skills](https://github.com/carpenter-singh-lab/vignette-catalog-skills) (`vignette-catalog-setup` for first-run setup, `vignette-catalog-compose-notebook` for adding or composing analyses); its specifics live in `catalog.toml`.
-The skills are installed via `npx skills add carpenter-singh-lab/vignette-catalog-skills --agent claude-code -y`, recorded in the tracked `skills-lock.json`, but **not vendored** - `.claude/skills/*` is gitignored, so restore them on a fresh clone before use.
+This catalog uses the shared [vignette-catalog-skills](https://github.com/carpenter-singh-lab/vignette-catalog-skills), with `vignette-catalog-compose-notebook` handling setup, execution, and composition; its specifics live in `catalog.toml`.
+The skills are recorded in the tracked `skills-lock.json` but not vendored; restore them with the exact commands in `README.md` after cloning.
 
 ## Launching notebooks
 
@@ -115,15 +115,32 @@ Read the installed `vignette-catalog-compose-notebook` skill (and `catalog.toml`
 
 These are fgx-specific endpoint-semantics papercuts (they do not live in the shared skill; the generic marimo/molab gotchas do).
 
-- **TSV is the API default** (`Content-Type: text/tab-separated-values`). `fetch_json` *unconditionally* injects `format=json`, so pick the helper by the response shape you want; you cannot flip format via a kwarg.
-- **Filter before printing.** `credible_sets_by_gene/PCSK9` is ~3,200 rows / ~1.3 MB and `resource_metadata/finngen` ~3,300 rows. Summarize in-cell (`.filter`, `.head(20)`, `group_by+agg`) and never let a raw full-size response land in the transcript.
-- **Do not infer semantics from a path name.** `exome_results_by_gene` returns per-variant single-variant rows, not gene-level burden. `mlog10p` saturates at floating-point limits (`mlog10p == 324` with `se == 0`), `pip` can be null, and `most_severe` is a VEP prediction, not a clinical classification. Read the actual response (or the OpenAPI spec) first.
-- **`/search` uses `q`, not `query`.** Passing `query=` 422s with `Unknown query parameter(s): query`. `/search` does accept `format`, so plain `fetch_json("/search", q=term)` works - the 422 you will hit here is the parameter name, not the format.
-- **`/credible_sets_by_phenotype` needs `{resource}/{phenotype}`** in the path (e.g. `finngen/T2D`, `open_targets/GCST...`). Omitting the resource is a 404.
-- **Identifiers are system-specific.** Phenotype codes (`I9_CHD`, `T2D`) are FinnGen definitions - look them up via `fetch_json_raw("/trait_name_mapping")` (it is one of the no-`format` endpoints). An rsID can resolve to a different alt allele than the credible-set store indexed; when a known-good identifier returns 0 rows, suspect the mapping, not the data.
-- **`/credible_sets_by_phenotype_leads` answers JSON, not TSV**, unlike most of the API. One row per credible set (the highest-PIP variant in the 95% set), which makes it the right entry point for counting *independent signals* rather than tag variants. It also returns sets regardless of significance - filter on `mlog10p` yourself.
-- **The batch `POST /credible_sets_by_variant` separator is a NEWLINE.** The body is `{"variants": "<v1>\n<v2>\n..."}`; commas, spaces and semicolons all 422 with "variant needs to contain four fields". Chunk at ~40 variants.
-- **Eleven endpoints reject `format` but answer JSON anyway.** The ones this catalog touches are `/datasets`, `/resources`, `/rsid/variants`, `/trait_name_mapping` and `/dataset_display_names`. They 422 with `Unknown query parameter(s): format`, so `fetch_json` cannot reach them (it injects `format=json` unconditionally) and `fetch_tsv` cannot parse the JSON that comes back. Neither helper works: use nb01's **`fetch_json_raw`**. Before writing against an endpoint, check whether `/openapi.json` gives it a `format` parameter; the 422 body also names everything it does accept.
-- **`/search` caps `limit` at 100** and its `types` values are plural (`phenotypes`, `genes`). Use it for discovery, never for exhaustive enumeration - to enumerate, probe the endpoint and record the status codes.
-- **`/resource_metadata` dtypes vary by resource.** Count columns come back Int64 for some resources and String for others, so `pl.concat` across resources raises `SchemaError`. Cast, or pass `how="vertical_relaxed"`.
-- **The phenotype list is not the fine-mapping store.** A phenotype in `/resource_metadata` frequently 404s on the credible-set endpoints (in FinnGen R14, 371 of 602 cancer endpoints do). Never infer coverage from the metadata list; probe and keep the failures.
+- **TSV is the API default** (`Content-Type: text/tab-separated-values`).
+  `fetch_json` *unconditionally* injects `format=json`, so pick the helper by the response shape you want; you cannot flip format via a kwarg.
+- **Filter before printing.** `credible_sets_by_gene/PCSK9` is ~3,200 rows / ~1.3 MB and `resource_metadata/finngen` ~3,300 rows.
+  Summarize in-cell (`.filter`, `.head(20)`, `group_by+agg`) and never let a raw full-size response land in the transcript.
+- **Do not infer semantics from a path name.** `exome_results_by_gene` returns per-variant single-variant rows, not gene-level burden.
+  `mlog10p` saturates at floating-point limits (`mlog10p == 324` with `se == 0`), `pip` can be null, and `most_severe` is a VEP prediction, not a clinical classification.
+  Read the actual response (or the OpenAPI spec) first.
+- **`/search` uses `q`, not `query`.** Passing `query=` 422s with `Unknown query parameter(s): query`.
+  `/search` does accept `format`, so plain `fetch_json("/search", q=term)` works - the 422 you will hit here is the parameter name, not the format.
+- **`/credible_sets_by_phenotype` needs `{resource}/{phenotype}`** in the path (e.g.
+  `finngen/T2D`, `open_targets/GCST...`).
+  Omitting the resource is a 404.
+- **Identifiers are system-specific.** Phenotype codes (`I9_CHD`, `T2D`) are FinnGen definitions - look them up via `fetch_json_raw("/trait_name_mapping")` (it is one of the no-`format` endpoints).
+  An rsID can resolve to a different alt allele than the credible-set store indexed; when a known-good identifier returns 0 rows, suspect the mapping, not the data.
+- **`/credible_sets_by_phenotype_leads` answers JSON, not TSV**, unlike most of the API.
+  One row per credible set (the highest-PIP variant in the 95% set), which makes it the right entry point for counting *independent signals* rather than tag variants.
+  It also returns sets regardless of significance - filter on `mlog10p` yourself.
+- **The batch `POST /credible_sets_by_variant` separator is a NEWLINE.** The body is `{"variants": "<v1>\n<v2>\n..."}`; commas, spaces and semicolons all 422 with "variant needs to contain four fields".
+  Chunk at ~40 variants.
+- **Eleven endpoints reject `format` but answer JSON anyway.** The ones this catalog touches are `/datasets`, `/resources`, `/rsid/variants`, `/trait_name_mapping` and `/dataset_display_names`.
+  They 422 with `Unknown query parameter(s): format`, so `fetch_json` cannot reach them (it injects `format=json` unconditionally) and `fetch_tsv` cannot parse the JSON that comes back.
+  Neither helper works: use nb01's **`fetch_json_raw`**.
+  Before writing against an endpoint, check whether `/openapi.json` gives it a `format` parameter; the 422 body also names everything it does accept.
+- **`/search` caps `limit` at 100** and its `types` values are plural (`phenotypes`, `genes`).
+  Use it for discovery, never for exhaustive enumeration - to enumerate, probe the endpoint and record the status codes.
+- **`/resource_metadata` dtypes vary by resource.** Count columns come back Int64 for some resources and String for others, so `pl.concat` across resources raises `SchemaError`.
+  Cast, or pass `how="vertical_relaxed"`.
+- **The phenotype list is not the fine-mapping store.** A phenotype in `/resource_metadata` frequently 404s on the credible-set endpoints (in FinnGen R14, 371 of 602 cancer endpoints do).
+  Never infer coverage from the metadata list; probe and keep the failures.
