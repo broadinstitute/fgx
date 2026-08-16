@@ -7,6 +7,7 @@ Planning and cross-instance coordination live in the primary [`jx`](https://gith
 `README.md` is the human entry point.
 This catalog uses the shared [vignette-catalog-skills](https://github.com/carpenter-singh-lab/vignette-catalog-skills), with `vignette-catalog-compose-notebook` handling setup, execution, and composition; its specifics live in `catalog.toml`.
 The skills are recorded in the tracked `skills-lock.json` but not vendored; restore them with the exact commands in `README.md` after cloning.
+Repository instructions, `catalog.toml`, and the compose notebook contract override generic `marimo-notebook` advice when they are more specific.
 
 ## Launching notebooks
 
